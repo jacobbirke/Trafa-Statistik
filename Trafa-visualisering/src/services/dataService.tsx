@@ -38,7 +38,7 @@ export const fetchData1 = async (): Promise<{ parsedData: ParsedDataItem[]; year
     const data: Data1 = await response.json();
     
     const seriesNames = {
-      gtrparb: data.seriesNameGtrparb || "Guds Transportarbete",  // Default name if not available
+      gtrparb: data.seriesNameGtrparb || "Gods Transportarbete",  // Default name if not available
       ptrparb: data.seriesNamePtrparb || "Persontransportarbete",  // Default name if not available
     };
 
