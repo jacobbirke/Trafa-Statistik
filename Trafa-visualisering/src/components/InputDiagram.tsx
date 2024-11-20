@@ -87,8 +87,9 @@ export const InputDiagram: React.FC = () => {
       ],
     });
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
+    const handleFileUpload = (e: Event) => {
+      const inputElement = e.target as HTMLInputElement;
+      const file = inputElement.files?.[0];
       if (!file) return;
 
       const reader = new FileReader();
@@ -147,18 +148,23 @@ export const InputDiagram: React.FC = () => {
           type: "spline",
         });
 
+        function getColor(colorIndex: number): string {
+          const color = Highcharts.getOptions().colors?.[colorIndex];
+          return typeof color === "string" ? color : "black";
+        }
+
         // Punktlighet Y-axel
         chart.yAxis[0].update({
           title: {
             text: headers[2],
             style: {
-              color: Highcharts.getOptions().colors?.[1] || "black",
+              color: getColor(1),
             },
           },
           labels: {
             format: "{value} " + units[2],
             style: {
-              color: Highcharts.getOptions().colors?.[1] || "black",
+              color: getColor(1), // Ensure color is a string
             },
           },
           min: 0, // Procent min - max
@@ -170,13 +176,13 @@ export const InputDiagram: React.FC = () => {
           title: {
             text: headers[1],
             style: {
-              color: Highcharts.getOptions().colors?.[0] || "black",
+              color: getColor(0), // Ensure color is a string
             },
           },
           labels: {
             format: "{value:,.0f} " + units[1], // :,.0f separerar tusen
             style: {
-              color: Highcharts.getOptions().colors?.[0] || "black",
+              color: getColor(0), // Ensure color is a string
             },
           },
         });
@@ -190,11 +196,11 @@ export const InputDiagram: React.FC = () => {
       reader.readAsBinaryString(file);
     };
 
-    const uploadInput = document.getElementById("upload") as HTMLInputElement;
-    uploadInput.addEventListener("change", handleFileUpload);
+    const inputElement = document.getElementById("upload") as HTMLInputElement;
+    inputElement.addEventListener("change", handleFileUpload);
 
     return () => {
-      uploadInput?.removeEventListener("change", handleFileUpload);
+      inputElement.removeEventListener("change", handleFileUpload);
     };
   }, []);
 
