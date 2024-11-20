@@ -97,7 +97,9 @@ export const InputDiagram: React.FC = () => {
         const workbook = XLSX.read(data, { type: "binary" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        const jsonData: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const jsonData: any[][] = XLSX.utils.sheet_to_json(sheet, {
+          header: 1,
+        });
 
         const title = jsonData[0]?.[1] || "";
         const headers = jsonData[1];
@@ -132,6 +134,7 @@ export const InputDiagram: React.FC = () => {
           tooltip: {
             valueSuffix: " " + units[1], // Detalj vy
           },
+          type: "column",
         });
 
         // Punktlighet
@@ -141,6 +144,7 @@ export const InputDiagram: React.FC = () => {
           tooltip: {
             valueSuffix: " " + units[2], // Detalj vy
           },
+          type: "spline",
         });
 
         // Punktlighet Y-axel
@@ -198,10 +202,8 @@ export const InputDiagram: React.FC = () => {
     <>
       <input type="file" id="upload" accept=".csv" />
       <div id="container" className="w-full h-96"></div>
-
     </>
   );
 };
-
 
 export default InputDiagram;
