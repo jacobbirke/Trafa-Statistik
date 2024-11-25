@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { fetchData1 } from '../services/dataService';
+import { fetchData1 } from '../services/JärnvägstransportAnropAPi';
 
 interface DataItem {
   year: string;
@@ -14,7 +14,7 @@ interface StatNames {
   ptrparb: string;
 }
 
-const PunktlighetPerAr: React.FC = () => {
+const Järnvägstransport: React.FC = () => {
   const [data1, setData1] = useState<DataItem[]>([]);
   const [categories1, setCategories1] = useState<string[]>([]);
   const [statNames1, setStatNames1] = useState<StatNames>({
@@ -104,4 +104,4 @@ const PunktlighetPerAr: React.FC = () => {
   );
 };
 
-export default PunktlighetPerAr;
+export default Järnvägstransport;
