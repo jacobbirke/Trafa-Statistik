@@ -14,7 +14,7 @@ interface StatNames {
   ptrparb: string;
 }
 
-const DataVisualization: React.FC = () => {
+const PunktlighetPerAr: React.FC = () => {
   const [data1, setData1] = useState<DataItem[]>([]);
   const [categories1, setCategories1] = useState<string[]>([]);
   const [statNames1, setStatNames1] = useState<StatNames>({
@@ -52,7 +52,7 @@ const DataVisualization: React.FC = () => {
 
   const chartOptions: Highcharts.Options = {
     chart: {
-      zoomType: 'xy'  as any, // Enables zooming on both axes
+      zoomType: 'xy'
     },
     title: { text: 'Transport Data Visualization (Dual Axes)' },
     xAxis: {
@@ -104,4 +104,4 @@ const DataVisualization: React.FC = () => {
   );
 };
 
-export default DataVisualization;
+export default PunktlighetPerAr;

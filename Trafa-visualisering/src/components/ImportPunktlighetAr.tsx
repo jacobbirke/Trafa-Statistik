@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
 
-export const InputDiagram: React.FC = () => {
+export const ImportPunktlighetPerAr: React.FC = () => {
   useEffect(() => {
     const chart = Highcharts.chart("container", {
       chart: {
@@ -212,4 +212,4 @@ export const InputDiagram: React.FC = () => {
   );
 };
 
-export default InputDiagram;
+export default ImportPunktlighetPerAr;
