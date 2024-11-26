@@ -10,11 +10,8 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/Järnvägstransport" element={<Järnvägstransport />} />
-        <Route
-          path="/ImportPunktlighetÅr"
-          element={<ImportPunktlighetPerAr />}
-        />
-        <Route path="/PunktlighetTågtyper" element={<PunktlighetTagtyper />} />
+        <Route path="/PunktlighetÅr" element={<ImportPunktlighetPerAr />} />
+        <Route path="/Tågtyper" element={<PunktlighetTagtyper />} />
       </Routes>
     </Router>
   );
