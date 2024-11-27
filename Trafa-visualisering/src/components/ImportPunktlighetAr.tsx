@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 
 export const ImportPunktlighetPerAr: React.FC = () => {
   useEffect(() => {
+    // @ts-ignore
     const chart = Highcharts.chart("container", {
       chart: {
         zooming: {
