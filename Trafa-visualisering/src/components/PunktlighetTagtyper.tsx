@@ -82,7 +82,7 @@ const PunktlighetTagtyper: React.FC = () => {
       setChart(newChart);
 
       return () => {
-        newChart.destroy(); // Cleanup chart on unmount
+        newChart.destroy(); 
       };
     }
   }, []);
@@ -109,7 +109,7 @@ const PunktlighetTagtyper: React.FC = () => {
         const groupedData: Record<string, GroupedData> = {};
         const years: string[] = [];
 
-        jsonData.forEach((row, index) => {
+        jsonData.forEach((row: any[], index: number) => {
           if (index <= 2) return; // Skip title, header, and unit rows
 
           const year = row[0];
