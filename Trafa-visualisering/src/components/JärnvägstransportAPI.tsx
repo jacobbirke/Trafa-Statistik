@@ -16,6 +16,7 @@ interface StatNames {
 
 const Järnvägstransport: React.FC = () => {
   const [data1, setData1] = useState<DataItem[]>([]);
+  // @ts-ignore
   const [categories1, setCategories1] = useState<string[]>([]);
   const [statNames1, setStatNames1] = useState<StatNames>({
     gtrparb: '',
