@@ -52,6 +52,7 @@ const Järnvägstransport: React.FC = () => {
 
   const chartOptions: Highcharts.Options = {
     chart: {
+      // @ts-ignore
       zoomType: 'xy'
     },
     title: { text: 'Transport Data Visualization (Dual Axes)' },
