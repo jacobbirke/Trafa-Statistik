@@ -4,13 +4,10 @@ import * as XLSX from "xlsx";
 
 export const ImportPunktlighetPerAr: React.FC = () => {
   useEffect(() => {
-    const chart = Highcharts.chart(
-      "container",
-      {
-        chart: {
-          zooming: {
-            type: "xy",
-          },
+    const chart = Highcharts.chart("container", {
+      chart: {
+        zooming: {
+          type: "xy",
         },
         title: {
           text: "", // Titel
