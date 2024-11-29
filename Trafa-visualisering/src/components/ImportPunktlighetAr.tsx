@@ -4,89 +4,92 @@ import * as XLSX from "xlsx";
 
 export const ImportPunktlighetPerAr: React.FC = () => {
   useEffect(() => {
-    // @ts-ignore
-    const chart = Highcharts.chart("container", {
-      chart: {
-        zooming: {
-          type: "xy",
+    const chart = Highcharts.chart(
+      "container",
+      {
+        chart: {
+          zooming: {
+            type: "xy",
+          },
         },
-      },
-      title: {
-        text: "", // Titel
-        align: "left",
-      },
-      credits: {
-        text: 'Source: <a href="https://www.trafa.se/bantrafik/punktlighet-pa-jarnvag/" target="_blank">Trafikanalys</a>',
-      },
-      xAxis: [
-        {
-          categories: [],
-          crosshair: true,
+        title: {
+          text: "", // Titel
+          align: "left",
         },
-      ],
-      yAxis: [
-        {
-          // Primär y-axel (Punktlighet)
-          title: {
-            text: "",
-            style: {
-              color: Highcharts.getOptions().colors?.[1] || "black",
+        credits: {
+          text: 'Source: <a href="https://www.trafa.se/bantrafik/punktlighet-pa-jarnvag/" target="_blank">Trafikanalys</a>',
+        },
+        xAxis: [
+          {
+            categories: [],
+            crosshair: true,
+          },
+        ],
+        yAxis: [
+          {
+            // Primär y-axel (Punktlighet)
+            title: {
+              text: "",
+              style: {
+                color: Highcharts.getOptions().colors?.[1] as string || "black",
+              },
+            },
+            labels: {
+              format: "{value} ",
+              style: {
+                color: Highcharts.getOptions().colors?.[1] as string || "black",
+              },
             },
           },
-          labels: {
-            format: "{value} ",
-            style: {
-              color: Highcharts.getOptions().colors?.[1] || "black",
+          {
+            // Sekundär y-axel (Antal tåg)
+            title: {
+              text: "",
+              style: {
+                color: Highcharts.getOptions().colors?.[0] as string || "black",
+              },
             },
+            labels: {
+              format: "{value} ",
+              style: {
+                color: Highcharts.getOptions().colors?.[0] as string || "black",
+              },
+            },
+            opposite: true,
           },
+        ],
+        tooltip: {
+          shared: true,
         },
-        {
-          // Sekundär y-axel (Antal tåg)
-          title: {
-            text: "",
-            style: {
-              color: Highcharts.getOptions().colors?.[0] || "black",
-            },
-          },
-          labels: {
-            format: "{value} ",
-            style: {
-              color: Highcharts.getOptions().colors?.[0] || "black",
-            },
-          },
-          opposite: true,
+        legend: {
+          align: "left",
+          verticalAlign: "top",
+          backgroundColor:
+            Highcharts.defaultOptions.legend?.backgroundColor ||
+            "rgba(255,255,255,0.25)",
         },
-      ],
-      tooltip: {
-        shared: true,
+        series: [
+          {
+            name: "", // Header 1
+            type: "column",
+            yAxis: 1,
+            data: [],
+            tooltip: {
+              valueSuffix: "",
+            },
+          },
+          {
+            name: "", // Header 2
+            type: "spline",
+            data: [],
+            tooltip: {
+              valueSuffix: "", // unit
+            },
+          },
+        ],
       },
-      legend: {
-        align: "left",
-        verticalAlign: "top",
-        backgroundColor:
-          Highcharts.defaultOptions.legend?.backgroundColor ||
-          "rgba(255,255,255,0.25)",
-      },
-      series: [
-        {
-          name: "", // Header 1
-          type: "column",
-          yAxis: 1,
-          data: [],
-          tooltip: {
-            valueSuffix: "",
-          },
-        },
-        {
-          name: "", // Header 2
-          type: "spline",
-          data: [],
-          tooltip: {
-            valueSuffix: "", // unit
-          },
-        },
-      ],
-    });
+      () => {}
+    );
 
     const handleFileUpload = (e: Event) => {
       const inputElement = e.target as HTMLInputElement;
