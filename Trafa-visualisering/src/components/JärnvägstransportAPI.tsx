@@ -102,7 +102,7 @@ const Järnvägstransport: React.FC = () => {
     <div>
       <h1>Transport Data Visualization </h1>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} />
-      </div>
+    </div>
   );
 };
 
