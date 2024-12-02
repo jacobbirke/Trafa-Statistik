@@ -31,13 +31,13 @@ export const ImportPunktlighetPerAr: React.FC = () => {
             title: {
               text: "",
               style: {
-                color: Highcharts.getOptions().colors?.[1] as string || "black",
+                color: Highcharts.getOptions().colors?.[1] as string ?? "black",
               },
             },
             labels: {
               format: "{value} ",
               style: {
-                color: Highcharts.getOptions().colors?.[1] as string || "black",
+                color: Highcharts.getOptions().colors?.[1] as string ?? "blue",
               },
             },
           },
@@ -46,13 +46,13 @@ export const ImportPunktlighetPerAr: React.FC = () => {
             title: {
               text: "",
               style: {
-                color: Highcharts.getOptions().colors?.[0] as string || "black",
+                color: Highcharts.getOptions().colors?.[0] as string ?? "green",
               },
             },
             labels: {
               format: "{value} ",
               style: {
-                color: Highcharts.getOptions().colors?.[0] as string || "black",
+                color: Highcharts.getOptions().colors?.[0] as string ?? "red",
               },
             },
             opposite: true,
@@ -65,7 +65,7 @@ export const ImportPunktlighetPerAr: React.FC = () => {
           align: "left",
           verticalAlign: "top",
           backgroundColor:
-            Highcharts.defaultOptions.legend?.backgroundColor ||
+            Highcharts.defaultOptions.legend?.backgroundColor ??
             "rgba(255,255,255,0.25)",
         },
         series: [
@@ -106,7 +106,7 @@ export const ImportPunktlighetPerAr: React.FC = () => {
           header: 1,
         });
 
-        const title = jsonData[0]?.[1] || "";
+        const title = jsonData[0]?.[1] ?? "";
         const headers = jsonData[1];
         const units = jsonData[2];
 

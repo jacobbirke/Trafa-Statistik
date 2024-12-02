@@ -41,13 +41,13 @@ const PunktlighetTagtyper: React.FC = () => {
               title: {
                 text: "",
                 style: {
-                  color: Highcharts.getOptions().colors[1] as string,
+                  color: Highcharts.getOptions().colors?.[1] as string ?? "black",
                 },
               },
               labels: {
                 format: "{value} ",
                 style: {
-                  color: Highcharts.getOptions().colors[1] as string,
+                  color: Highcharts.getOptions().colors?.[1] as string  ?? "blue",
                 },
               },
             },
@@ -56,13 +56,13 @@ const PunktlighetTagtyper: React.FC = () => {
               title: {
                 text: "",
                 style: {
-                  color: Highcharts.getOptions().colors[0] as string,
+                  color: Highcharts.getOptions().colors?.[0] as string  ?? "greem",
                 },
               },
               labels: {
                 format: "{value} ",
                 style: {
-                  color: Highcharts.getOptions().colors[0] as string,
+                  color: Highcharts.getOptions().colors?.[0] as string  ?? "red",
                 },
               },
               opposite: true,
@@ -75,7 +75,7 @@ const PunktlighetTagtyper: React.FC = () => {
             align: "left",
             verticalAlign: "top",
             backgroundColor:
-              Highcharts.defaultOptions.legend.backgroundColor ||
+              Highcharts.defaultOptions.legend?.backgroundColor ??
               "rgba(255,255,255,0.25)",
           },
           series: [],
@@ -121,7 +121,7 @@ const PunktlighetTagtyper: React.FC = () => {
           let punctuality = row[3];
 
           if (punctuality === undefined || punctuality === null) {
-            punctuality = 0; // Default to 0 if no punctuality data
+            punctuality = 0; 
           } else {
             punctuality = parseFloat(punctuality).toFixed(2);
             punctuality = parseFloat(punctuality);
@@ -149,7 +149,7 @@ const PunktlighetTagtyper: React.FC = () => {
             categories: years,
           });
 
-          chart.series = []; // Reset previous series
+          chart.series = [];
 
           Object.keys(groupedData).forEach((trainType) => {
             const data = groupedData[trainType];
@@ -182,7 +182,7 @@ const PunktlighetTagtyper: React.FC = () => {
               text: headers[3], // Punctuality title
               style: {
       
-                color: Highcharts.getOptions().colors[1],
+                color: Highcharts.getOptions().colors?.[1],
               },
             },
             labels: {
@@ -190,7 +190,7 @@ const PunktlighetTagtyper: React.FC = () => {
               format: "{value} " + units[3], // Punctuality unit
               style: {
       
-                color: Highcharts.getOptions().colors[1],
+                color: Highcharts.getOptions().colors?.[1],
               },
             },
             min: 0,
@@ -206,7 +206,7 @@ const PunktlighetTagtyper: React.FC = () => {
               text: headers[2], // Train title
               style: {
       
-                color: Highcharts.getOptions().colors[0],
+                color: Highcharts.getOptions().colors?.[0],
               },
             },
             labels: {
@@ -214,7 +214,7 @@ const PunktlighetTagtyper: React.FC = () => {
               format: "{value:,.0f} " + units[2], // Train unit
               style: {
       
-                color: Highcharts.getOptions().colors[0],
+                color: Highcharts.getOptions().colors?.[0],
               },
             },
           });
