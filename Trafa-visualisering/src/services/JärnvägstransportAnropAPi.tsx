@@ -37,10 +37,10 @@ export const fetchData1 = async (): Promise<{ parsedData: ParsedDataItem[]; year
     const response = await fetch(`${API_BASE_URL}T04022%7Cgtrparb%7Cptrparb%7Car`);
     const data: Data1 = await response.json();
     
-    const seriesNames = {
-      gtrparb: data.seriesNameGtrparb || "Gods Transportarbete",  // Default name if not available
-      ptrparb: data.seriesNamePtrparb || "Persontransportarbete",  // Default name if not available
-    };
+    // const seriesNames = {
+    //   gtrparb: data.seriesNameGtrparb || "Gods Transportarbete",  // Default name if not available
+    //   ptrparb: data.seriesNamePtrparb || "Persontransportarbete",  // Default name if not available
+    // };
 
     return parseData1(data);
   } catch (error) {
@@ -63,9 +63,9 @@ export const fetchData2 = async (): Promise<{ parsedData: ParsedData2; years: st
 
 // Function to parse the first dataset
 const parseData1 = (data: Data1): { parsedData: ParsedDataItem[]; years: string[] } => {
-  const columns = data.Header.Column;
-  const gtrparbColumn = columns.find((col) => col.Name === 'gtrparb');
-  const ptrparbColumn = columns.find((col) => col.Name === 'ptrparb');
+  // const columns = data.Header.Column;
+  // const gtrparbColumn = columns.find((col) => col.Name === 'gtrparb');
+  // const ptrparbColumn = columns.find((col) => col.Name === 'ptrparb');
 
   const rows = data.Rows;
   const parsedData: ParsedDataItem[] = [];
@@ -92,10 +92,10 @@ const parseData1 = (data: Data1): { parsedData: ParsedDataItem[]; years: string[
 
 // Function to parse the second dataset
 const parseData2 = (data: Data2): { parsedData: ParsedData2; years: string[] } => {
-  const columns = data.Header.Column;
-  const gtrparbColumn = columns.find((col) => col.Name === 'gtrparb');
-  const riktninghColumn = columns.find((col) => col.Name === 'riktningh');
-  const lasttypColumn = columns.find((col) => col.Name === 'lasttyp');
+  // const columns = data.Header.Column;
+  // const gtrparbColumn = columns.find((col) => col.Name === 'gtrparb');
+  // const riktninghColumn = columns.find((col) => col.Name === 'riktningh');
+  // const lasttypColumn = columns.find((col) => col.Name === 'lasttyp');
 
   const rows = data.Rows;
   const parsedData: ParsedData2 = {};
