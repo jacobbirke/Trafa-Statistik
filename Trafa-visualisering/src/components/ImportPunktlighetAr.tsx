@@ -4,10 +4,13 @@ import * as XLSX from "xlsx";
 
 export const ImportPunktlighetPerAr: React.FC = () => {
   useEffect(() => {
-    const chart = Highcharts.chart("container", {
-      chart: {
-        zooming: {
-          type: "xy",
+    const chart = Highcharts.chart(
+      "container",
+      {
+        chart: {
+          zooming: {
+            type: "xy",
+          },
         },
         title: {
           text: "", // Titel
@@ -28,13 +31,15 @@ export const ImportPunktlighetPerAr: React.FC = () => {
             title: {
               text: "",
               style: {
-                color: Highcharts.getOptions().colors?.[1] as string ?? "black",
+                color:
+                  (Highcharts.getOptions().colors?.[1] as string) ?? "black",
               },
             },
             labels: {
               format: "{value} ",
               style: {
-                color: Highcharts.getOptions().colors?.[1] as string ?? "blue",
+                color:
+                  (Highcharts.getOptions().colors?.[1] as string) ?? "blue",
               },
             },
           },
@@ -43,13 +48,14 @@ export const ImportPunktlighetPerAr: React.FC = () => {
             title: {
               text: "",
               style: {
-                color: Highcharts.getOptions().colors?.[0] as string ?? "green",
+                color:
+                  (Highcharts.getOptions().colors?.[0] as string) ?? "green",
               },
             },
             labels: {
               format: "{value} ",
               style: {
-                color: Highcharts.getOptions().colors?.[0] as string ?? "red",
+                color: (Highcharts.getOptions().colors?.[0] as string) ?? "red",
               },
             },
             opposite: true,
