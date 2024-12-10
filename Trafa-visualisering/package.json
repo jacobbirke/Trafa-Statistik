@@ -13,6 +13,7 @@
     "highcharts": "^11.4.8",
     "highcharts-more": "^0.1.7",
     "highcharts-react-official": "^3.2.1",
+    "papaparse": "^5.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@types/highcharts": "^7.0.0",
+    "@types/papaparse": "^5.3.15",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-router-dom": "^5.3.3",
