@@ -155,7 +155,7 @@ const PunktlighetTagtyper: React.FC = () => {
             const data = groupedData[trainType];
 
             chart.addSeries({
-              name: `${trainType} - Tåg`,
+              name: `${trainType} - ${headers[2]}`,
               type: "column",
               yAxis: 1,
               data: data.trainCounts,
@@ -166,7 +166,7 @@ const PunktlighetTagtyper: React.FC = () => {
             });
 
             chart.addSeries({
-              name: `${trainType} - Punktlighet`,
+              name: `${trainType} - ${headers[3]}`,
               type: "spline",
               data: data.punctualities,
               tooltip: {
