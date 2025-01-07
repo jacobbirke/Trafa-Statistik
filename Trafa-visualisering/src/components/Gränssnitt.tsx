@@ -1,4 +1,4 @@
-import Highcharts, { chart } from "highcharts";
+import Highcharts from "highcharts";
 import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
@@ -17,8 +17,8 @@ type RegisterUserSteps =
 
 const StatisticsInterface: React.FC = () => {
   const [step, setStep] = useState<RegisterUserSteps>("input-cvs");
-  const [year, setYear] = useState<string>("");
-  const [file, setFile] = useState<string>("");
+  const [year] = useState<string>("");
+  const [file] = useState<string>("");
   const [trainType, setTrainType] = useState<string>("");
   const [bar, setBar] = useState<string>("");
   const [line, setLine] = useState<string>("");
@@ -183,7 +183,7 @@ const StatisticsInterface: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleYearChange = (e) => {
+  const handleYearChange = (e: { target: { value: any; }; }) => {
     const year = e.target.value;
     setSelectedYears((prevSelectedYears) =>
       prevSelectedYears.includes(year)
