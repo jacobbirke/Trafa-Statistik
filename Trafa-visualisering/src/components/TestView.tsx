@@ -1,5 +1,5 @@
-import Highcharts, { chart } from "highcharts";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
 
 interface GroupedData {
@@ -8,26 +8,11 @@ interface GroupedData {
   punctualities: number[];
 }
 
-type RegisterUserSteps =
-  | "input-cvs"
-  | "input-train-type"
-  | "input-year"
-  | "input-unit"
-  | "review-submit";
-
-const StatisticsInterface: React.FC = () => {
-  const [step, setStep] = useState<RegisterUserSteps>("input-cvs");
-  const [year, setYear] = useState<string>("");
-  const [file, setFile] = useState<string>("");
-  const [trainType, setTrainType] = useState<string>("");
-  const [bar, setBar] = useState<string>("");
-  const [line, setLine] = useState<string>("");
+const Test: React.FC = () => {
   const [chart, setChart] = useState<any>(null);
   const [allYears, setAllYears] = useState<string[]>([]); // Store all years
   const [selectedYears, setSelectedYears] = useState<string[]>([]); // Store selected years
-  const [groupedData, setGroupedData] = useState<Record<string, GroupedData>>(
-    {}
-  ); // Store grouped data
+  const [groupedData, setGroupedData] = useState<Record<string, GroupedData>>( {} ); // Store grouped data
   const [title, setTitle] = useState<string>(""); // Store the title for chart
   const [headers, setHeaders] = useState<string[]>([]); // Store headers (for column titles, etc.)
   const [units, setUnits] = useState<string[]>([]); // Store units for data (Train unit, Punctuality unit)
@@ -169,7 +154,6 @@ const StatisticsInterface: React.FC = () => {
           groupedData[trainType].punctualities.push(punctuality);
         });
 
-        // Store data and metadata in state
         setGroupedData(groupedData);
         setAllYears(years);
         setTitle(title);
@@ -183,22 +167,13 @@ const StatisticsInterface: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleYearChange = (e) => {
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const year = e.target.value;
-    setSelectedYears((prevSelectedYears) =>
-      prevSelectedYears.includes(year)
-        ? prevSelectedYears.filter((item) => item !== year)
-        : [...prevSelectedYears, year]
+    setSelectedYears((prev) =>
+      e.target.checked
+        ? [...prev, year]
+        : prev.filter((selectedYear) => selectedYear !== year)
     );
-  };
-
-  // Handle select all / deselect all
-  const handleSelectAll = (selectAll: boolean) => {
-    if (selectAll) {
-      setSelectedYears(allYears); // Select all years
-    } else {
-      setSelectedYears([]); // Deselect all years
-    }
   };
 
   const handleGenerateChart = () => {
@@ -311,169 +286,44 @@ const StatisticsInterface: React.FC = () => {
 
   return (
     <div>
-      {step == "input-cvs" && (
+      <input
+        type="file"
+        id="upload"
+        accept=".csv"
+        onChange={handleFileUpload}
+      />
+
+      {/* Display checkboxes for each year */}
+      {allYears.length > 0 && (
         <div>
-          <h3>Ladda upp CVS-fil</h3>
-          <input
-            type="file"
-            id="upload"
-            accept=".csv"
-            onChange={handleFileUpload}
-          />
-          <button onClick={() => setStep("input-year")}>Nästa</button>
+          <label>Select years:</label>
+          <div>
+            {allYears.map((year) => (
+              <div key={year}>
+                <input
+                  type="checkbox"
+                  id={`year-${year}`}
+                  value={year}
+                  onChange={handleYearChange}
+                />
+                <label htmlFor={`year-${year}`}>{year}</label>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {step == "input-year" && (
-        <div>
-          <h3>Välj period</h3>
+      {/* Button to generate the chart */}
+      <button onClick={handleGenerateChart}>Generate Diagram</button>
 
-          {/* Buttons to select/deselect all years */}
-          <button onClick={() => handleSelectAll(true)}>Markera alla</button>
-          <button onClick={() => handleSelectAll(false)}>Avmarkera alla</button>
-
-          {/* Dynamically render checkboxes for each year */}
-          {allYears.length > 0 && (
-            <div>
-              {allYears.map((year) => (
-                <div key={year}>
-                  <input
-                    type="checkbox"
-                    id={`year-${year}`}
-                    value={year}
-                    checked={selectedYears.includes(year)}
-                    onChange={handleYearChange}
-                  />
-                  <label htmlFor={`year-${year}`}>{year}</label>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Navigation buttons */}
-          <button onClick={() => setStep("input-cvs")}>Tillbaka</button>
-          <button onClick={() => setStep("input-train-type")}>Nästa</button>
-        </div>
-      )}
-
-      {step == "input-train-type" && (
-        <div>
-          <h3>Välj tågtyp</h3>
-
-          <p>
-            <input
-              type="checkbox"
-              name="typeOfTrain"
-              value={trainType}
-              onChange={(e) => setTrainType(e.target.value)}
-            />{" "}
-            Kortdistanståg
-          </p>
-          <p>
-            <input
-              type="checkbox"
-              name="typeOfTrain"
-              value={trainType}
-              onChange={(e) => setTrainType(e.target.value)}
-            />{" "}
-            Medeldistanståg
-          </p>
-          <p>
-            <input
-              type="checkbox"
-              name="typeOfTrain"
-              value={trainType}
-              onChange={(e) => setTrainType(e.target.value)}
-            />{" "}
-            Långdistanståg
-          </p>
-          <button onClick={() => setStep("input-year")}>Tillbaka</button>
-          <button onClick={() => setStep("input-unit")}>Nästa</button>
-        </div>
-      )}
-
-      {step == "input-unit" && (
-        <div>
-          <h3>Välj enheter för stapel- och linjediagram</h3>
-          <p>
-            <label htmlFor="bar">Stapel: </label>
-            <select name="bar" id="bar">
-              <option value={bar}>Punktlighet</option>
-              <option value={bar}>Antal framförda tåg</option>
-            </select>{" "}
-          </p>
-          <p>
-            <label htmlFor="line">Linje: </label>
-            <select name="line" id="line">
-              <option value={line}>Punktlighet</option>
-              <option value={line}>Antal framförda tåg</option>
-            </select>{" "}
-          </p>
-
-          {/* eller */}
-
-          <p>
-            Stapel:
-            <input
-              type="radio"
-              name="Stapel"
-              value={bar}
-              onChange={(e) => setBar(e.target.value)}
-            />{" "}
-            Punktlighet
-            <input
-              type="radio"
-              name="Stapel"
-              value={bar}
-              onChange={(e) => setBar(e.target.value)}
-            />{" "}
-            Antal framförda tåg
-          </p>
-          <p>
-            Linje:
-            <input
-              type="radio"
-              name="linje"
-              value={line}
-              onChange={(e) => setLine(e.target.value)}
-            />{" "}
-            Punktlighet
-            <input
-              type="radio"
-              name="linje"
-              value={line}
-              onChange={(e) => setLine(e.target.value)}
-            />{" "}
-            Antal framförda tåg
-          </p>
-          <button onClick={() => setStep("input-train-type")}>Tiilbaka</button>
-          <button onClick={() => setStep("review-submit")}>Nästa</button>
-        </div>
-      )}
-
-      {step == "review-submit" && (
-        <div>
-          <h3>Ditt urval</h3>
-
-          <p>CVS-fil: {file}</p>
-          <p>Period: {year}</p>
-          <p>Typ av tåg: {trainType}</p>
-          <p>Stapel: {bar} </p>
-          <p>Linje: {line}</p>
-
-          <button onClick={() => setStep("input-unit")}>Tillbaka</button>
-          <button onClick={() => setStep("input-cvs")}>Börja om</button>
-          <br />
-          <button onClick={handleGenerateChart}>Generate Diagram</button>
-          <div
-            id="container"
-            ref={containerRef}
-            style={{ width: "100%", height: "600px" }}
-          />
-        </div>
-      )}
+      {/* Chart container */}
+      <div
+        id="container"
+        ref={containerRef}
+        style={{ width: "100%", height: "600px" }}
+      />
     </div>
   );
 };
 
-export default StatisticsInterface;
+export default Test;
