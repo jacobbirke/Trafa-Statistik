@@ -56,7 +56,7 @@ const PunktlighetTagtyper: React.FC = () => {
               title: {
                 text: "",
                 style: {
-                  color: Highcharts.getOptions().colors?.[0] as string  ?? "greem",
+                  color: Highcharts.getOptions().colors?.[0] as string  ?? "green",
                 },
               },
               labels: {
@@ -72,8 +72,8 @@ const PunktlighetTagtyper: React.FC = () => {
             shared: true,
           },
           legend: {
-            align: "left",
-            verticalAlign: "top",
+            align: "center",
+            verticalAlign: "bottom",
             backgroundColor:
               Highcharts.defaultOptions.legend?.backgroundColor ??
               "rgba(255,255,255,0.25)",
