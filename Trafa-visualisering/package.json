@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vercel/speed-insights": "^1.1.0",
     "highcharts": "^11.4.8",
     "highcharts-more": "^0.1.7",
     "highcharts-react-official": "^3.2.1",
