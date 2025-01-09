@@ -1,5 +1,5 @@
+import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
-import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 interface GroupedData {
@@ -15,23 +15,25 @@ type RegisterUserSteps =
   | "input-unit"
   | "review-submit";
 
-const StatisticsInterface: React.FC = () => {
+const StatistikGränssnitt: React.FC = () => {
   const [step, setStep] = useState<RegisterUserSteps>("input-cvs");
-  const [year] = useState<string>("");
-  const [file] = useState<string>("");
-  const [trainType, setTrainType] = useState<string>("");
-  const [bar, setBar] = useState<string>("");
-  const [line, setLine] = useState<string>("");
   const [chart, setChart] = useState<any>(null);
-  const [allYears, setAllYears] = useState<string[]>([]); // Store all years
-  const [selectedYears, setSelectedYears] = useState<string[]>([]); // Store selected years
+  const [allYears, setAllYears] = useState<string[]>([]);
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [groupedData, setGroupedData] = useState<Record<string, GroupedData>>(
     {}
-  ); // Store grouped data
-  const [title, setTitle] = useState<string>(""); // Store the title for chart
-  const [headers, setHeaders] = useState<string[]>([]); // Store headers (for column titles, etc.)
-  const [units, setUnits] = useState<string[]>([]); // Store units for data (Train unit, Punctuality unit)
+  );
+  const [title, setTitle] = useState<string>("");
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [units, setUnits] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [trainTypes, setTrainTypes] = useState<string[]>([]);
+  const [barData, setBarData] = useState<"Punktlighet" | "Antal Framförda tåg">(
+    "Antal Framförda tåg"
+  );
+  const [lineData, setLineData] = useState<
+    "Punktlighet" | "Antal Framförda tåg"
+  >("Punktlighet");
 
   useEffect(() => {
     if (containerRef.current) {
@@ -114,7 +116,7 @@ const StatisticsInterface: React.FC = () => {
     }
   }, []);
 
-  // Handle file upload and CSV parsing
+  // File upload and CSV parsing
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -140,7 +142,7 @@ const StatisticsInterface: React.FC = () => {
         jsonData.forEach((row: any[], index: number) => {
           if (index <= 2) return; // Skip title, header, and unit rows
 
-          const year = row[0].toString().trim(); // Trim year to avoid spaces or hidden characters
+          const year = row[0].toString();
           const trainType = row[1];
           const trainCount = row[2];
           let punctuality = row[3];
@@ -169,7 +171,6 @@ const StatisticsInterface: React.FC = () => {
           groupedData[trainType].punctualities.push(punctuality);
         });
 
-        // Store data and metadata in state
         setGroupedData(groupedData);
         setAllYears(years);
         setTitle(title);
@@ -183,34 +184,33 @@ const StatisticsInterface: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleYearChange = (e: { target: { value: any; }; }) => {
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const year = e.target.value;
-    setSelectedYears((prevSelectedYears) =>
-      prevSelectedYears.includes(year)
-        ? prevSelectedYears.filter((item) => item !== year)
-        : [...prevSelectedYears, year]
+    setSelectedYears((prev) =>
+      e.target.checked
+        ? [...prev, year]
+        : prev.filter((selectedYear) => selectedYear !== year)
     );
   };
 
-  // Handle select all / deselect all
-  const handleSelectAll = (selectAll: boolean) => {
-    if (selectAll) {
-      setSelectedYears(allYears); // Select all years
-    } else {
-      setSelectedYears([]); // Deselect all years
-    }
+  const handleTrainTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const trainType = e.target.value;
+    setTrainTypes((prev) =>
+      e.target.checked
+        ? [...prev, trainType]
+        : prev.filter((selectedType) => selectedType !== trainType)
+    );
   };
 
   const handleGenerateChart = () => {
-    if (!selectedYears.length || !chart) return;
+    if (!selectedYears.length || !trainTypes.length || !chart) return;
 
     const filteredGroupedData: Record<string, GroupedData> = {};
-    const filteredYears = selectedYears; // Only show selected years
+    const filteredYears = selectedYears;
 
-    console.log("Selected Years:", selectedYears); // Debugging selected years
-
-    // Filter the data based on selected years
     Object.keys(groupedData).forEach((trainType) => {
+      if (!trainTypes.includes(trainType)) return;
+
       const data = groupedData[trainType];
       const filteredData: GroupedData = {
         years: [],
@@ -219,7 +219,6 @@ const StatisticsInterface: React.FC = () => {
       };
 
       data.years.forEach((year, index) => {
-        // Ensure year is cleaned (trimmed) before comparing
         if (selectedYears.includes(year.trim())) {
           filteredData.years.push(year);
           filteredData.trainCounts.push(data.trainCounts[index]);
@@ -232,15 +231,11 @@ const StatisticsInterface: React.FC = () => {
       }
     });
 
-    console.log("Filtered Grouped Data:", filteredGroupedData); // Debugging filtered data
-
-    // Check if there's any data to display
     if (Object.keys(filteredGroupedData).length === 0) {
-      console.error("No data available for the selected years.");
+      console.error("No data available for the selected years or train types.");
       return;
     }
 
-    // Update the chart with filtered data
     chart.xAxis[0].update({
       categories: filteredYears,
     });
@@ -248,56 +243,66 @@ const StatisticsInterface: React.FC = () => {
     chart.series = [];
     Object.keys(filteredGroupedData).forEach((trainType) => {
       const data = filteredGroupedData[trainType];
-      console.log(`Adding series for train type: ${trainType}`);
+
+      // Stapel
       chart.addSeries({
-        name: `${trainType} - ${headers[2]}`,
+        name: `${trainType} - ${
+          barData === "Antal Framförda tåg" ? headers[2] : headers[3]
+        }`,
         type: "column",
         yAxis: 1,
-        data: data.trainCounts,
+        data:
+          barData === "Antal Framförda tåg"
+            ? data.trainCounts
+            : data.punctualities,
         tooltip: {
-          valueSuffix: " " + units[2], // Train unit
+          valueSuffix:
+            " " + (barData === "Antal Framförda tåg" ? units[2] : units[3]),
         },
       });
 
       chart.addSeries({
-        name: `${trainType} - ${headers[3]}`,
+        name: `${trainType} - ${
+          lineData === "Punktlighet" ? headers[3] : headers[2]
+        }`,
         type: "spline",
-        data: data.punctualities,
+        data:
+          lineData === "Punktlighet" ? data.punctualities : data.trainCounts,
         tooltip: {
-          valueSuffix: " " + units[3], // Punctuality unit
+          valueSuffix: " " + (lineData === "Punktlighet" ? units[3] : units[2]),
         },
       });
     });
 
+    // Linje
     chart.yAxis[0].update({
       title: {
-        text: headers[3], // Punctuality title
+        text: lineData === "Punktlighet" ? headers[3] : headers[2],
         style: {
           color: Highcharts.getOptions().colors?.[1],
         },
       },
       labels: {
-        format: "{value} " + units[3], // Punctuality unit
+        format: "{value} " + (lineData === "Punktlighet" ? units[3] : units[2]),
         style: {
           color: Highcharts.getOptions().colors?.[1],
         },
       },
-      min: 0,
-      max: 100,
-      tickInterval: 20,
       endOnTick: false,
       startOnTick: false,
     });
 
     chart.yAxis[1].update({
       title: {
-        text: headers[2], // Train title
+        text: barData === "Antal Framförda tåg" ? headers[2] : headers[3],
         style: {
           color: Highcharts.getOptions().colors?.[0],
         },
       },
       labels: {
-        format: "{value:,.0f} " + units[2], // Train unit
+        format:
+          "{value:,.0f} " +
+          (barData === "Antal Framförda tåg" ? units[2] : units[3]),
         style: {
           color: Highcharts.getOptions().colors?.[0],
         },
@@ -307,6 +312,14 @@ const StatisticsInterface: React.FC = () => {
     chart.setTitle({
       text: title,
     });
+  };
+
+  const handleSelectAll = (selectAll: boolean) => {
+    if (selectAll) {
+      setSelectedYears(allYears);
+    } else {
+      setSelectedYears([]);
+    }
   };
 
   return (
@@ -327,30 +340,27 @@ const StatisticsInterface: React.FC = () => {
       {step == "input-year" && (
         <div>
           <h3>Välj period</h3>
-
-          {/* Buttons to select/deselect all years */}
           <button onClick={() => handleSelectAll(true)}>Markera alla</button>
           <button onClick={() => handleSelectAll(false)}>Avmarkera alla</button>
-
-          {/* Dynamically render checkboxes for each year */}
           {allYears.length > 0 && (
             <div>
-              {allYears.map((year) => (
-                <div key={year}>
-                  <input
-                    type="checkbox"
-                    id={`year-${year}`}
-                    value={year}
-                    checked={selectedYears.includes(year)}
-                    onChange={handleYearChange}
-                  />
-                  <label htmlFor={`year-${year}`}>{year}</label>
-                </div>
-              ))}
+              <label>Select years:</label>
+              <div>
+                {allYears.map((year) => (
+                  <div key={year}>
+                    <input
+                      type="checkbox"
+                      id={`year-${year}`}
+                      value={year}
+                      checked={selectedYears.includes(year)}
+                      onChange={handleYearChange}
+                    />
+                    <label htmlFor={`year-${year}`}>{year}</label>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-
-          {/* Navigation buttons */}
           <button onClick={() => setStep("input-cvs")}>Tillbaka</button>
           <button onClick={() => setStep("input-train-type")}>Nästa</button>
         </div>
@@ -358,122 +368,107 @@ const StatisticsInterface: React.FC = () => {
 
       {step == "input-train-type" && (
         <div>
-          <h3>Välj tågtyp</h3>
+          <h3>Välj tågtåp</h3>
+          <div>
+            <input
+              type="checkbox"
+              id="Kortdistanståg"
+              value="Kortdistanståg"
+              checked={trainTypes.includes("Kortdistanståg")}
+              onChange={handleTrainTypeChange}
+            />
+            <label htmlFor="Kortdistanståg">Kortdistanståg</label>
+          </div>
+          <div>
+            <input
+              type="checkbox"
+              id="Medeldistanståg"
+              value="Medeldistanståg"
+              checked={trainTypes.includes("Medeldistanståg")}
+              onChange={handleTrainTypeChange}
+            />
+            <label htmlFor="Medeldistanståg">Medeldistanståg</label>
+          </div>
+          <div>
+            <input
+              type="checkbox"
+              id="Långdistanståg"
+              value="Långdistanståg"
+              checked={trainTypes.includes("Långdistanståg")}
+              onChange={handleTrainTypeChange}
+            />
+            <label htmlFor="Långdistanståg">Långdistanståg</label>
+          </div>
 
-          <p>
-            <input
-              type="checkbox"
-              name="typeOfTrain"
-              value={trainType}
-              onChange={(e) => setTrainType(e.target.value)}
-            />{" "}
-            Kortdistanståg
-          </p>
-          <p>
-            <input
-              type="checkbox"
-              name="typeOfTrain"
-              value={trainType}
-              onChange={(e) => setTrainType(e.target.value)}
-            />{" "}
-            Medeldistanståg
-          </p>
-          <p>
-            <input
-              type="checkbox"
-              name="typeOfTrain"
-              value={trainType}
-              onChange={(e) => setTrainType(e.target.value)}
-            />{" "}
-            Långdistanståg
-          </p>
           <button onClick={() => setStep("input-year")}>Tillbaka</button>
           <button onClick={() => setStep("input-unit")}>Nästa</button>
         </div>
       )}
 
-      {step == "input-unit" && (
+      {step === "input-unit" && (
         <div>
-          <h3>Välj enheter för stapel- och linjediagram</h3>
-          <p>
-            <label htmlFor="bar">Stapel: </label>
-            <select name="bar" id="bar">
-              <option value={bar}>Punktlighet</option>
-              <option value={bar}>Antal framförda tåg</option>
-            </select>{" "}
-          </p>
-          <p>
-            <label htmlFor="line">Linje: </label>
-            <select name="line" id="line">
-              <option value={line}>Punktlighet</option>
-              <option value={line}>Antal framförda tåg</option>
-            </select>{" "}
-          </p>
+          <h3>Välj enhet för stapel- och linjediagram</h3>
+          <div>
+            <h4>Välj data för stapeldiagrammet</h4>
+            <label>
+              <input
+                type="radio"
+                name="barData"
+                value="Antal Framförda tåg"
+                checked={barData === "Antal Framförda tåg"}
+                onChange={() => setBarData("Antal Framförda tåg")}
+              />
+              Antal Framförda tåg
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="barData"
+                value="Punktlighet"
+                checked={barData === "Punktlighet"}
+                onChange={() => setBarData("Punktlighet")}
+              />
+              Punktlighet
+            </label>
+          </div>
 
-          {/* eller */}
+          <div>
+            <h4>Välj data för linjediagrammet</h4>
+            <label>
+              <input
+                type="radio"
+                name="lineData"
+                value="Antal Framförda tåg"
+                checked={lineData === "Antal Framförda tåg"}
+                onChange={() => setLineData("Antal Framförda tåg")}
+              />
+              Antal Framförda tåg
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="lineData"
+                value="Punktlighet"
+                checked={lineData === "Punktlighet"}
+                onChange={() => setLineData("Punktlighet")}
+              />
+              Punktlighet
+            </label>
+          </div>
 
-          <p>
-            Stapel:
-            <input
-              type="radio"
-              name="Stapel"
-              value={bar}
-              onChange={(e) => setBar(e.target.value)}
-            />{" "}
-            Punktlighet
-            <input
-              type="radio"
-              name="Stapel"
-              value={bar}
-              onChange={(e) => setBar(e.target.value)}
-            />{" "}
-            Antal framförda tåg
-          </p>
-          <p>
-            Linje:
-            <input
-              type="radio"
-              name="linje"
-              value={line}
-              onChange={(e) => setLine(e.target.value)}
-            />{" "}
-            Punktlighet
-            <input
-              type="radio"
-              name="linje"
-              value={line}
-              onChange={(e) => setLine(e.target.value)}
-            />{" "}
-            Antal framförda tåg
-          </p>
-          <button onClick={() => setStep("input-train-type")}>Tiilbaka</button>
+          <button onClick={() => setStep("input-train-type")}>Tillbaka</button>
           <button onClick={() => setStep("review-submit")}>Nästa</button>
         </div>
       )}
-
-      {step == "review-submit" && (
-        <div>
-          <h3>Ditt urval</h3>
-
-          <p>CVS-fil: {file}</p>
-          <p>Period: {year}</p>
-          <p>Typ av tåg: {trainType}</p>
-          <p>Stapel: {bar} </p>
-          <p>Linje: {line}</p>
-
-          <button onClick={() => setStep("input-unit")}>Tillbaka</button>
-          <button onClick={() => setStep("input-cvs")}>Börja om</button>
-          <br />
-          <button onClick={handleGenerateChart}>Generate Diagram</button>
-          <div
-            id="container"
-            ref={containerRef}
-            style={{ width: "100%", height: "600px" }}
-          />
-        </div>
-      )}
+      
+      <button onClick={handleGenerateChart}>Generate Diagram</button>
+      <div
+        id="container"
+        ref={containerRef}
+        style={{ width: "100%", height: "600px" }}
+      />
     </div>
   );
 };
 
-export default StatisticsInterface;
+export default StatistikGränssnitt;
