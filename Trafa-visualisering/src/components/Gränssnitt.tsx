@@ -461,7 +461,7 @@ const StatistikGränssnitt: React.FC = () => {
         </div>
       )}
       
-      <button onClick={handleGenerateChart}>Generate Diagram</button>
+      <button onClick={handleGenerateChart}>Skapa Diagram</button>
       <div
         id="container"
         ref={containerRef}
