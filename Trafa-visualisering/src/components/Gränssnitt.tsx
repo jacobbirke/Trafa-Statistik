@@ -344,7 +344,6 @@ const StatistikGränssnitt: React.FC = () => {
           <button onClick={() => handleSelectAll(false)}>Avmarkera alla</button>
           {allYears.length > 0 && (
             <div>
-              <label>Select years:</label>
               <div>
                 {allYears.map((year) => (
                   <div key={year}>
@@ -368,7 +367,7 @@ const StatistikGränssnitt: React.FC = () => {
 
       {step == "input-train-type" && (
         <div>
-          <h3>Välj tågtåp</h3>
+          <h3>Välj tågtyp</h3>
           <div>
             <input
               type="checkbox"
