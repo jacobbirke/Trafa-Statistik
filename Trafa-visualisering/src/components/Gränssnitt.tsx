@@ -13,7 +13,7 @@ type RegisterUserSteps =
   | "input-train-type"
   | "input-year"
   | "input-unit"
-  | "review-submit";
+  | "review-generate";
 
 const StatistikGränssnitt: React.FC = () => {
   const [step, setStep] = useState<RegisterUserSteps>("input-cvs");
@@ -456,16 +456,30 @@ const StatistikGränssnitt: React.FC = () => {
           </div>
 
           <button onClick={() => setStep("input-train-type")}>Tillbaka</button>
-          <button onClick={() => setStep("review-submit")}>Nästa</button>
+          <button onClick={() => setStep("review-generate")}>Nästa</button>
         </div>
       )}
-      
+
       <button onClick={handleGenerateChart}>Skapa Diagram</button>
       <div
         id="container"
         ref={containerRef}
         style={{ width: "100%", height: "600px" }}
       />
+
+
+      {/* {step == "review-generate" && (
+        <div>
+          <button onClick={handleGenerateChart}>Skapa Diagram</button>
+          <div
+            id="container"
+            ref={containerRef}
+            style={{ width: "100%", height: "600px" }}
+          />
+        </div>
+      )} */}
+
+
     </div>
   );
 };
