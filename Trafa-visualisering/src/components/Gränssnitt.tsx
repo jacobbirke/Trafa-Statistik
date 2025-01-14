@@ -138,6 +138,7 @@ const StatistikGränssnitt: React.FC = () => {
 
         const groupedData: Record<string, GroupedData> = {};
         const years: string[] = [];
+        const uniqueTrainTypes: Set<string> = new Set(); // To store unique train types
 
         jsonData.forEach((row: any[], index: number) => {
           if (index <= 2) return; // Skip title, header, and unit rows
@@ -169,6 +170,7 @@ const StatistikGränssnitt: React.FC = () => {
           groupedData[trainType].years.push(year);
           groupedData[trainType].trainCounts.push(trainCount);
           groupedData[trainType].punctualities.push(punctuality);
+          uniqueTrainTypes.add(trainType);
         });
 
         setGroupedData(groupedData);
@@ -176,6 +178,7 @@ const StatistikGränssnitt: React.FC = () => {
         setTitle(title);
         setHeaders(headers);
         setUnits(units);
+        setTrainTypes(Array.from(uniqueTrainTypes)); 
       } catch (error) {
         console.error("Error parsing the Excel file:", error);
       }
@@ -368,36 +371,22 @@ const StatistikGränssnitt: React.FC = () => {
       {step == "input-train-type" && (
         <div>
           <h3>Välj tågtyp</h3>
-          <div>
-            <input
-              type="checkbox"
-              id="Kortdistanståg"
-              value="Kortdistanståg"
-              checked={trainTypes.includes("Kortdistanståg")}
-              onChange={handleTrainTypeChange}
-            />
-            <label htmlFor="Kortdistanståg">Kortdistanståg</label>
-          </div>
-          <div>
-            <input
-              type="checkbox"
-              id="Medeldistanståg"
-              value="Medeldistanståg"
-              checked={trainTypes.includes("Medeldistanståg")}
-              onChange={handleTrainTypeChange}
-            />
-            <label htmlFor="Medeldistanståg">Medeldistanståg</label>
-          </div>
-          <div>
-            <input
-              type="checkbox"
-              id="Långdistanståg"
-              value="Långdistanståg"
-              checked={trainTypes.includes("Långdistanståg")}
-              onChange={handleTrainTypeChange}
-            />
-            <label htmlFor="Långdistanståg">Långdistanståg</label>
-          </div>
+          {trainTypes.length > 0 ? (
+            trainTypes.map((trainType) => (
+              <div key={trainType}>
+                <input
+                  type="checkbox"
+                  id={trainType}
+                  value={trainType}
+                  checked={trainTypes.includes(trainType)}
+                  onChange={handleTrainTypeChange}
+                />
+                <label htmlFor={trainType}>{trainType}</label>
+              </div>
+            ))
+          ) : (
+            <p>Inga tågtyper tillgängliga</p>
+          )}
 
           <button onClick={() => setStep("input-year")}>Tillbaka</button>
           <button onClick={() => setStep("input-unit")}>Nästa</button>
@@ -467,7 +456,6 @@ const StatistikGränssnitt: React.FC = () => {
         style={{ width: "100%", height: "600px" }}
       />
 
-
       {/* {step == "review-generate" && (
         <div>
           <button onClick={handleGenerateChart}>Skapa Diagram</button>
@@ -478,8 +466,6 @@ const StatistikGränssnitt: React.FC = () => {
           />
         </div>
       )} */}
-
-
     </div>
   );
 };
