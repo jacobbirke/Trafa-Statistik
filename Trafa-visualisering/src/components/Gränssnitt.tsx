@@ -50,7 +50,7 @@ const StatistikGränssnitt: React.FC = () => {
             align: "left",
           },
           credits: {
-            text: 'Source: <a href="https://www.trafa.se/bantrafik/punktlighet-pa-jarnvag/" target="_blank">Trafikanalys</a>',
+            text: 'Source: <a href="https://www.trafa.se/" target="_blank">Trafikanalys</a>',
           },
           xAxis: [
             {
@@ -449,23 +449,17 @@ const StatistikGränssnitt: React.FC = () => {
         </div>
       )}
 
-      <button onClick={handleGenerateChart}>Skapa Diagram</button>
       <div
         id="container"
         ref={containerRef}
         style={{ width: "100%", height: "600px" }}
       />
 
-      {/* {step == "review-generate" && (
+      {step == "review-generate" && (
         <div>
           <button onClick={handleGenerateChart}>Skapa Diagram</button>
-          <div
-            id="container"
-            ref={containerRef}
-            style={{ width: "100%", height: "600px" }}
-          />
         </div>
-      )} */}
+      )}
     </div>
   );
 };
