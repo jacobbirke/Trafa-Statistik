@@ -8,105 +8,45 @@ interface GroupedData {
   punctualities: number[];
 }
 
-type RegisterUserSteps =
-  | "input-cvs"
-  | "input-train-type"
-  | "input-year"
-  | "input-unit"
-  | "review-generate";
-
 const StatistikGränssnitt: React.FC = () => {
-  const [step, setStep] = useState<RegisterUserSteps>("input-cvs");
+  const [step, setStep] = useState<"input-cvs" | "input-train-type" | "input-year" | "input-unit" | "review-generate">("input-cvs");
   const [chart, setChart] = useState<any>(null);
   const [allYears, setAllYears] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
-  const [groupedData, setGroupedData] = useState<Record<string, GroupedData>>(
-    {}
-  );
+  const [groupedData, setGroupedData] = useState<Record<string, GroupedData>>({});
   const [title, setTitle] = useState<string>("");
   const [headers, setHeaders] = useState<string[]>([]);
   const [units, setUnits] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [trainTypes, setTrainTypes] = useState<string[]>([]);
-  const [barData, setBarData] = useState<"Punktlighet" | "Antal Framförda tåg">(
-    "Antal Framförda tåg"
-  );
-  const [lineData, setLineData] = useState<
-    "Punktlighet" | "Antal Framförda tåg"
-  >("Punktlighet");
+  const [trainTypes, setTrainTypes] = useState<string[]>([]); // List of all available train types
+  const [selectedTrainTypes, setSelectedTrainTypes] = useState<string[]>([]); // List of selected train types
+  const [barData, setBarData] = useState<"Punktlighet" | "Antal Framförda tåg">("Antal Framförda tåg");
+  const [lineData, setLineData] = useState<"Punktlighet" | "Antal Framförda tåg">("Punktlighet");
 
   useEffect(() => {
     if (containerRef.current) {
-      const newChart = Highcharts.chart(
-        containerRef.current,
-        {
-          chart: {
-            zooming: {
-              type: "xy",
-            },
-          },
-          title: {
-            text: "",
-            align: "left",
-          },
-          credits: {
-            text: 'Source: <a href="https://www.trafa.se/" target="_blank">Trafikanalys</a>',
-          },
-          xAxis: [
-            {
-              categories: [],
-              crosshair: true,
-            },
-          ],
-          yAxis: [
-            {
-              title: {
-                text: "",
-                style: {
-                  color:
-                    (Highcharts.getOptions().colors?.[1] as string) ?? "black",
-                },
-              },
-              labels: {
-                format: "{value} ",
-                style: {
-                  color:
-                    (Highcharts.getOptions().colors?.[1] as string) ?? "blue",
-                },
-              },
-            },
-            {
-              title: {
-                text: "",
-                style: {
-                  color:
-                    (Highcharts.getOptions().colors?.[0] as string) ?? "green",
-                },
-              },
-              labels: {
-                format: "{value} ",
-                style: {
-                  color:
-                    (Highcharts.getOptions().colors?.[0] as string) ?? "red",
-                },
-              },
-              opposite: true,
-            },
-          ],
-          tooltip: {
-            shared: true,
-          },
-          legend: {
-            align: "center",
-            verticalAlign: "bottom",
-            backgroundColor:
-              Highcharts.defaultOptions.legend?.backgroundColor ??
-              "rgba(255,255,255,0.25)",
-          },
-          series: [],
+      const newChart = Highcharts.chart(containerRef.current, {
+        chart: { zooming: { type: "xy" } },
+        title: { text: "", align: "left" },
+        credits: {
+          text: 'Source: <a href="https://www.trafa.se/" target="_blank">Trafikanalys</a>',
         },
-        () => {}
-      );
+        xAxis: [{ categories: [], crosshair: true }],
+        yAxis: [
+          {
+            title: { text: "", style: { color: (Highcharts.getOptions().colors?.[1] as string) ?? "black" } },
+            labels: { format: "{value} ", style: { color: (Highcharts.getOptions().colors?.[1] as string) ?? "blue" } },
+          },
+          {
+            title: { text: "", style: { color: (Highcharts.getOptions().colors?.[0] as string) ?? "green" } },
+            labels: { format: "{value} ", style: { color: (Highcharts.getOptions().colors?.[0] as string) ?? "red" } },
+            opposite: true,
+          },
+        ],
+        tooltip: { shared: true },
+        legend: { align: "center", verticalAlign: "bottom", backgroundColor: "rgba(255,255,255,0.25)" },
+        series: [],
+      });
 
       setChart(newChart);
 
@@ -116,7 +56,6 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, []);
 
-  // File upload and CSV parsing
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -129,9 +68,7 @@ const StatistikGränssnitt: React.FC = () => {
       try {
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json<string[]>(sheet, {
-          header: 1,
-        });
+        const jsonData = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
         const title = jsonData[0][1];
         const headers = jsonData[1];
         const units = jsonData[2];
@@ -160,11 +97,7 @@ const StatistikGränssnitt: React.FC = () => {
           }
 
           if (!groupedData[trainType]) {
-            groupedData[trainType] = {
-              years: [],
-              trainCounts: [],
-              punctualities: [],
-            };
+            groupedData[trainType] = { years: [], trainCounts: [], punctualities: [] };
           }
 
           groupedData[trainType].years.push(year);
@@ -178,7 +111,7 @@ const StatistikGränssnitt: React.FC = () => {
         setTitle(title);
         setHeaders(headers);
         setUnits(units);
-        setTrainTypes(Array.from(uniqueTrainTypes)); 
+        setTrainTypes(Array.from(uniqueTrainTypes)); // Set all available train types
       } catch (error) {
         console.error("Error parsing the Excel file:", error);
       }
@@ -190,15 +123,13 @@ const StatistikGränssnitt: React.FC = () => {
   const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const year = e.target.value;
     setSelectedYears((prev) =>
-      e.target.checked
-        ? [...prev, year]
-        : prev.filter((selectedYear) => selectedYear !== year)
+      e.target.checked ? [...prev, year] : prev.filter((selectedYear) => selectedYear !== year)
     );
   };
 
   const handleTrainTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const trainType = e.target.value;
-    setTrainTypes((prev) =>
+    setSelectedTrainTypes((prev) =>
       e.target.checked
         ? [...prev, trainType]
         : prev.filter((selectedType) => selectedType !== trainType)
@@ -206,20 +137,16 @@ const StatistikGränssnitt: React.FC = () => {
   };
 
   const handleGenerateChart = () => {
-    if (!selectedYears.length || !trainTypes.length || !chart) return;
+    if (!selectedYears.length || !selectedTrainTypes.length || !chart) return;
 
     const filteredGroupedData: Record<string, GroupedData> = {};
     const filteredYears = selectedYears;
 
     Object.keys(groupedData).forEach((trainType) => {
-      if (!trainTypes.includes(trainType)) return;
+      if (!selectedTrainTypes.includes(trainType)) return;
 
       const data = groupedData[trainType];
-      const filteredData: GroupedData = {
-        years: [],
-        trainCounts: [],
-        punctualities: [],
-      };
+      const filteredData: GroupedData = { years: [], trainCounts: [], punctualities: [] };
 
       data.years.forEach((year, index) => {
         if (selectedYears.includes(year.trim())) {
@@ -239,29 +166,18 @@ const StatistikGränssnitt: React.FC = () => {
       return;
     }
 
-    chart.xAxis[0].update({
-      categories: filteredYears,
-    });
-
+    chart.xAxis[0].update({ categories: filteredYears });
     chart.series = [];
     Object.keys(filteredGroupedData).forEach((trainType) => {
       const data = filteredGroupedData[trainType];
-
-      // Stapel
       chart.addSeries({
         name: `${trainType} - ${
           barData === "Antal Framförda tåg" ? headers[2] : headers[3]
         }`,
         type: "column",
         yAxis: 1,
-        data:
-          barData === "Antal Framförda tåg"
-            ? data.trainCounts
-            : data.punctualities,
-        tooltip: {
-          valueSuffix:
-            " " + (barData === "Antal Framförda tåg" ? units[2] : units[3]),
-        },
+        data: barData === "Antal Framförda tåg" ? data.trainCounts : data.punctualities,
+        tooltip: { valueSuffix: " " + (barData === "Antal Framförda tåg" ? units[2] : units[3]) },
       });
 
       chart.addSeries({
@@ -269,52 +185,12 @@ const StatistikGränssnitt: React.FC = () => {
           lineData === "Punktlighet" ? headers[3] : headers[2]
         }`,
         type: "spline",
-        data:
-          lineData === "Punktlighet" ? data.punctualities : data.trainCounts,
-        tooltip: {
-          valueSuffix: " " + (lineData === "Punktlighet" ? units[3] : units[2]),
-        },
+        data: lineData === "Punktlighet" ? data.punctualities : data.trainCounts,
+        tooltip: { valueSuffix: " " + (lineData === "Punktlighet" ? units[3] : units[2]) },
       });
     });
 
-    // Linje
-    chart.yAxis[0].update({
-      title: {
-        text: lineData === "Punktlighet" ? headers[3] : headers[2],
-        style: {
-          color: Highcharts.getOptions().colors?.[1],
-        },
-      },
-      labels: {
-        format: "{value} " + (lineData === "Punktlighet" ? units[3] : units[2]),
-        style: {
-          color: Highcharts.getOptions().colors?.[1],
-        },
-      },
-      endOnTick: false,
-      startOnTick: false,
-    });
-
-    chart.yAxis[1].update({
-      title: {
-        text: barData === "Antal Framförda tåg" ? headers[2] : headers[3],
-        style: {
-          color: Highcharts.getOptions().colors?.[0],
-        },
-      },
-      labels: {
-        format:
-          "{value:,.0f} " +
-          (barData === "Antal Framförda tåg" ? units[2] : units[3]),
-        style: {
-          color: Highcharts.getOptions().colors?.[0],
-        },
-      },
-    });
-
-    chart.setTitle({
-      text: title,
-    });
+    chart.setTitle({ text: title });
   };
 
   const handleSelectAll = (selectAll: boolean) => {
@@ -327,40 +203,33 @@ const StatistikGränssnitt: React.FC = () => {
 
   return (
     <div>
-      {step == "input-cvs" && (
+      {step === "input-cvs" && (
         <div>
           <h3>Ladda upp CVS-fil</h3>
-          <input
-            type="file"
-            id="upload"
-            accept=".csv"
-            onChange={handleFileUpload}
-          />
+          <input type="file" id="upload" accept=".csv" onChange={handleFileUpload} />
           <button onClick={() => setStep("input-year")}>Nästa</button>
         </div>
       )}
 
-      {step == "input-year" && (
+      {step === "input-year" && (
         <div>
           <h3>Välj period</h3>
           <button onClick={() => handleSelectAll(true)}>Markera alla</button>
           <button onClick={() => handleSelectAll(false)}>Avmarkera alla</button>
           {allYears.length > 0 && (
             <div>
-              <div>
-                {allYears.map((year) => (
-                  <div key={year}>
-                    <input
-                      type="checkbox"
-                      id={`year-${year}`}
-                      value={year}
-                      checked={selectedYears.includes(year)}
-                      onChange={handleYearChange}
-                    />
-                    <label htmlFor={`year-${year}`}>{year}</label>
-                  </div>
-                ))}
-              </div>
+              {allYears.map((year) => (
+                <div key={year}>
+                  <input
+                    type="checkbox"
+                    id={`year-${year}`}
+                    value={year}
+                    checked={selectedYears.includes(year)}
+                    onChange={handleYearChange}
+                  />
+                  <label htmlFor={`year-${year}`}>{year}</label>
+                </div>
+              ))}
             </div>
           )}
           <button onClick={() => setStep("input-cvs")}>Tillbaka</button>
@@ -368,7 +237,7 @@ const StatistikGränssnitt: React.FC = () => {
         </div>
       )}
 
-      {step == "input-train-type" && (
+      {step === "input-train-type" && (
         <div>
           <h3>Välj tågtyp</h3>
           {trainTypes.length > 0 ? (
@@ -378,7 +247,7 @@ const StatistikGränssnitt: React.FC = () => {
                   type="checkbox"
                   id={trainType}
                   value={trainType}
-                  checked={trainTypes.includes(trainType)}
+                  checked={selectedTrainTypes.includes(trainType)}
                   onChange={handleTrainTypeChange}
                 />
                 <label htmlFor={trainType}>{trainType}</label>
@@ -393,7 +262,7 @@ const StatistikGränssnitt: React.FC = () => {
         </div>
       )}
 
-      {step === "input-unit" && (
+{step === "input-unit" && (
         <div>
           <h3>Välj enhet för stapel- och linjediagram</h3>
           <div>
@@ -455,7 +324,7 @@ const StatistikGränssnitt: React.FC = () => {
         style={{ width: "100%", height: "600px" }}
       />
 
-      {step == "review-generate" && (
+      {step === "review-generate" && (
         <div>
           <button onClick={handleGenerateChart}>Skapa Diagram</button>
         </div>
