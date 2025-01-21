@@ -59,7 +59,7 @@ const StatistikGränssnitt: React.FC = () => {
 
         const title = parsedData[0][1];
         const headers = parsedData[2];
-        const units = parsedData[2];
+        // const units = parsedData[2];
 
         const dimensionsData: Dimension[] = headers.map((header, index) => {
           const uniqueValues = new Set<string>();
