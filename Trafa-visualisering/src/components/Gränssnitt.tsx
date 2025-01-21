@@ -6,16 +6,17 @@ interface Dimension {
   name: string;
   allValues: string[];
   selectedValues: string[];
+  unit?: string;
 }
 
 const StatistikGränssnitt: React.FC = () => {
   const [step, setStep] = useState<
-    "input-cvs" | "input-dimensions" | "review-generate"
-  >("input-cvs");
+    "input-file" | "input-dimensions" | "review-generate"
+  >("input-file");
   const [chart, setChart] = useState<any>(null);
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
-  const [title, setTitle] = useState<string>("");
-  const [jsonData, setJsonData] = useState<any[]>([]); // Store the parsed data from the file
+  const [title, setTitle] = useState<string>("Diagram utan titel");
+  const [jsonData, setJsonData] = useState<any[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -57,9 +58,9 @@ const StatistikGränssnitt: React.FC = () => {
           header: 1,
         });
 
-        const title = parsedData[0][1];
-        const headers = parsedData[2];
-        // const units = parsedData[2];
+        const title = parsedData[0][0];
+        const headers = parsedData[1];
+        const units = parsedData[2];
 
         const dimensionsData: Dimension[] = headers.map((header, index) => {
           const uniqueValues = new Set<string>();
@@ -70,6 +71,7 @@ const StatistikGränssnitt: React.FC = () => {
             name: header,
             allValues: Array.from(uniqueValues),
             selectedValues: [],
+            unit: units[index] || "",
           };
         });
 
@@ -77,7 +79,7 @@ const StatistikGränssnitt: React.FC = () => {
         setDimensions(dimensionsData);
         setJsonData(parsedData);
       } catch (error) {
-        console.error("Error parsing the file:", error);
+        console.error("Error", error);
       }
     };
 
@@ -132,7 +134,7 @@ const StatistikGränssnitt: React.FC = () => {
         });
 
         return {
-          name: dim.name,
+          name: `${dim.name} (${dim.unit || ""})`,
           data: seriesValues,
         };
       });
@@ -144,10 +146,14 @@ const StatistikGränssnitt: React.FC = () => {
 
   return (
     <div>
-      {step === "input-cvs" && (
+      {step === "input-file" && (
         <div>
-          <h3>Ladda upp CSV-fil</h3>
-          <input type="file" accept=".csv" onChange={handleFileUpload} />
+          <h3>Ladda upp Fil</h3>
+          <input
+            type="file"
+            accept=".xlsx, .xls, .csv"
+            onChange={handleFileUpload}
+          />
           <button onClick={() => setStep("input-dimensions")}>Nästa</button>
         </div>
       )}
@@ -157,7 +163,9 @@ const StatistikGränssnitt: React.FC = () => {
           <h3>Dimensioner</h3>
           {dimensions.map((dim) => (
             <div key={dim.name}>
-              <h4>{dim.name}</h4>
+              <h4>
+                {dim.name} {dim.unit && `(${dim.unit})`}
+              </h4>
               {dim.allValues.map((value) => (
                 <div key={value}>
                   <label>
@@ -179,7 +187,7 @@ const StatistikGränssnitt: React.FC = () => {
               ))}
             </div>
           ))}
-          <button onClick={() => setStep("input-cvs")}>Tillbaka</button>
+          <button onClick={() => setStep("input-file")}>Tillbaka</button>
           <button onClick={() => setStep("review-generate")}>Nästa</button>
         </div>
       )}
