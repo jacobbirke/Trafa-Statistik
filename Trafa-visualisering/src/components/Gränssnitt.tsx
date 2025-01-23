@@ -9,12 +9,28 @@ interface Dimension {
   unit?: string;
 }
 
+interface Measure {
+  name: string;
+  unit?: string;
+  isSelected: boolean;
+}
+
 const StatistikGränssnitt: React.FC = () => {
   const [step, setStep] = useState<
-    "input-file" | "input-dimensions" | "review-generate"
+    | "input-file"
+    | "select-dimensions"
+    | "filter-dimensions"
+    | "select-measures"
+    | "chart-configuration"
+    | "review-generate"
   >("input-file");
   const [chart, setChart] = useState<any>(null);
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
+  const [selectedDimensions, setSelectedDimensions] = useState<Dimension[]>([]);
+  const [measures, setMeasures] = useState<Measure[]>([]);
+  const [barMeasure, setBarMeasure] = useState<string | null>(null);
+  const [lineMeasure, setLineMeasure] = useState<string | null>(null);
+  const [xAxisDimension, setXAxisDimension] = useState<string | null>(null);
   const [title, setTitle] = useState<string>("Diagram utan titel");
   const [jsonData, setJsonData] = useState<any[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -54,15 +70,24 @@ const StatistikGränssnitt: React.FC = () => {
       try {
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const parsedData = XLSX.utils.sheet_to_json<any[]>(sheet, {
-          header: 1,
-        });
+        const parsedData = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1 });
 
         const title = parsedData[0][0];
         const headers = parsedData[1];
         const units = parsedData[2];
 
-        const dimensionsData: Dimension[] = headers.map((header, index) => {
+        const dimensionHeaders: string[] = [];
+        const measureHeaders: string[] = [];
+
+        headers.forEach((header) => {
+          if (header.endsWith("_M")) {
+            measureHeaders.push(header);
+          } else {
+            dimensionHeaders.push(header);
+          }
+        });
+
+        const dimensionsData: Dimension[] = dimensionHeaders.map((header, index) => {
           const uniqueValues = new Set<string>();
           parsedData.forEach((row, rowIndex) => {
             if (rowIndex > 2) uniqueValues.add(row[index]?.toString() || "");
@@ -75,8 +100,15 @@ const StatistikGränssnitt: React.FC = () => {
           };
         });
 
+        const measuresData: Measure[] = measureHeaders.map((header, index) => ({
+          name: header.replace("_M", ""),
+          unit: units[index] || "",
+          isSelected: false,
+        }));
+
         setTitle(title);
         setDimensions(dimensionsData);
+        setMeasures(measuresData);
         setJsonData(parsedData);
       } catch (error) {
         console.error("Error", error);
@@ -86,21 +118,40 @@ const StatistikGränssnitt: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleDimensionSelection = (
+  const handleDimensionSelection = (dimensionName: string, isSelected: boolean) => {
+    if (isSelected) {
+      const dimension = dimensions.find((dim) => dim.name === dimensionName);
+      if (dimension) {
+        setSelectedDimensions((prev) => [...prev, { ...dimension, selectedValues: [] }]);
+      }
+    } else {
+      setSelectedDimensions((prev) => prev.filter((dim) => dim.name !== dimensionName));
+    }
+  };
+
+  const handleDimensionValueSelection = (
     dimensionName: string,
     value: string,
     isSelected: boolean
   ) => {
-    setDimensions((prevDimensions) =>
-      prevDimensions.map((dimension) =>
-        dimension.name === dimensionName
+    setSelectedDimensions((prev) =>
+      prev.map((dim) =>
+        dim.name === dimensionName
           ? {
-              ...dimension,
+              ...dim,
               selectedValues: isSelected
-                ? [...dimension.selectedValues, value]
-                : dimension.selectedValues.filter((v) => v !== value),
+                ? [...dim.selectedValues, value]
+                : dim.selectedValues.filter((v) => v !== value),
             }
-          : dimension
+          : dim
+      )
+    );
+  };
+
+  const handleMeasureSelection = (measureName: string, isSelected: boolean) => {
+    setMeasures((prev) =>
+      prev.map((measure) =>
+        measure.name === measureName ? { ...measure, isSelected } : measure
       )
     );
   };
@@ -108,40 +159,73 @@ const StatistikGränssnitt: React.FC = () => {
   const handleGenerateChart = () => {
     if (!chart || !jsonData) return;
 
-    const selectedDimensions = dimensions.filter(
-      (dim) => dim.selectedValues.length > 0
-    );
-
-    if (selectedDimensions.length === 0) {
-      console.log("No dimensions selected!");
+    if (!xAxisDimension || (!barMeasure && !lineMeasure)) {
+      alert("Vänligen välj x-axel och minst ett mått för stapel eller linjediagram.");
       return;
     }
 
-    const selectedCategories =
-      selectedDimensions.find((dim) => dim.name === "Year")?.selectedValues ||
-      [];
+    const xAxisDimensionData = dimensions.find((dim) => dim.name === xAxisDimension);
+    if (!xAxisDimensionData) {
+      alert("Dimension för x-axeln hittades inte!");
+      return;
+    }
 
-    const seriesData = selectedDimensions
-      .filter((dim) => dim.name !== "Year")
-      .map((dim) => {
-        const seriesValues = selectedCategories.map((category) => {
-          return jsonData
-            .filter((row) => row[dim.name] === category)
-            .reduce(
-              (acc, row) => acc + (parseFloat(row[dim.name] as string) || 0),
-              0
-            );
+    const xAxisCategories = xAxisDimensionData.selectedValues;
+
+    const seriesData: any[] = [];
+
+    const filterRowsBySelectedDimensions = () => {
+      return jsonData.filter((row) => {
+        return dimensions.every((dimension) => {
+          if (dimension.selectedValues.length === 0) return true;
+
+          const rowValue = row[dimension.name]?.toString();
+          return dimension.selectedValues.includes(rowValue);
         });
-
-        return {
-          name: `${dim.name} (${dim.unit || ""})`,
-          data: seriesValues,
-        };
       });
+    };
 
-    chart.xAxis[0].update({ categories: selectedCategories });
-    chart.series = seriesData;
-    chart.setTitle({ text: title });
+    const filteredRows = filterRowsBySelectedDimensions();
+
+    const aggregateMeasureData = (measureName: string) => {
+      return xAxisCategories.map((category) => {
+        const categoryRows = filteredRows.filter(
+          (row) => row[xAxisDimension]?.toString() === category
+        );
+
+        const aggregatedValue = categoryRows.reduce((sum, row) => {
+          const value = parseFloat(row[measureName]);
+          return sum + (isNaN(value) ? 0 : value);
+        }, 0);
+
+        return aggregatedValue;
+      });
+    };
+
+    if (barMeasure) {
+      const barData = aggregateMeasureData(barMeasure);
+      seriesData.push({
+        name: `${barMeasure} (Bar)`,
+        type: "column",
+        data: barData,
+        color: "#007bff",
+      });
+    }
+
+    if (lineMeasure) {
+      const lineData = aggregateMeasureData(lineMeasure);
+      seriesData.push({
+        name: `${lineMeasure} (Line)`,
+        type: "spline",
+        data: lineData,
+        color: "#ff5722",
+      });
+    }
+
+    chart.xAxis[0].update({ categories: xAxisCategories });
+    chart.series = [];
+    seriesData.forEach((series) => chart.addSeries(series));
+    chart.setTitle({ text: title || "Diagram" });
   };
 
   return (
@@ -149,36 +233,44 @@ const StatistikGränssnitt: React.FC = () => {
       {step === "input-file" && (
         <div>
           <h3>Ladda upp Fil</h3>
-          <input
-            type="file"
-            accept=".xlsx, .xls, .csv"
-            onChange={handleFileUpload}
-          />
-          <button onClick={() => setStep("input-dimensions")}>Nästa</button>
+          <input type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
+          <button onClick={() => setStep("select-dimensions")}>Nästa</button>
         </div>
       )}
 
-      {step === "input-dimensions" && (
+      {step === "select-dimensions" && (
         <div>
-          <h3>Dimensioner</h3>
+          <h3>Välj Dimensioner</h3>
           {dimensions.map((dim) => (
             <div key={dim.name}>
-              <h4>
+              <label>
+                <input
+                  type="checkbox"
+                  onChange={(e) => handleDimensionSelection(dim.name, e.target.checked)}
+                />
                 {dim.name} {dim.unit && `(${dim.unit})`}
-              </h4>
+              </label>
+            </div>
+          ))}
+          <button onClick={() => setStep("input-file")}>Tillbaka</button>
+          <button onClick={() => setStep("filter-dimensions")}>Nästa</button>
+        </div>
+      )}
+
+      {step === "filter-dimensions" && (
+        <div>
+          <h3>Filtrera Dimensioner</h3>
+          {selectedDimensions.map((dim) => (
+            <div key={dim.name}>
+              <h4>{dim.name}</h4>
               {dim.allValues.map((value) => (
                 <div key={value}>
                   <label>
                     <input
                       type="checkbox"
-                      value={value}
                       checked={dim.selectedValues.includes(value)}
                       onChange={(e) =>
-                        handleDimensionSelection(
-                          dim.name,
-                          value,
-                          e.target.checked
-                        )
+                        handleDimensionValueSelection(dim.name, value, e.target.checked)
                       }
                     />
                     {value}
@@ -187,7 +279,85 @@ const StatistikGränssnitt: React.FC = () => {
               ))}
             </div>
           ))}
-          <button onClick={() => setStep("input-file")}>Tillbaka</button>
+          <button onClick={() => setStep("select-dimensions")}>Tillbaka</button>
+          <button onClick={() => setStep("select-measures")}>Nästa</button>
+        </div>
+      )}
+
+      {step === "select-measures" && (
+        <div>
+          <h3>Välj Mått</h3>
+          {measures.map((measure) => (
+            <div key={measure.name}>
+              <label>
+                <input
+                  type="checkbox"
+                  onChange={(e) => handleMeasureSelection(measure.name, e.target.checked)}
+                />
+                {measure.name} {measure.unit && `(${measure.unit})`}
+              </label>
+            </div>
+          ))}
+          <button onClick={() => setStep("filter-dimensions")}>Tillbaka</button>
+          <button onClick={() => setStep("chart-configuration")}>Nästa</button>
+        </div>
+      )}
+
+      {step === "chart-configuration" && (
+        <div>
+          <h3>Diagramkonfiguration</h3>
+          <div>
+            <h4>Välj X-Axel (Dimension)</h4>
+            {selectedDimensions.map((dim) => (
+              <div key={dim.name}>
+                <label>
+                  <input
+                    type="radio"
+                    name="xAxis"
+                    value={dim.name}
+                    checked={xAxisDimension === dim.name}
+                    onChange={() => setXAxisDimension(dim.name)}
+                  />
+                  {dim.name}
+                </label>
+              </div>
+            ))}
+          </div>
+          <div>
+            <h4>Välj Mått för Stapeldiagram</h4>
+            {measures.map((measure) => (
+              <div key={measure.name}>
+                <label>
+                  <input
+                    type="radio"
+                    name="barMeasure"
+                    value={measure.name}
+                    checked={barMeasure === measure.name}
+                    onChange={() => setBarMeasure(measure.name)}
+                  />
+                  {measure.name}
+                </label>
+              </div>
+            ))}
+          </div>
+          <div>
+            <h4>Välj Mått för Linjediagram</h4>
+            {measures.map((measure) => (
+              <div key={measure.name}>
+                <label>
+                  <input
+                    type="radio"
+                    name="lineMeasure"
+                    value={measure.name}
+                    checked={lineMeasure === measure.name}
+                    onChange={() => setLineMeasure(measure.name)}
+                  />
+                  {measure.name}
+                </label>
+              </div>
+            ))}
+          </div>
+          <button onClick={() => setStep("select-measures")}>Tillbaka</button>
           <button onClick={() => setStep("review-generate")}>Nästa</button>
         </div>
       )}
