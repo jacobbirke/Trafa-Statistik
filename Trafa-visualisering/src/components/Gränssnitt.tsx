@@ -113,7 +113,7 @@ const StatistikGränssnitt: React.FC = () => {
         setTitle(title);
         setDimensions(dimensionsData);
         setMeasures(measuresData);
-        setJsonData(parsedData);
+        setJsonData(parsedData.slice(3));
       } catch (error) {
         console.error("Error", error);
       }
@@ -171,84 +171,97 @@ const StatistikGränssnitt: React.FC = () => {
   const handleGenerateChart = () => {
     if (!chart || !jsonData) return;
 
-    if (!xAxisDimension || (!barMeasure && !lineMeasure)) {
-      alert(
-        "Vänligen välj x-axel och minst ett mått för stapel eller linjediagram."
-      );
-      return;
-    }
-
-    const xAxisDimensionData = dimensions.find(
+    const xAxisDimensionIndex = dimensions.findIndex(
       (dim) => dim.name === xAxisDimension
     );
-    if (!xAxisDimensionData) {
+
+    if (xAxisDimensionIndex === -1) {
       alert("Dimension för x-axeln hittades inte!");
       return;
     }
 
-    const xAxisCategories = xAxisDimensionData.selectedValues;
+    const selectedXAxisValues = selectedDimensions.find(
+      (dim) => dim.name === xAxisDimension
+    )?.selectedValues;
 
-    const seriesData: any[] = [];
+    if (!selectedXAxisValues || selectedXAxisValues.length === 0) {
+      alert("Inga valda värden för X-axeln.");
+      return;
+    }
 
-    const filterRowsBySelectedDimensions = () => {
-      return jsonData.filter((row) => {
-        return dimensions.every((dimension) => {
-          if (dimension.selectedValues.length === 0) return true;
+    const filteredRows = jsonData.filter((row) => {
+      return selectedDimensions.every((dimension) => {
+        const dimensionIndex = dimensions.findIndex(
+          (dim) => dim.name === dimension.name
+        );
+        if (dimensionIndex === -1) return true;
 
-          const rowValue = row[dimension.name]?.toString();
-          return dimension.selectedValues.includes(rowValue);
-        });
+        const rowValue = row[dimensionIndex]?.toString();
+        return (
+          dimension.selectedValues.length === 0 ||
+          dimension.selectedValues.includes(rowValue)
+        );
       });
-    };
+    });
 
-    const filteredRows = filterRowsBySelectedDimensions();
+    if (filteredRows.length === 0) {
+      alert("Inga rader matchar de valda filtren.");
+      return;
+    }
 
     const aggregateMeasureData = (measureName: string) => {
-      return xAxisCategories.map((category) => {
+      const measureIndex =
+        measures.findIndex((measure) => measure.name === measureName) +
+        dimensions.length;
+
+      return selectedXAxisValues.map((category) => {
         const categoryRows = filteredRows.filter(
-          (row) => row[xAxisDimension]?.toString() === category
+          (row) => row[xAxisDimensionIndex]?.toString() === category
         );
 
-        const aggregatedValue = categoryRows.reduce((sum, row) => {
-          const value = parseFloat(row[measureName]);
+        return categoryRows.reduce((sum, row) => {
+          const value = parseFloat(row[measureIndex]);
           return sum + (isNaN(value) ? 0 : value);
         }, 0);
-
-        return aggregatedValue;
       });
     };
+
+    const seriesData: any[] = [];
 
     if (barMeasure) {
       const barData = aggregateMeasureData(barMeasure);
       seriesData.push({
-        name: `${barMeasure} (Bar)`,
+        name: `${barMeasure}`,
         type: "column",
         data: barData,
-        color: "#007bff",
+        color: "blue",
       });
     }
 
     if (lineMeasure) {
       const lineData = aggregateMeasureData(lineMeasure);
       seriesData.push({
-        name: `${lineMeasure} (Line)`,
+        name: `${lineMeasure}`,
         type: "spline",
         data: lineData,
-        color: "#ff5722",
+        color: "orange",
       });
     }
 
-    chart.xAxis[0].update({ categories: xAxisCategories });
-    chart.series = [];
-    seriesData.forEach((series) => chart.addSeries(series));
+    chart.xAxis[0].update({ categories: selectedXAxisValues });
+    chart.series.forEach((series: any) => series.remove(false));
+    seriesData.forEach((series) => chart.addSeries(series, false));
+    chart.redraw();
     chart.setTitle({ text: title || "Diagram" });
+
+    console.log(seriesData);
   };
 
   return (
     <div>
       {step === "input-file" && (
         <div>
-          <h3>Ladda upp Fil</h3>
+          <h3>Ladda upp fil</h3>
           <input
             type="file"
             accept=".xlsx, .xls, .csv"
@@ -306,7 +319,22 @@ const StatistikGränssnitt: React.FC = () => {
             </div>
           ))}
           <button onClick={() => setStep("select-dimensions")}>Tillbaka</button>
-          <button onClick={() => setStep("select-measures")}>Nästa</button>
+          <button
+            onClick={() => {
+              const allDimensionsValid = selectedDimensions.every(
+                (dim) => dim.selectedValues.length > 0
+              );
+
+              if (!allDimensionsValid) {
+                alert("Välj minst ett värde för varje vald dimension");
+                return;
+              }
+
+              setStep("select-measures");
+            }}
+          >
+            Nästa
+          </button>
         </div>
       )}
 
@@ -354,7 +382,7 @@ const StatistikGränssnitt: React.FC = () => {
           <div>
             <h4>Välj Mått för Stapeldiagram</h4>
             {measures
-              .filter((measure) => measure.isSelected) 
+              .filter((measure) => measure.isSelected)
               .map((measure) => (
                 <div key={measure.name}>
                   <label>
@@ -390,7 +418,19 @@ const StatistikGränssnitt: React.FC = () => {
               ))}
           </div>
           <button onClick={() => setStep("select-measures")}>Tillbaka</button>
-          <button onClick={() => setStep("review-generate")}>Nästa</button>
+          <button
+            onClick={() => {
+              if (!xAxisDimension || (!barMeasure && !lineMeasure)) {
+                alert(
+                  "Välj x-axel och minst ett mått för stapel eller linjediagram."
+                );
+                return;
+              }
+              setStep("review-generate");
+            }}
+          >
+            Nästa
+          </button>{" "}
         </div>
       )}
 
