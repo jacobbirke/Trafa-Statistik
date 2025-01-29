@@ -1,59 +1,72 @@
 import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
+import HighchartsGroupedCategories from "highcharts-grouped-categories";
+HighchartsGroupedCategories(Highcharts);
 
-interface GroupedData {
-  years: string[];
-  trainCounts: number[];
-  punctualities: number[];
+interface Dimension {
+  name: string;
+  allValues: string[];
+  selectedValues: string[];
+  unit?: string;
+}
+
+interface Measure {
+  name: string;
+  unit?: string;
+  isSelected: boolean;
 }
 
 const StatistikGränssnitt: React.FC = () => {
-  const [step, setStep] = useState<"input-cvs" | "input-train-type" | "input-year" | "input-unit" | "review-generate">("input-cvs");
+  const [step, setStep] = useState<
+    | "input-file"
+    | "select-dimensions"
+    | "filter-dimensions"
+    | "select-measures"
+    | "chart-configuration"
+    | "review-generate"
+  >("input-file");
   const [chart, setChart] = useState<any>(null);
-  const [allYears, setAllYears] = useState<string[]>([]);
-  const [selectedYears, setSelectedYears] = useState<string[]>([]);
-  const [groupedData, setGroupedData] = useState<Record<string, GroupedData>>({});
-  const [title, setTitle] = useState<string>("");
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [units, setUnits] = useState<string[]>([]);
+  const [dimensions, setDimensions] = useState<Dimension[]>([]);
+  const [selectedDimensions, setSelectedDimensions] = useState<Dimension[]>([]);
+  const [measures, setMeasures] = useState<Measure[]>([]);
+  const [barMeasure, setBarMeasure] = useState<string | null>(null);
+  const [lineMeasure, setLineMeasure] = useState<string | null>(null);
+  const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
+  const [title, setTitle] = useState<string>("Diagram utan titel");
+  const [jsonData, setJsonData] = useState<any[]>([]);
+  const [chartType, setChartType] = useState<"column" | "line">("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [trainTypes, setTrainTypes] = useState<string[]>([]); // List of all available train types
-  const [selectedTrainTypes, setSelectedTrainTypes] = useState<string[]>([]); // List of selected train types
-  const [barData, setBarData] = useState<"Punktlighet" | "Antal Framförda tåg">("Antal Framförda tåg");
-  const [lineData, setLineData] = useState<"Punktlighet" | "Antal Framförda tåg">("Punktlighet");
 
   useEffect(() => {
-    if (containerRef.current) {
-      const newChart = Highcharts.chart(containerRef.current, {
-        chart: { zooming: { type: "xy" } },
-        title: { text: "", align: "left" },
-        credits: {
-          text: 'Source: <a href="https://www.trafa.se/" target="_blank">Trafikanalys</a>',
+    if (!containerRef.current) return;
+
+    const newChart = Highcharts.chart(containerRef.current, {
+      chart: { type: "column" },
+      title: { text: "", align: "left" },
+      xAxis: {
+        type: "category",
+        crosshair: true,
+      },
+      yAxis: {
+        title: { text: "Values", style: { color: "blue" } },
+      },
+      tooltip: { shared: true },
+      plotOptions: {
+        column: {
+          grouping: true,
+          pointPadding: 0.2,
+          borderWidth: 0,
         },
-        xAxis: [{ categories: [], crosshair: true }],
-        yAxis: [
-          {
-            title: { text: "", style: { color: (Highcharts.getOptions().colors?.[1] as string) ?? "black" } },
-            labels: { format: "{value} ", style: { color: (Highcharts.getOptions().colors?.[1] as string) ?? "blue" } },
-          },
-          {
-            title: { text: "", style: { color: (Highcharts.getOptions().colors?.[0] as string) ?? "green" } },
-            labels: { format: "{value} ", style: { color: (Highcharts.getOptions().colors?.[0] as string) ?? "red" } },
-            opposite: true,
-          },
-        ],
-        tooltip: { shared: true },
-        legend: { align: "center", verticalAlign: "bottom", backgroundColor: "rgba(255,255,255,0.25)" },
-        series: [],
-      });
+      },
+      series: [],
+    });
 
-      setChart(newChart);
+    setChart(newChart);
 
-      return () => {
-        newChart.destroy();
-      };
-    }
+    return () => {
+      newChart.destroy();
+    };
   }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,253 +81,468 @@ const StatistikGränssnitt: React.FC = () => {
       try {
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
-        const title = jsonData[0][1];
-        const headers = jsonData[1];
-        const units = jsonData[2];
-
-        const groupedData: Record<string, GroupedData> = {};
-        const years: string[] = [];
-        const uniqueTrainTypes: Set<string> = new Set(); // To store unique train types
-
-        jsonData.forEach((row: any[], index: number) => {
-          if (index <= 2) return; // Skip title, header, and unit rows
-
-          const year = row[0].toString();
-          const trainType = row[1];
-          const trainCount = row[2];
-          let punctuality = row[3];
-
-          if (punctuality === undefined || punctuality === null) {
-            punctuality = 0;
-          } else {
-            punctuality = parseFloat(punctuality).toFixed(2);
-            punctuality = parseFloat(punctuality);
-          }
-
-          if (!years.includes(year)) {
-            years.push(year);
-          }
-
-          if (!groupedData[trainType]) {
-            groupedData[trainType] = { years: [], trainCounts: [], punctualities: [] };
-          }
-
-          groupedData[trainType].years.push(year);
-          groupedData[trainType].trainCounts.push(trainCount);
-          groupedData[trainType].punctualities.push(punctuality);
-          uniqueTrainTypes.add(trainType);
+        const parsedData = XLSX.utils.sheet_to_json<any[]>(sheet, {
+          header: 1,
         });
 
-        setGroupedData(groupedData);
-        setAllYears(years);
+        const title = parsedData[0][0];
+        const headers = parsedData[1];
+        const units = parsedData[2];
+
+        const dimensionHeaders: string[] = [];
+        const measureHeaders: string[] = [];
+
+        headers.forEach((header) => {
+          if (header.endsWith("_M")) {
+            measureHeaders.push(header);
+          } else {
+            dimensionHeaders.push(header);
+          }
+        });
+
+        const dimensionsData: Dimension[] = dimensionHeaders.map(
+          (header, index) => {
+            const uniqueValues = new Set<string>();
+            parsedData.forEach((row, rowIndex) => {
+              if (rowIndex > 2) uniqueValues.add(row[index]?.toString() || "");
+            });
+            return {
+              name: header,
+              allValues: Array.from(uniqueValues),
+              selectedValues: [],
+              unit: units[index] || "",
+            };
+          }
+        );
+
+        const measuresData: Measure[] = measureHeaders.map((header, index) => ({
+          name: header.replace("_M", ""),
+          unit: units[index] || "",
+          isSelected: false,
+        }));
+
         setTitle(title);
-        setHeaders(headers);
-        setUnits(units);
-        setTrainTypes(Array.from(uniqueTrainTypes)); // Set all available train types
+        setDimensions(dimensionsData);
+        setMeasures(measuresData);
+        setJsonData(parsedData.slice(3));
       } catch (error) {
-        console.error("Error parsing the Excel file:", error);
+        console.error("Error", error);
       }
     };
 
     reader.readAsArrayBuffer(file);
   };
 
-  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const year = e.target.value;
-    setSelectedYears((prev) =>
-      e.target.checked ? [...prev, year] : prev.filter((selectedYear) => selectedYear !== year)
+  const handleDimensionSelection = (
+    dimensionName: string,
+    isSelected: boolean
+  ) => {
+    if (isSelected) {
+      const dimension = dimensions.find((dim) => dim.name === dimensionName);
+      if (dimension) {
+        setSelectedDimensions((prev) => [
+          ...prev,
+          { ...dimension, selectedValues: [] },
+        ]);
+      }
+    } else {
+      setSelectedDimensions((prev) =>
+        prev.filter((dim) => dim.name !== dimensionName)
+      );
+    }
+  };
+
+  const handleDimensionValueSelection = (
+    dimensionName: string,
+    value: string,
+    isSelected: boolean
+  ) => {
+    setSelectedDimensions((prev) =>
+      prev.map((dim) =>
+        dim.name === dimensionName
+          ? {
+              ...dim,
+              selectedValues: isSelected
+                ? [...dim.selectedValues, value]
+                : dim.selectedValues.filter((v) => v !== value),
+            }
+          : dim
+      )
     );
   };
 
-  const handleTrainTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const trainType = e.target.value;
-    setSelectedTrainTypes((prev) =>
-      e.target.checked
-        ? [...prev, trainType]
-        : prev.filter((selectedType) => selectedType !== trainType)
+  const handleMeasureSelection = (measureName: string, isSelected: boolean) => {
+    setMeasures((prev) =>
+      prev.map((measure) =>
+        measure.name === measureName ? { ...measure, isSelected } : measure
+      )
     );
   };
 
   const handleGenerateChart = () => {
-    if (!selectedYears.length || !selectedTrainTypes.length || !chart) return;
+    if (!chart || !jsonData) return;
 
-    const filteredGroupedData: Record<string, GroupedData> = {};
-    const filteredYears = selectedYears;
-
-    Object.keys(groupedData).forEach((trainType) => {
-      if (!selectedTrainTypes.includes(trainType)) return;
-
-      const data = groupedData[trainType];
-      const filteredData: GroupedData = { years: [], trainCounts: [], punctualities: [] };
-
-      data.years.forEach((year, index) => {
-        if (selectedYears.includes(year.trim())) {
-          filteredData.years.push(year);
-          filteredData.trainCounts.push(data.trainCounts[index]);
-          filteredData.punctualities.push(data.punctualities[index]);
-        }
-      });
-
-      if (filteredData.years.length > 0) {
-        filteredGroupedData[trainType] = filteredData;
-      }
-    });
-
-    if (Object.keys(filteredGroupedData).length === 0) {
-      console.error("No data available for the selected years or train types.");
+    if (xAxisDimensions.length === 0) {
+      alert("Välj minst en dimension för x-axeln.");
       return;
     }
 
-    chart.xAxis[0].update({ categories: filteredYears });
-    chart.series = [];
-    Object.keys(filteredGroupedData).forEach((trainType) => {
-      const data = filteredGroupedData[trainType];
-      chart.addSeries({
-        name: `${trainType} - ${
-          barData === "Antal Framförda tåg" ? headers[2] : headers[3]
-        }`,
-        type: "column",
-        yAxis: 1,
-        data: barData === "Antal Framförda tåg" ? data.trainCounts : data.punctualities,
-        tooltip: { valueSuffix: " " + (barData === "Antal Framförda tåg" ? units[2] : units[3]) },
-      });
+    const xAxisDimensionIndices = xAxisDimensions.map((dimName) =>
+      dimensions.findIndex((dim) => dim.name === dimName)
+    );
 
-      chart.addSeries({
-        name: `${trainType} - ${
-          lineData === "Punktlighet" ? headers[3] : headers[2]
-        }`,
-        type: "spline",
-        data: lineData === "Punktlighet" ? data.punctualities : data.trainCounts,
-        tooltip: { valueSuffix: " " + (lineData === "Punktlighet" ? units[3] : units[2]) },
+    if (xAxisDimensionIndices.some((index) => index === -1)) {
+      alert("Dimension för x-axeln hittades inte!");
+      return;
+    }
+
+    const selectedXAxisValues = xAxisDimensions.map(
+      (dimName) =>
+        selectedDimensions.find((dim) => dim.name === dimName)
+          ?.selectedValues ?? []
+    );
+
+    if (selectedXAxisValues.some((values) => values.length === 0)) {
+      alert("Inga valda värden för X-axeln.");
+      return;
+    }
+
+    const filteredRows = jsonData.filter((row) => {
+      return selectedDimensions.every((dimension) => {
+        const dimensionIndex = dimensions.findIndex(
+          (dim) => dim.name === dimension.name
+        );
+        if (dimensionIndex === -1) return true;
+        const rowValue = row[dimensionIndex]?.toString();
+        return dimension.selectedValues.includes(rowValue);
       });
     });
 
-    chart.setTitle({ text: title });
-  };
-
-  const handleSelectAll = (selectAll: boolean) => {
-    if (selectAll) {
-      setSelectedYears(allYears);
-    } else {
-      setSelectedYears([]);
+    if (filteredRows.length === 0) {
+      alert("Inga rader matchar de valda filtren.");
+      return;
     }
+
+    const aggregateMeasureData = (measureName: string) => {
+      const measureIndex =
+        measures.findIndex((measure) => measure.name === measureName) +
+        dimensions.length;
+
+      if (xAxisDimensions.length === 1) {
+        return selectedXAxisValues[0].map((category) => {
+          const categoryRows = filteredRows.filter(
+            (row) => row[xAxisDimensionIndices[0]]?.toString() === category
+          );
+          return categoryRows.reduce((sum, row) => {
+            const value = parseFloat(row[measureIndex]);
+            return sum + (isNaN(value) ? 0 : value);
+          }, 0);
+        });
+      } else {
+        return selectedXAxisValues[0].map((mainCategory) => {
+          return selectedXAxisValues[1].map((subCategory) => {
+            const categoryRows = filteredRows.filter(
+              (row) =>
+                row[xAxisDimensionIndices[0]]?.toString() === mainCategory &&
+                row[xAxisDimensionIndices[1]]?.toString() === subCategory
+            );
+            return categoryRows.reduce((sum, row) => {
+              const value = parseFloat(row[measureIndex]);
+              return sum + (isNaN(value) ? 0 : value);
+            }, 0);
+          });
+        });
+      }
+    };
+
+    const seriesData: any[] = [];
+    const selectedMeasures = measures.filter((measure) => measure.isSelected);
+
+    if (selectedMeasures.length === 1) {
+      const measure = selectedMeasures[0];
+      const data = aggregateMeasureData(measure.name);
+      seriesData.push({
+        name: `${measure.name}${measure.unit ? ` (${measure.unit})` : ""}`,
+        type: chartType,
+        data: xAxisDimensions.length === 2 ? data.flat() : data,
+        color: chartType === "column" ? "blue" : "pink",
+      });
+    } else {
+      if (barMeasure) {
+        const barData = aggregateMeasureData(barMeasure);
+        seriesData.push({
+          name: `${barMeasure}`,
+          type: "column",
+          data: xAxisDimensions.length === 2 ? barData.flat() : barData,
+          color: "blue",
+        });
+      }
+
+      if (lineMeasure) {
+        const lineData = aggregateMeasureData(lineMeasure);
+        seriesData.push({
+          name: `${lineMeasure}`,
+          type: "spline",
+          data: xAxisDimensions.length === 2 ? lineData.flat() : lineData,
+          color: "pink",
+        });
+      }
+    }
+
+    const categories =
+      xAxisDimensions.length === 2
+        ? selectedXAxisValues[0].map((mainCategory) => ({
+            name: mainCategory,
+            categories: selectedXAxisValues[1],
+          }))
+        : selectedXAxisValues[0];
+
+    chart.xAxis[0].update({
+      categories: categories,
+      labels: {
+        groupedOptions: xAxisDimensions.length === 2 ? {} : undefined,
+      },
+    });
+
+    chart.series.forEach((series: any) => series.remove(false));
+    seriesData.forEach((series) => chart.addSeries(series, false));
+    chart.redraw();
+    chart.setTitle({ text: title || "Diagram" });
+    chart.update({
+      chart: {
+        type: xAxisDimensions.length === 2 ? "column" : chartType,
+      },
+    });
   };
 
   return (
     <div>
-      {step === "input-cvs" && (
+      {step === "input-file" && (
         <div>
-          <h3>Ladda upp CVS-fil</h3>
-          <input type="file" id="upload" accept=".csv" onChange={handleFileUpload} />
-          <button onClick={() => setStep("input-year")}>Nästa</button>
+          <h3>Ladda upp fil</h3>
+          <input
+            type="file"
+            accept=".xlsx, .xls, .csv"
+            onChange={handleFileUpload}
+          />
+          <button onClick={() => setStep("select-dimensions")}>Nästa</button>
         </div>
       )}
 
-      {step === "input-year" && (
+      {step === "select-dimensions" && (
         <div>
-          <h3>Välj period</h3>
-          <button onClick={() => handleSelectAll(true)}>Markera alla</button>
-          <button onClick={() => handleSelectAll(false)}>Avmarkera alla</button>
-          {allYears.length > 0 && (
-            <div>
-              {allYears.map((year) => (
-                <div key={year}>
-                  <input
-                    type="checkbox"
-                    id={`year-${year}`}
-                    value={year}
-                    checked={selectedYears.includes(year)}
-                    onChange={handleYearChange}
-                  />
-                  <label htmlFor={`year-${year}`}>{year}</label>
+          <h3>Välj Dimensioner</h3>
+          {dimensions.map((dim) => (
+            <div key={dim.name}>
+              <label>
+                <input
+                  type="checkbox"
+                  onChange={(e) =>
+                    handleDimensionSelection(dim.name, e.target.checked)
+                  }
+                />
+                {dim.name} {dim.unit && `(${dim.unit})`}
+              </label>
+            </div>
+          ))}
+          <button onClick={() => setStep("input-file")}>Tillbaka</button>
+          <button onClick={() => setStep("filter-dimensions")}>Nästa</button>
+        </div>
+      )}
+
+      {step === "filter-dimensions" && (
+        <div>
+          <h3>Filtrera Dimensioner</h3>
+          {selectedDimensions.map((dim) => (
+            <div key={dim.name}>
+              <h4>{dim.name}</h4>
+              {dim.allValues.map((value) => (
+                <div key={value}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={dim.selectedValues.includes(value)}
+                      onChange={(e) =>
+                        handleDimensionValueSelection(
+                          dim.name,
+                          value,
+                          e.target.checked
+                        )
+                      }
+                    />
+                    {value}
+                  </label>
                 </div>
               ))}
             </div>
-          )}
-          <button onClick={() => setStep("input-cvs")}>Tillbaka</button>
-          <button onClick={() => setStep("input-train-type")}>Nästa</button>
+          ))}
+          <button onClick={() => setStep("select-dimensions")}>Tillbaka</button>
+          <button
+            onClick={() => {
+              const allDimensionsValid = selectedDimensions.every(
+                (dim) => dim.selectedValues.length > 0
+              );
+
+              if (!allDimensionsValid) {
+                alert("Välj minst ett värde för varje vald dimension");
+                return;
+              }
+
+              setStep("select-measures");
+            }}
+          >
+            Nästa
+          </button>
         </div>
       )}
 
-      {step === "input-train-type" && (
+      {step === "select-measures" && (
         <div>
-          <h3>Välj tågtyp</h3>
-          {trainTypes.length > 0 ? (
-            trainTypes.map((trainType) => (
-              <div key={trainType}>
+          <h3>Välj Mått</h3>
+          {measures.map((measure) => (
+            <div key={measure.name}>
+              <label>
                 <input
                   type="checkbox"
-                  id={trainType}
-                  value={trainType}
-                  checked={selectedTrainTypes.includes(trainType)}
-                  onChange={handleTrainTypeChange}
+                  onChange={(e) =>
+                    handleMeasureSelection(measure.name, e.target.checked)
+                  }
                 />
-                <label htmlFor={trainType}>{trainType}</label>
-              </div>
-            ))
-          ) : (
-            <p>Inga tågtyper tillgängliga</p>
-          )}
-
-          <button onClick={() => setStep("input-year")}>Tillbaka</button>
-          <button onClick={() => setStep("input-unit")}>Nästa</button>
+                {measure.name} {measure.unit && `(${measure.unit})`}
+              </label>
+            </div>
+          ))}
+          <button onClick={() => setStep("filter-dimensions")}>Tillbaka</button>
+          <button onClick={() => setStep("chart-configuration")}>Nästa</button>
         </div>
       )}
 
-{step === "input-unit" && (
+      {step === "chart-configuration" && (
         <div>
-          <h3>Välj enhet för stapel- och linjediagram</h3>
+          <h3>Diagramkonfiguration</h3>
           <div>
-            <h4>Välj data för stapeldiagrammet</h4>
-            <label>
-              <input
-                type="radio"
-                name="barData"
-                value="Antal Framförda tåg"
-                checked={barData === "Antal Framförda tåg"}
-                onChange={() => setBarData("Antal Framförda tåg")}
-              />
-              Antal Framförda tåg
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="barData"
-                value="Punktlighet"
-                checked={barData === "Punktlighet"}
-                onChange={() => setBarData("Punktlighet")}
-              />
-              Punktlighet
-            </label>
+            <h4>Välj X-Axel (Dimension)</h4>
+            {selectedDimensions.map((dim) => (
+              <div key={dim.name}>
+                <label>
+                  <input
+                    type="checkbox"
+                    name="xAxis"
+                    value={dim.name}
+                    checked={xAxisDimensions.includes(dim.name)}
+                    onChange={() => {
+                      if (xAxisDimensions.includes(dim.name)) {
+                        setXAxisDimensions((prev) =>
+                          prev.filter((name) => name !== dim.name)
+                        );
+                      } else {
+                        if (xAxisDimensions.length < 2) {
+                          setXAxisDimensions((prev) => [...prev, dim.name]);
+                        } else {
+                          alert(
+                            "Du kan bara välja två dimensioner för x-axeln."
+                          );
+                        }
+                      }
+                    }}
+                  />
+                  {dim.name}
+                </label>
+              </div>
+            ))}
           </div>
+          {measures.filter((measure) => measure.isSelected).length === 1 && (
+            <div>
+              <h4>Välj Diagramtyp</h4>
+              <label>
+                <input
+                  type="radio"
+                  name="chartType"
+                  value="column"
+                  checked={chartType === "column"}
+                  onChange={() => setChartType("column")}
+                />
+                Stapeldiagram
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chartType"
+                  value="line"
+                  checked={chartType === "line"}
+                  onChange={() => setChartType("line")}
+                />
+                Linjediagram
+              </label>
+            </div>
+          )}
+          {measures.filter((measure) => measure.isSelected).length > 1 && (
+            <div>
+              <h4>Välj Mått för Stapeldiagram</h4>
+              {measures
+                .filter((measure) => measure.isSelected)
+                .map((measure) => (
+                  <div key={measure.name}>
+                    <label>
+                      <input
+                        type="radio"
+                        name="barMeasure"
+                        value={measure.name}
+                        checked={barMeasure === measure.name}
+                        onChange={() => setBarMeasure(measure.name)}
+                      />
+                      {measure.name}
+                    </label>
+                  </div>
+                ))}
+              <h4>Välj Mått för Linjediagram</h4>
+              {measures
+                .filter((measure) => measure.isSelected)
+                .map((measure) => (
+                  <div key={measure.name}>
+                    <label>
+                      <input
+                        type="radio"
+                        name="lineMeasure"
+                        value={measure.name}
+                        checked={lineMeasure === measure.name}
+                        onChange={() => setLineMeasure(measure.name)}
+                      />
+                      {measure.name}
+                    </label>
+                  </div>
+                ))}
+            </div>
+          )}
+          <button onClick={() => setStep("select-measures")}>Tillbaka</button>
+          <button
+            onClick={() => {
+              if (xAxisDimensions.length === 0) {
+                alert("Välj minst en dimension för x-axeln.");
+                return;
+              }
 
-          <div>
-            <h4>Välj data för linjediagrammet</h4>
-            <label>
-              <input
-                type="radio"
-                name="lineData"
-                value="Antal Framförda tåg"
-                checked={lineData === "Antal Framförda tåg"}
-                onChange={() => setLineData("Antal Framförda tåg")}
-              />
-              Antal Framförda tåg
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="lineData"
-                value="Punktlighet"
-                checked={lineData === "Punktlighet"}
-                onChange={() => setLineData("Punktlighet")}
-              />
-              Punktlighet
-            </label>
-          </div>
+              if (
+                measures.filter((measure) => measure.isSelected).length > 1 &&
+                (!barMeasure || !lineMeasure)
+              ) {
+                alert(
+                  "Välj mått för både stapel- och linjediagram när flera mått är valda."
+                );
+                return;
+              }
 
-          <button onClick={() => setStep("input-train-type")}>Tillbaka</button>
-          <button onClick={() => setStep("review-generate")}>Nästa</button>
+              setStep("review-generate");
+            }}
+          >
+            Nästa
+          </button>
+        </div>
+      )}
+
+      {step === "review-generate" && (
+        <div>
+          <button onClick={handleGenerateChart}>Generera diagram</button>
         </div>
       )}
 
@@ -323,12 +551,6 @@ const StatistikGränssnitt: React.FC = () => {
         ref={containerRef}
         style={{ width: "100%", height: "600px" }}
       />
-
-      {step === "review-generate" && (
-        <div>
-          <button onClick={handleGenerateChart}>Skapa Diagram</button>
-        </div>
-      )}
     </div>
   );
 };
