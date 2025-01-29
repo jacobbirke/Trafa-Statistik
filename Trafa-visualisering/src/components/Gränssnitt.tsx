@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
+import HighchartsGroupedCategories from "highcharts-grouped-categories";
+HighchartsGroupedCategories(Highcharts);
 
 interface Dimension {
   name: string;
@@ -30,24 +32,33 @@ const StatistikGränssnitt: React.FC = () => {
   const [measures, setMeasures] = useState<Measure[]>([]);
   const [barMeasure, setBarMeasure] = useState<string | null>(null);
   const [lineMeasure, setLineMeasure] = useState<string | null>(null);
-  const [xAxisDimension, setXAxisDimension] = useState<string | null>(null);
+  const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("Diagram utan titel");
   const [jsonData, setJsonData] = useState<any[]>([]);
+  const [chartType, setChartType] = useState<"column" | "line">("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const newChart = Highcharts.chart(containerRef.current, {
-      chart: { zooming: { type: "xy" } },
+      chart: { type: "column" },
       title: { text: "", align: "left" },
-      xAxis: [{ categories: [], crosshair: true }],
-      yAxis: [
-        {
-          title: { text: "Values", style: { color: "#007bff" } },
-        },
-      ],
+      xAxis: {
+        type: "category",
+        crosshair: true,
+      },
+      yAxis: {
+        title: { text: "Values", style: { color: "blue" } },
+      },
       tooltip: { shared: true },
+      plotOptions: {
+        column: {
+          grouping: true,
+          pointPadding: 0.2,
+          borderWidth: 0,
+        },
+      },
       series: [],
     });
 
@@ -171,20 +182,27 @@ const StatistikGränssnitt: React.FC = () => {
   const handleGenerateChart = () => {
     if (!chart || !jsonData) return;
 
-    const xAxisDimensionIndex = dimensions.findIndex(
-      (dim) => dim.name === xAxisDimension
+    if (xAxisDimensions.length === 0) {
+      alert("Välj minst en dimension för x-axeln.");
+      return;
+    }
+
+    const xAxisDimensionIndices = xAxisDimensions.map((dimName) =>
+      dimensions.findIndex((dim) => dim.name === dimName)
     );
 
-    if (xAxisDimensionIndex === -1) {
+    if (xAxisDimensionIndices.some((index) => index === -1)) {
       alert("Dimension för x-axeln hittades inte!");
       return;
     }
 
-    const selectedXAxisValues = selectedDimensions.find(
-      (dim) => dim.name === xAxisDimension
-    )?.selectedValues;
+    const selectedXAxisValues = xAxisDimensions.map(
+      (dimName) =>
+        selectedDimensions.find((dim) => dim.name === dimName)
+          ?.selectedValues ?? []
+    );
 
-    if (!selectedXAxisValues || selectedXAxisValues.length === 0) {
+    if (selectedXAxisValues.some((values) => values.length === 0)) {
       alert("Inga valda värden för X-axeln.");
       return;
     }
@@ -195,12 +213,8 @@ const StatistikGränssnitt: React.FC = () => {
           (dim) => dim.name === dimension.name
         );
         if (dimensionIndex === -1) return true;
-
         const rowValue = row[dimensionIndex]?.toString();
-        return (
-          dimension.selectedValues.length === 0 ||
-          dimension.selectedValues.includes(rowValue)
-        );
+        return dimension.selectedValues.includes(rowValue);
       });
     });
 
@@ -214,47 +228,91 @@ const StatistikGränssnitt: React.FC = () => {
         measures.findIndex((measure) => measure.name === measureName) +
         dimensions.length;
 
-      return selectedXAxisValues.map((category) => {
-        const categoryRows = filteredRows.filter(
-          (row) => row[xAxisDimensionIndex]?.toString() === category
-        );
-
-        return categoryRows.reduce((sum, row) => {
-          const value = parseFloat(row[measureIndex]);
-          return sum + (isNaN(value) ? 0 : value);
-        }, 0);
-      });
+      if (xAxisDimensions.length === 1) {
+        return selectedXAxisValues[0].map((category) => {
+          const categoryRows = filteredRows.filter(
+            (row) => row[xAxisDimensionIndices[0]]?.toString() === category
+          );
+          return categoryRows.reduce((sum, row) => {
+            const value = parseFloat(row[measureIndex]);
+            return sum + (isNaN(value) ? 0 : value);
+          }, 0);
+        });
+      } else {
+        return selectedXAxisValues[0].map((mainCategory) => {
+          return selectedXAxisValues[1].map((subCategory) => {
+            const categoryRows = filteredRows.filter(
+              (row) =>
+                row[xAxisDimensionIndices[0]]?.toString() === mainCategory &&
+                row[xAxisDimensionIndices[1]]?.toString() === subCategory
+            );
+            return categoryRows.reduce((sum, row) => {
+              const value = parseFloat(row[measureIndex]);
+              return sum + (isNaN(value) ? 0 : value);
+            }, 0);
+          });
+        });
+      }
     };
 
     const seriesData: any[] = [];
+    const selectedMeasures = measures.filter((measure) => measure.isSelected);
 
-    if (barMeasure) {
-      const barData = aggregateMeasureData(barMeasure);
+    if (selectedMeasures.length === 1) {
+      const measure = selectedMeasures[0];
+      const data = aggregateMeasureData(measure.name);
       seriesData.push({
-        name: `${barMeasure}`,
-        type: "column",
-        data: barData,
-        color: "blue",
+        name: `${measure.name}${measure.unit ? ` (${measure.unit})` : ""}`,
+        type: chartType,
+        data: xAxisDimensions.length === 2 ? data.flat() : data,
+        color: chartType === "column" ? "blue" : "pink",
       });
+    } else {
+      if (barMeasure) {
+        const barData = aggregateMeasureData(barMeasure);
+        seriesData.push({
+          name: `${barMeasure}`,
+          type: "column",
+          data: xAxisDimensions.length === 2 ? barData.flat() : barData,
+          color: "blue",
+        });
+      }
+
+      if (lineMeasure) {
+        const lineData = aggregateMeasureData(lineMeasure);
+        seriesData.push({
+          name: `${lineMeasure}`,
+          type: "spline",
+          data: xAxisDimensions.length === 2 ? lineData.flat() : lineData,
+          color: "pink",
+        });
+      }
     }
 
-    if (lineMeasure) {
-      const lineData = aggregateMeasureData(lineMeasure);
-      seriesData.push({
-        name: `${lineMeasure}`,
-        type: "spline",
-        data: lineData,
-        color: "orange",
-      });
-    }
+    const categories =
+      xAxisDimensions.length === 2
+        ? selectedXAxisValues[0].map((mainCategory) => ({
+            name: mainCategory,
+            categories: selectedXAxisValues[1],
+          }))
+        : selectedXAxisValues[0];
 
-    chart.xAxis[0].update({ categories: selectedXAxisValues });
+    chart.xAxis[0].update({
+      categories: categories,
+      labels: {
+        groupedOptions: xAxisDimensions.length === 2 ? {} : undefined,
+      },
+    });
+
     chart.series.forEach((series: any) => series.remove(false));
     seriesData.forEach((series) => chart.addSeries(series, false));
     chart.redraw();
     chart.setTitle({ text: title || "Diagram" });
-
-    console.log(seriesData);
+    chart.update({
+      chart: {
+        type: xAxisDimensions.length === 2 ? "column" : chartType,
+      },
+    });
   };
 
   return (
@@ -368,69 +426,117 @@ const StatistikGränssnitt: React.FC = () => {
               <div key={dim.name}>
                 <label>
                   <input
-                    type="radio"
+                    type="checkbox"
                     name="xAxis"
                     value={dim.name}
-                    checked={xAxisDimension === dim.name}
-                    onChange={() => setXAxisDimension(dim.name)}
+                    checked={xAxisDimensions.includes(dim.name)}
+                    onChange={() => {
+                      if (xAxisDimensions.includes(dim.name)) {
+                        setXAxisDimensions((prev) =>
+                          prev.filter((name) => name !== dim.name)
+                        );
+                      } else {
+                        if (xAxisDimensions.length < 2) {
+                          setXAxisDimensions((prev) => [...prev, dim.name]);
+                        } else {
+                          alert(
+                            "Du kan bara välja två dimensioner för x-axeln."
+                          );
+                        }
+                      }
+                    }}
                   />
                   {dim.name}
                 </label>
               </div>
             ))}
           </div>
-          <div>
-            <h4>Välj Mått för Stapeldiagram</h4>
-            {measures
-              .filter((measure) => measure.isSelected)
-              .map((measure) => (
-                <div key={measure.name}>
-                  <label>
-                    <input
-                      type="radio"
-                      name="barMeasure"
-                      value={measure.name}
-                      checked={barMeasure === measure.name}
-                      onChange={() => setBarMeasure(measure.name)}
-                    />
-                    {measure.name}
-                  </label>
-                </div>
-              ))}
-          </div>
-          <div>
-            <h4>Välj Mått för Linjediagram</h4>
-            {measures
-              .filter((measure) => measure.isSelected)
-              .map((measure) => (
-                <div key={measure.name}>
-                  <label>
-                    <input
-                      type="radio"
-                      name="lineMeasure"
-                      value={measure.name}
-                      checked={lineMeasure === measure.name}
-                      onChange={() => setLineMeasure(measure.name)}
-                    />
-                    {measure.name}
-                  </label>
-                </div>
-              ))}
-          </div>
+          {measures.filter((measure) => measure.isSelected).length === 1 && (
+            <div>
+              <h4>Välj Diagramtyp</h4>
+              <label>
+                <input
+                  type="radio"
+                  name="chartType"
+                  value="column"
+                  checked={chartType === "column"}
+                  onChange={() => setChartType("column")}
+                />
+                Stapeldiagram
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="chartType"
+                  value="line"
+                  checked={chartType === "line"}
+                  onChange={() => setChartType("line")}
+                />
+                Linjediagram
+              </label>
+            </div>
+          )}
+          {measures.filter((measure) => measure.isSelected).length > 1 && (
+            <div>
+              <h4>Välj Mått för Stapeldiagram</h4>
+              {measures
+                .filter((measure) => measure.isSelected)
+                .map((measure) => (
+                  <div key={measure.name}>
+                    <label>
+                      <input
+                        type="radio"
+                        name="barMeasure"
+                        value={measure.name}
+                        checked={barMeasure === measure.name}
+                        onChange={() => setBarMeasure(measure.name)}
+                      />
+                      {measure.name}
+                    </label>
+                  </div>
+                ))}
+              <h4>Välj Mått för Linjediagram</h4>
+              {measures
+                .filter((measure) => measure.isSelected)
+                .map((measure) => (
+                  <div key={measure.name}>
+                    <label>
+                      <input
+                        type="radio"
+                        name="lineMeasure"
+                        value={measure.name}
+                        checked={lineMeasure === measure.name}
+                        onChange={() => setLineMeasure(measure.name)}
+                      />
+                      {measure.name}
+                    </label>
+                  </div>
+                ))}
+            </div>
+          )}
           <button onClick={() => setStep("select-measures")}>Tillbaka</button>
           <button
             onClick={() => {
-              if (!xAxisDimension || (!barMeasure && !lineMeasure)) {
+              if (xAxisDimensions.length === 0) {
+                alert("Välj minst en dimension för x-axeln.");
+                return;
+              }
+
+              if (
+                measures.filter((measure) => measure.isSelected).length > 1 &&
+                (!barMeasure || !lineMeasure)
+              ) {
                 alert(
-                  "Välj x-axel och minst ett mått för stapel eller linjediagram."
+                  "Välj mått för både stapel- och linjediagram när flera mått är valda."
                 );
                 return;
               }
+
               setStep("review-generate");
             }}
           >
             Nästa
-          </button>{" "}
+          </button>
         </div>
       )}
 
