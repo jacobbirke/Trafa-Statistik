@@ -48,9 +48,16 @@ const StatistikGränssnitt: React.FC = () => {
         type: "category",
         crosshair: true,
       },
-      yAxis: {
-        title: { text: "Values", style: { color: "blue" } },
-      },
+      yAxis: [
+        {
+          title: { text: "", style: { color: "blue" } },
+          opposite: false, 
+        },
+        {
+          title: { text: "", style: { color: "pink" } },
+          opposite: true, 
+        },
+      ],
       tooltip: { shared: true },
       plotOptions: {
         column: {
@@ -275,6 +282,7 @@ const StatistikGränssnitt: React.FC = () => {
           type: "column",
           data: xAxisDimensions.length === 2 ? barData.flat() : barData,
           color: "blue",
+          yAxis: 0, // Use primary y-axis
         });
       }
 
@@ -285,6 +293,7 @@ const StatistikGränssnitt: React.FC = () => {
           type: "spline",
           data: xAxisDimensions.length === 2 ? lineData.flat() : lineData,
           color: "pink",
+          yAxis: 1, // Use secondary y-axis
         });
       }
     }
@@ -303,6 +312,26 @@ const StatistikGränssnitt: React.FC = () => {
         groupedOptions: xAxisDimensions.length === 2 ? {} : undefined,
       },
     });
+
+    const selectedMeasure = measures.find((measure) => measure.isSelected);
+
+    chart.yAxis[0].update({
+      title: {
+        text:
+          selectedMeasures.length === 1
+            ? `${selectedMeasure?.name}${selectedMeasure?.unit ? ` (${selectedMeasure.unit})` : ""}`
+            : barMeasure || "",
+        style: { color: "blue" },
+      },
+    });
+    
+    chart.yAxis[1].update({
+      title: {
+        text: lineMeasure ? `${lineMeasure}` : "",
+        style: { color: "pink" },
+      },
+    });
+    
 
     chart.series.forEach((series: any) => series.remove(false));
     seriesData.forEach((series) => chart.addSeries(series, false));
