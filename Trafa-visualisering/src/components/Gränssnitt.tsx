@@ -48,9 +48,16 @@ const StatistikGränssnitt: React.FC = () => {
         type: "category",
         crosshair: true,
       },
-      yAxis: {
-        title: { text: "Values", style: { color: "blue" } },
-      },
+      yAxis: [
+        {
+          title: { text: "", style: { color: "blue" } },
+          opposite: false,
+        },
+        {
+          title: { text: "", style: { color: "pink" } },
+          opposite: true,
+        },
+      ],
       tooltip: { shared: true },
       plotOptions: {
         column: {
@@ -133,50 +140,40 @@ const StatistikGränssnitt: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleDimensionSelection = (
-    dimensionName: string,
-    isSelected: boolean
-  ) => {
-    if (isSelected) {
-      const dimension = dimensions.find((dim) => dim.name === dimensionName);
-      if (dimension) {
-        setSelectedDimensions((prev) => [
-          ...prev,
-          { ...dimension, selectedValues: [] },
-        ]);
-      }
-    } else {
-      setSelectedDimensions((prev) =>
-        prev.filter((dim) => dim.name !== dimensionName)
-      );
-    }
+  const handleSelectAllDimensions = () => {
+    setSelectedDimensions(
+      dimensions.map((dim) => ({ ...dim, selectedValues: [] }))
+    );
   };
 
-  const handleDimensionValueSelection = (
-    dimensionName: string,
-    value: string,
-    isSelected: boolean
-  ) => {
+  const handleDeselectAllDimensions = () => {
+    setSelectedDimensions([]);
+  };
+
+  const handleSelectAllDimensionValues = (dimensionName: string) => {
     setSelectedDimensions((prev) =>
       prev.map((dim) =>
         dim.name === dimensionName
-          ? {
-              ...dim,
-              selectedValues: isSelected
-                ? [...dim.selectedValues, value]
-                : dim.selectedValues.filter((v) => v !== value),
-            }
+          ? { ...dim, selectedValues: [...dim.allValues] }
           : dim
       )
     );
   };
 
-  const handleMeasureSelection = (measureName: string, isSelected: boolean) => {
-    setMeasures((prev) =>
-      prev.map((measure) =>
-        measure.name === measureName ? { ...measure, isSelected } : measure
+  const handleDeselectAllDimensionValues = (dimensionName: string) => {
+    setSelectedDimensions((prev) =>
+      prev.map((dim) =>
+        dim.name === dimensionName ? { ...dim, selectedValues: [] } : dim
       )
     );
+  };
+
+  const handleSelectAllMeasures = () => {
+    setMeasures(measures.map((measure) => ({ ...measure, isSelected: true })));
+  };
+
+  const handleDeselectAllMeasures = () => {
+    setMeasures(measures.map((measure) => ({ ...measure, isSelected: false })));
   };
 
   const handleGenerateChart = () => {
@@ -275,6 +272,7 @@ const StatistikGränssnitt: React.FC = () => {
           type: "column",
           data: xAxisDimensions.length === 2 ? barData.flat() : barData,
           color: "blue",
+          yAxis: 0,
         });
       }
 
@@ -285,6 +283,7 @@ const StatistikGränssnitt: React.FC = () => {
           type: "spline",
           data: xAxisDimensions.length === 2 ? lineData.flat() : lineData,
           color: "pink",
+          yAxis: 1,
         });
       }
     }
@@ -301,6 +300,27 @@ const StatistikGränssnitt: React.FC = () => {
       categories: categories,
       labels: {
         groupedOptions: xAxisDimensions.length === 2 ? {} : undefined,
+      },
+    });
+
+    const selectedMeasure = measures.find((measure) => measure.isSelected);
+
+    chart.yAxis[0].update({
+      title: {
+        text:
+          selectedMeasures.length === 1
+            ? `${selectedMeasure?.name}${
+                selectedMeasure?.unit ? ` (${selectedMeasure.unit})` : ""
+              }`
+            : barMeasure || "",
+        style: { color: "blue" },
+      },
+    });
+
+    chart.yAxis[1].update({
+      title: {
+        text: lineMeasure ? `${lineMeasure}` : "",
+        style: { color: "pink" },
       },
     });
 
@@ -332,13 +352,20 @@ const StatistikGränssnitt: React.FC = () => {
       {step === "select-dimensions" && (
         <div>
           <h3>Välj Dimensioner</h3>
+          <button onClick={handleSelectAllDimensions}>Markera alla</button>
+          <button onClick={handleDeselectAllDimensions}>Ta bort alla</button>
           {dimensions.map((dim) => (
             <div key={dim.name}>
               <label>
                 <input
                   type="checkbox"
+                  checked={selectedDimensions.some((d) => d.name === dim.name)}
                   onChange={(e) =>
-                    handleDimensionSelection(dim.name, e.target.checked)
+                    setSelectedDimensions((prev) =>
+                      e.target.checked
+                        ? [...prev, { ...dim, selectedValues: [] }]
+                        : prev.filter((d) => d.name !== dim.name)
+                    )
                   }
                 />
                 {dim.name} {dim.unit && `(${dim.unit})`}
@@ -356,6 +383,14 @@ const StatistikGränssnitt: React.FC = () => {
           {selectedDimensions.map((dim) => (
             <div key={dim.name}>
               <h4>{dim.name}</h4>
+              <button onClick={() => handleSelectAllDimensionValues(dim.name)}>
+                Markera alla
+              </button>
+              <button
+                onClick={() => handleDeselectAllDimensionValues(dim.name)}
+              >
+                Ta bort alla
+              </button>
               {dim.allValues.map((value) => (
                 <div key={value}>
                   <label>
@@ -363,10 +398,19 @@ const StatistikGränssnitt: React.FC = () => {
                       type="checkbox"
                       checked={dim.selectedValues.includes(value)}
                       onChange={(e) =>
-                        handleDimensionValueSelection(
-                          dim.name,
-                          value,
-                          e.target.checked
+                        setSelectedDimensions((prev) =>
+                          prev.map((d) =>
+                            d.name === dim.name
+                              ? {
+                                  ...d,
+                                  selectedValues: e.target.checked
+                                    ? [...d.selectedValues, value]
+                                    : d.selectedValues.filter(
+                                        (v) => v !== value
+                                      ),
+                                }
+                              : d
+                          )
                         )
                       }
                     />
@@ -399,13 +443,22 @@ const StatistikGränssnitt: React.FC = () => {
       {step === "select-measures" && (
         <div>
           <h3>Välj Mått</h3>
+          <button onClick={handleSelectAllMeasures}>Markera alla</button>
+          <button onClick={handleDeselectAllMeasures}>Ta bort alla</button>
           {measures.map((measure) => (
             <div key={measure.name}>
               <label>
                 <input
                   type="checkbox"
+                  checked={measure.isSelected}
                   onChange={(e) =>
-                    handleMeasureSelection(measure.name, e.target.checked)
+                    setMeasures((prev) =>
+                      prev.map((m) =>
+                        m.name === measure.name
+                          ? { ...m, isSelected: e.target.checked }
+                          : m
+                      )
+                    )
                   }
                 />
                 {measure.name} {measure.unit && `(${measure.unit})`}
