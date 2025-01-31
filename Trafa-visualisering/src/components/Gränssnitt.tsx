@@ -54,7 +54,7 @@ const StatistikGränssnitt: React.FC = () => {
           opposite: false,
         },
         {
-          title: { text: "", style: { color: "pink" } },
+          title: { text: "", style: { color: "red" } },
           opposite: true,
         },
       ],
@@ -262,7 +262,7 @@ const StatistikGränssnitt: React.FC = () => {
         name: `${measure.name}${measure.unit ? ` (${measure.unit})` : ""}`,
         type: chartType,
         data: xAxisDimensions.length === 2 ? data.flat() : data,
-        color: chartType === "column" ? "blue" : "pink",
+        color: chartType === "column" ? "blue" : "red",
       });
     } else {
       if (barMeasure) {
@@ -282,7 +282,7 @@ const StatistikGränssnitt: React.FC = () => {
           name: `${lineMeasure}`,
           type: "spline",
           data: xAxisDimensions.length === 2 ? lineData.flat() : lineData,
-          color: "pink",
+          color: "red",
           yAxis: 1,
         });
       }
@@ -320,7 +320,7 @@ const StatistikGränssnitt: React.FC = () => {
     chart.yAxis[1].update({
       title: {
         text: lineMeasure ? `${lineMeasure}` : "",
-        style: { color: "pink" },
+        style: { color: "red" },
       },
     });
 
