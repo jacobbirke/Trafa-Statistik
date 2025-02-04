@@ -1,10 +1,10 @@
 import React from "react";
 import "./index.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import ImportPunktlighetPerAr from "./components/ImportPunktlighetAr";
-import PunktlighetTagtyper from "./components/PunktlighetTagtyper";
-import Järnvägstransport from "./components/JärnvägstransportAPI";
-import StatisticsInterface from "./components/Struktur";
+import ImportPunktlighetPerAr from "./tidigare arbete/ImportPunktlighetAr";
+import PunktlighetTagtyper from "./tidigare arbete/PunktlighetTagtyper";
+import Järnvägstransport from "./tidigare arbete/JärnvägstransportAPI";
+import StatisticsInterface from "./tidigare arbete/Struktur";
 import StatistikGränssnitt from "./components/Gränssnitt";
 
 const App: React.FC = () => {

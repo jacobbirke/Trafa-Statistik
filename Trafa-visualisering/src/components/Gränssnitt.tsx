@@ -2,16 +2,19 @@ import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
 import HighchartsGroupedCategories from "highcharts-grouped-categories";
+import { createChart } from "./createChart";
+import { userInterface } from "./userInterface";
+import { selectAllOptions } from "./selectAllOptions";
 HighchartsGroupedCategories(Highcharts);
 
-interface Dimension {
+export interface Dimension {
   name: string;
   allValues: string[];
   selectedValues: string[];
   unit?: string;
 }
 
-interface Measure {
+export interface Measure {
   name: string;
   unit?: string;
   isSelected: boolean;
@@ -26,6 +29,7 @@ const StatistikGränssnitt: React.FC = () => {
     | "chart-configuration"
     | "review-generate"
   >("input-file");
+
   const [chart, setChart] = useState<any>(null);
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
   const [selectedDimensions, setSelectedDimensions] = useState<Dimension[]>([]);
@@ -41,33 +45,7 @@ const StatistikGränssnitt: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const newChart = Highcharts.chart(containerRef.current, {
-      chart: { type: "column" },
-      title: { text: "", align: "left" },
-      xAxis: {
-        type: "category",
-        crosshair: true,
-      },
-      yAxis: [
-        {
-          title: { text: "", style: { color: "blue" } },
-          opposite: false,
-        },
-        {
-          title: { text: "", style: { color: "red" } },
-          opposite: true,
-        },
-      ],
-      tooltip: { shared: true },
-      plotOptions: {
-        column: {
-          grouping: true,
-          pointPadding: 0.2,
-          borderWidth: 0,
-        },
-      },
-      series: [],
-    });
+    const newChart = createChart(containerRef.current);
 
     setChart(newChart);
 
@@ -140,41 +118,19 @@ const StatistikGränssnitt: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleSelectAllDimensions = () => {
-    setSelectedDimensions(
-      dimensions.map((dim) => ({ ...dim, selectedValues: [] }))
-    );
-  };
-
-  const handleDeselectAllDimensions = () => {
-    setSelectedDimensions([]);
-  };
-
-  const handleSelectAllDimensionValues = (dimensionName: string) => {
-    setSelectedDimensions((prev) =>
-      prev.map((dim) =>
-        dim.name === dimensionName
-          ? { ...dim, selectedValues: [...dim.allValues] }
-          : dim
-      )
-    );
-  };
-
-  const handleDeselectAllDimensionValues = (dimensionName: string) => {
-    setSelectedDimensions((prev) =>
-      prev.map((dim) =>
-        dim.name === dimensionName ? { ...dim, selectedValues: [] } : dim
-      )
-    );
-  };
-
-  const handleSelectAllMeasures = () => {
-    setMeasures(measures.map((measure) => ({ ...measure, isSelected: true })));
-  };
-
-  const handleDeselectAllMeasures = () => {
-    setMeasures(measures.map((measure) => ({ ...measure, isSelected: false })));
-  };
+  const {
+    handleSelectAllDimensions,
+    handleDeselectAllDimensions,
+    handleSelectAllDimensionValues,
+    handleDeselectAllDimensionValues,
+    handleSelectAllMeasures,
+    handleDeselectAllMeasures,
+  } = selectAllOptions(
+    setSelectedDimensions,
+    dimensions,
+    setMeasures,
+    measures
+  );
 
   const handleGenerateChart = () => {
     if (!chart || !jsonData) return;
@@ -335,276 +291,31 @@ const StatistikGränssnitt: React.FC = () => {
     });
   };
 
-  return (
-    <div>
-      {step === "input-file" && (
-        <div>
-          <h3>Ladda upp fil</h3>
-          <input
-            type="file"
-            accept=".xlsx, .xls, .csv"
-            onChange={handleFileUpload}
-          />
-          <button onClick={() => setStep("select-dimensions")}>Nästa</button>
-        </div>
-      )}
-
-      {step === "select-dimensions" && (
-        <div>
-          <h3>Välj Dimensioner</h3>
-          <button onClick={handleSelectAllDimensions}>Markera alla</button>
-          <button onClick={handleDeselectAllDimensions}>Ta bort alla</button>
-          {dimensions.map((dim) => (
-            <div key={dim.name}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedDimensions.some((d) => d.name === dim.name)}
-                  onChange={(e) =>
-                    setSelectedDimensions((prev) =>
-                      e.target.checked
-                        ? [...prev, { ...dim, selectedValues: [] }]
-                        : prev.filter((d) => d.name !== dim.name)
-                    )
-                  }
-                />
-                {dim.name} {dim.unit && `(${dim.unit})`}
-              </label>
-            </div>
-          ))}
-          <button onClick={() => setStep("input-file")}>Tillbaka</button>
-          <button onClick={() => setStep("filter-dimensions")}>Nästa</button>
-        </div>
-      )}
-
-      {step === "filter-dimensions" && (
-        <div>
-          <h3>Filtrera Dimensioner</h3>
-          {selectedDimensions.map((dim) => (
-            <div key={dim.name}>
-              <h4>{dim.name}</h4>
-              <button onClick={() => handleSelectAllDimensionValues(dim.name)}>
-                Markera alla
-              </button>
-              <button
-                onClick={() => handleDeselectAllDimensionValues(dim.name)}
-              >
-                Ta bort alla
-              </button>
-              {dim.allValues.map((value) => (
-                <div key={value}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={dim.selectedValues.includes(value)}
-                      onChange={(e) =>
-                        setSelectedDimensions((prev) =>
-                          prev.map((d) =>
-                            d.name === dim.name
-                              ? {
-                                  ...d,
-                                  selectedValues: e.target.checked
-                                    ? [...d.selectedValues, value]
-                                    : d.selectedValues.filter(
-                                        (v) => v !== value
-                                      ),
-                                }
-                              : d
-                          )
-                        )
-                      }
-                    />
-                    {value}
-                  </label>
-                </div>
-              ))}
-            </div>
-          ))}
-          <button onClick={() => setStep("select-dimensions")}>Tillbaka</button>
-          <button
-            onClick={() => {
-              const allDimensionsValid = selectedDimensions.every(
-                (dim) => dim.selectedValues.length > 0
-              );
-
-              if (!allDimensionsValid) {
-                alert("Välj minst ett värde för varje vald dimension");
-                return;
-              }
-
-              setStep("select-measures");
-            }}
-          >
-            Nästa
-          </button>
-        </div>
-      )}
-
-      {step === "select-measures" && (
-        <div>
-          <h3>Välj Mått</h3>
-          <button onClick={handleSelectAllMeasures}>Markera alla</button>
-          <button onClick={handleDeselectAllMeasures}>Ta bort alla</button>
-          {measures.map((measure) => (
-            <div key={measure.name}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={measure.isSelected}
-                  onChange={(e) =>
-                    setMeasures((prev) =>
-                      prev.map((m) =>
-                        m.name === measure.name
-                          ? { ...m, isSelected: e.target.checked }
-                          : m
-                      )
-                    )
-                  }
-                />
-                {measure.name} {measure.unit && `(${measure.unit})`}
-              </label>
-            </div>
-          ))}
-          <button onClick={() => setStep("filter-dimensions")}>Tillbaka</button>
-          <button onClick={() => setStep("chart-configuration")}>Nästa</button>
-        </div>
-      )}
-
-      {step === "chart-configuration" && (
-        <div>
-          <h3>Diagramkonfiguration</h3>
-          <div>
-            <h4>Välj X-Axel (Dimension)</h4>
-            {selectedDimensions.map((dim) => (
-              <div key={dim.name}>
-                <label>
-                  <input
-                    type="checkbox"
-                    name="xAxis"
-                    value={dim.name}
-                    checked={xAxisDimensions.includes(dim.name)}
-                    onChange={() => {
-                      if (xAxisDimensions.includes(dim.name)) {
-                        setXAxisDimensions((prev) =>
-                          prev.filter((name) => name !== dim.name)
-                        );
-                      } else {
-                        if (xAxisDimensions.length < 2) {
-                          setXAxisDimensions((prev) => [...prev, dim.name]);
-                        } else {
-                          alert(
-                            "Du kan bara välja två dimensioner för x-axeln."
-                          );
-                        }
-                      }
-                    }}
-                  />
-                  {dim.name}
-                </label>
-              </div>
-            ))}
-          </div>
-          {measures.filter((measure) => measure.isSelected).length === 1 && (
-            <div>
-              <h4>Välj Diagramtyp</h4>
-              <label>
-                <input
-                  type="radio"
-                  name="chartType"
-                  value="column"
-                  checked={chartType === "column"}
-                  onChange={() => setChartType("column")}
-                />
-                Stapeldiagram
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="chartType"
-                  value="line"
-                  checked={chartType === "line"}
-                  onChange={() => setChartType("line")}
-                />
-                Linjediagram
-              </label>
-            </div>
-          )}
-          {measures.filter((measure) => measure.isSelected).length > 1 && (
-            <div>
-              <h4>Välj Mått för Stapeldiagram</h4>
-              {measures
-                .filter((measure) => measure.isSelected)
-                .map((measure) => (
-                  <div key={measure.name}>
-                    <label>
-                      <input
-                        type="radio"
-                        name="barMeasure"
-                        value={measure.name}
-                        checked={barMeasure === measure.name}
-                        onChange={() => setBarMeasure(measure.name)}
-                      />
-                      {measure.name}
-                    </label>
-                  </div>
-                ))}
-              <h4>Välj Mått för Linjediagram</h4>
-              {measures
-                .filter((measure) => measure.isSelected)
-                .map((measure) => (
-                  <div key={measure.name}>
-                    <label>
-                      <input
-                        type="radio"
-                        name="lineMeasure"
-                        value={measure.name}
-                        checked={lineMeasure === measure.name}
-                        onChange={() => setLineMeasure(measure.name)}
-                      />
-                      {measure.name}
-                    </label>
-                  </div>
-                ))}
-            </div>
-          )}
-          <button onClick={() => setStep("select-measures")}>Tillbaka</button>
-          <button
-            onClick={() => {
-              if (xAxisDimensions.length === 0) {
-                alert("Välj minst en dimension för x-axeln.");
-                return;
-              }
-
-              if (
-                measures.filter((measure) => measure.isSelected).length > 1 &&
-                (!barMeasure || !lineMeasure)
-              ) {
-                alert(
-                  "Välj mått för både stapel- och linjediagram när flera mått är valda."
-                );
-                return;
-              }
-
-              setStep("review-generate");
-            }}
-          >
-            Nästa
-          </button>
-        </div>
-      )}
-
-      {step === "review-generate" && (
-        <div>
-          <button onClick={handleGenerateChart}>Generera diagram</button>
-        </div>
-      )}
-
-      <div
-        id="container"
-        ref={containerRef}
-        style={{ width: "100%", height: "600px" }}
-      />
-    </div>
+  return userInterface(
+    step,
+    handleFileUpload,
+    setStep,
+    handleSelectAllDimensions,
+    handleDeselectAllDimensions,
+    dimensions,
+    selectedDimensions,
+    setSelectedDimensions,
+    handleSelectAllDimensionValues,
+    handleDeselectAllDimensionValues,
+    handleSelectAllMeasures,
+    handleDeselectAllMeasures,
+    measures,
+    setMeasures,
+    xAxisDimensions,
+    setXAxisDimensions,
+    chartType,
+    setChartType,
+    barMeasure,
+    setBarMeasure,
+    lineMeasure,
+    setLineMeasure,
+    handleGenerateChart,
+    containerRef
   );
 };
 

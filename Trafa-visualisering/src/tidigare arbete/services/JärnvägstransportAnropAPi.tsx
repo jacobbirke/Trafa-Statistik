@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL } from '../../config';
 
 // Define types for the parsed data and response data
 interface Column {
