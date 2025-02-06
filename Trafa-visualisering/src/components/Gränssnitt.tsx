@@ -138,28 +138,27 @@ const StatistikGränssnitt: React.FC = () => {
       alert("Välj minst en dimension för x-axeln.");
       return;
     }
-  
+
     const xAxisDimensionIndices = xAxisDimensions.map((dimName) =>
       dimensions.findIndex((dim) => dim.name === dimName)
     );
-  
+
     const seriesDimensionIndex = seriesDimension
       ? dimensions.findIndex((dim) => dim.name === seriesDimension)
       : -1;
-  
-      const seriesCategories = seriesDimensionIndex !== -1
-      ? selectedDimensions
-          .find((dim) => dim.name === seriesDimension)
-          ?.selectedValues ?? []
-      : [];
-    
-  
+
+    const seriesCategories =
+      seriesDimensionIndex !== -1
+        ? selectedDimensions.find((dim) => dim.name === seriesDimension)
+            ?.selectedValues ?? []
+        : [];
+
     const selectedXAxisValues = xAxisDimensions.map(
       (dimName) =>
         selectedDimensions.find((dim) => dim.name === dimName)
           ?.selectedValues ?? []
     );
-  
+
     const filteredRows = jsonData.filter((row) =>
       selectedDimensions.every((dimension) => {
         const dimensionIndex = dimensions.findIndex(
@@ -170,28 +169,47 @@ const StatistikGränssnitt: React.FC = () => {
         return dimension.selectedValues.includes(rowValue);
       })
     );
-  
+
     if (filteredRows.length === 0) {
       alert("Inga rader matchar de valda filtren.");
       return;
     }
-  
-    const aggregateMeasureData = (measureName: string, seriesValue: string | null) => {
+
+    chart.yAxis[0].update({
+      title: {
+        text: barMeasure ? barMeasure : "",
+        style: { color: "blue" },
+      },
+    });
+
+    chart.yAxis[1].update({
+      title: {
+        text: lineMeasure ? lineMeasure : "",
+        style: { color: "red" },
+      },
+      opposite: true,
+    });
+
+    const aggregateMeasureData = (
+      measureName: string,
+      seriesValue: string | null
+    ) => {
       const measureIndex =
         measures.findIndex((measure) => measure.name === measureName) +
         dimensions.length;
-    
+
       if (xAxisDimensions.length === 2) {
         const mainCategories = selectedXAxisValues[0];
         const subCategories = selectedXAxisValues[1];
-        
-        return mainCategories.flatMap((mainCat) => 
+
+        return mainCategories.flatMap((mainCat) =>
           subCategories.map((subCat) => {
             const categoryRows = filteredRows.filter(
               (row) =>
                 row[xAxisDimensionIndices[0]]?.toString() === mainCat &&
                 row[xAxisDimensionIndices[1]]?.toString() === subCat &&
-                (!seriesValue || row[seriesDimensionIndex]?.toString() === seriesValue)
+                (!seriesValue ||
+                  row[seriesDimensionIndex]?.toString() === seriesValue)
             );
             return categoryRows.reduce((sum, row) => {
               const value = parseFloat(row[measureIndex]);
@@ -200,12 +218,13 @@ const StatistikGränssnitt: React.FC = () => {
           })
         );
       }
-    
+
       return selectedXAxisValues[0].map((category) => {
         const categoryRows = filteredRows.filter(
           (row) =>
             row[xAxisDimensionIndices[0]]?.toString() === category &&
-            (!seriesValue || row[seriesDimensionIndex]?.toString() === seriesValue)
+            (!seriesValue ||
+              row[seriesDimensionIndex]?.toString() === seriesValue)
         );
         return categoryRows.reduce((sum, row) => {
           const value = parseFloat(row[measureIndex]);
@@ -213,50 +232,53 @@ const StatistikGränssnitt: React.FC = () => {
         }, 0);
       });
     };
-  
+
     const seriesData: any[] = [];
-  
+
     if (seriesDimension) {
+      // grupperad
       seriesCategories.forEach((seriesValue, index) => {
         measures
           .filter((measure) => measure.isSelected)
           .forEach((measure) => {
             seriesData.push({
               name: `${seriesValue} - ${measure.name}`,
-              type: chartType,
+              type: measure.name === lineMeasure ? "spline" : "column",
               data: aggregateMeasureData(measure.name, seriesValue),
               color: Highcharts.getOptions().colors?.[index % 10] || undefined,
+              yAxis: measure.name === lineMeasure ? 1 : 0,
             });
           });
       });
     } else {
+      // ogrupperad
       measures
         .filter((measure) => measure.isSelected)
         .forEach((measure, index) => {
           seriesData.push({
             name: measure.name,
-            type: chartType,
+            type: measure.name === lineMeasure ? "spline" : "column",
             data: aggregateMeasureData(measure.name, null),
             color: Highcharts.getOptions().colors?.[index % 10] || undefined,
+            yAxis: measure.name === lineMeasure ? 1 : 0,
           });
         });
     }
-  
+
     const categories =
-    xAxisDimensions.length === 2
-      ? selectedXAxisValues[0].map((mainCategory) => ({
-          name: mainCategory,
-          categories: selectedXAxisValues[1].map((subCategory) => subCategory),
-        }))
-      : selectedXAxisValues[0];
-  
-  
-  
-  
+      xAxisDimensions.length === 2
+        ? selectedXAxisValues[0].map((mainCategory) => ({
+            name: mainCategory,
+            categories: selectedXAxisValues[1].map(
+              (subCategory) => subCategory
+            ),
+          }))
+        : selectedXAxisValues[0];
+
     chart.xAxis[0].update({
       categories: categories,
     });
-  
+
     chart.series.forEach((series: any) => series.remove(false));
     seriesData.forEach((series) => chart.addSeries(series, false));
     chart.redraw();
@@ -291,11 +313,11 @@ const StatistikGränssnitt: React.FC = () => {
     setBarMeasure,
     lineMeasure,
     setLineMeasure,
-    seriesDimension, 
-    setSeriesDimension,    
+    seriesDimension,
+    setSeriesDimension,
     handleGenerateChart,
     containerRef
   );
-}
+};
 
 export default StatistikGränssnitt;

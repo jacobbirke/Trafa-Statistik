@@ -33,12 +33,11 @@ export function userInterface(
   setBarMeasure: React.Dispatch<React.SetStateAction<string | null>>,
   lineMeasure: string | null,
   setLineMeasure: React.Dispatch<React.SetStateAction<string | null>>,
-  seriesDimension: string | null,            // Add this
-  setSeriesDimension: React.Dispatch<React.SetStateAction<string | null>>, // Add this
+  seriesDimension: string | null, 
+  setSeriesDimension: React.Dispatch<React.SetStateAction<string | null>>,
   handleGenerateChart: () => void,
   containerRef: React.MutableRefObject<HTMLDivElement | null>
 ): React.ReactNode {
-
   return (
     <div>
       {step === "input-file" && (
@@ -209,18 +208,19 @@ export function userInterface(
             ))}
           </div>
           <div>
-  <h4>Välj Dimension för Serier</h4>
-  <select
-    value={seriesDimension || ""}
-    onChange={(e) => setSeriesDimension(e.target.value || null)}
-  >
-    <option value="">Ingen</option>
-    {selectedDimensions.map((dim) => (
-      <option key={dim.name} value={dim.name}>{dim.name}</option>
-    ))}
-  </select>
-</div>
-
+            <h4>Välj Dimension för Serier</h4>
+            <select
+              value={seriesDimension || ""}
+              onChange={(e) => setSeriesDimension(e.target.value || null)}
+            >
+              <option value="">Ingen</option>
+              {selectedDimensions.map((dim) => (
+                <option key={dim.name} value={dim.name}>
+                  {dim.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {measures.filter((measure) => measure.isSelected).length === 1 && (
             <div>
