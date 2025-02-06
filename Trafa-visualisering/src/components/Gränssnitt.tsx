@@ -235,35 +235,35 @@ const StatistikGränssnitt: React.FC = () => {
 
     const seriesData: any[] = [];
 
+    const selectedMeasures = measures.filter((measure) => measure.isSelected);
+    const isSingleMeasure = selectedMeasures.length === 1;
+    
     if (seriesDimension) {
-      // grupperad
       seriesCategories.forEach((seriesValue, index) => {
-        measures
-          .filter((measure) => measure.isSelected)
-          .forEach((measure) => {
-            seriesData.push({
-              name: `${seriesValue} - ${measure.name}`,
-              type: measure.name === lineMeasure ? "spline" : "column",
-              data: aggregateMeasureData(measure.name, seriesValue),
-              color: Highcharts.getOptions().colors?.[index % 10] || undefined,
-              yAxis: measure.name === lineMeasure ? 1 : 0,
-            });
-          });
-      });
-    } else {
-      // ogrupperad
-      measures
-        .filter((measure) => measure.isSelected)
-        .forEach((measure, index) => {
+        selectedMeasures.forEach((measure) => {
           seriesData.push({
-            name: measure.name,
-            type: measure.name === lineMeasure ? "spline" : "column",
-            data: aggregateMeasureData(measure.name, null),
+            name: `${seriesValue} - ${measure.name}`,
+            type: isSingleMeasure ? chartType : (measure.name === lineMeasure ? "spline" : "column"), 
+            data: aggregateMeasureData(measure.name, seriesValue),
             color: Highcharts.getOptions().colors?.[index % 10] || undefined,
-            yAxis: measure.name === lineMeasure ? 1 : 0,
+            yAxis: measure.name === lineMeasure ? 1 : 0, 
           });
         });
+      });
+    } else {
+      selectedMeasures.forEach((measure, index) => {
+        seriesData.push({
+          name: measure.name,
+          type: isSingleMeasure 
+            ? chartType 
+            : (measure.name === lineMeasure ? "spline" : "column"),
+          data: aggregateMeasureData(measure.name, null),
+          color: Highcharts.getOptions().colors?.[index % 10] || undefined,
+          yAxis: measure.name === lineMeasure ? 1 : 0,
+        });
+      });
     }
+    
 
     const categories =
       xAxisDimensions.length === 2
