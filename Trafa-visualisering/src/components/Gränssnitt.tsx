@@ -30,6 +30,7 @@ const StatistikGränssnitt: React.FC = () => {
     | "review-generate"
   >("input-file");
 
+  const [seriesDimension, setSeriesDimension] = useState<string | null>(null);
   const [chart, setChart] = useState<any>(null);
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
   const [selectedDimensions, setSelectedDimensions] = useState<Dimension[]>([]);
@@ -133,153 +134,129 @@ const StatistikGränssnitt: React.FC = () => {
   );
 
   const handleGenerateChart = () => {
-    if (!chart || !jsonData) return;
-
-    if (xAxisDimensions.length === 0) {
+    if (!chart || !jsonData || xAxisDimensions.length === 0) {
       alert("Välj minst en dimension för x-axeln.");
       return;
     }
-
+  
     const xAxisDimensionIndices = xAxisDimensions.map((dimName) =>
       dimensions.findIndex((dim) => dim.name === dimName)
     );
-
-    if (xAxisDimensionIndices.some((index) => index === -1)) {
-      alert("Dimension för x-axeln hittades inte!");
-      return;
-    }
-
+  
+    const seriesDimensionIndex = seriesDimension
+      ? dimensions.findIndex((dim) => dim.name === seriesDimension)
+      : -1;
+  
+      const seriesCategories = seriesDimensionIndex !== -1
+      ? selectedDimensions
+          .find((dim) => dim.name === seriesDimension)
+          ?.selectedValues ?? []
+      : [];
+    
+  
     const selectedXAxisValues = xAxisDimensions.map(
       (dimName) =>
         selectedDimensions.find((dim) => dim.name === dimName)
           ?.selectedValues ?? []
     );
-
-    if (selectedXAxisValues.some((values) => values.length === 0)) {
-      alert("Inga valda värden för X-axeln.");
-      return;
-    }
-
-    const filteredRows = jsonData.filter((row) => {
-      return selectedDimensions.every((dimension) => {
+  
+    const filteredRows = jsonData.filter((row) =>
+      selectedDimensions.every((dimension) => {
         const dimensionIndex = dimensions.findIndex(
           (dim) => dim.name === dimension.name
         );
         if (dimensionIndex === -1) return true;
         const rowValue = row[dimensionIndex]?.toString();
         return dimension.selectedValues.includes(rowValue);
-      });
-    });
-
+      })
+    );
+  
     if (filteredRows.length === 0) {
       alert("Inga rader matchar de valda filtren.");
       return;
     }
-
-    const aggregateMeasureData = (measureName: string) => {
+  
+    const aggregateMeasureData = (measureName: string, seriesValue: string | null) => {
       const measureIndex =
         measures.findIndex((measure) => measure.name === measureName) +
         dimensions.length;
-
-      if (xAxisDimensions.length === 1) {
-        return selectedXAxisValues[0].map((category) => {
-          const categoryRows = filteredRows.filter(
-            (row) => row[xAxisDimensionIndices[0]]?.toString() === category
-          );
-          return categoryRows.reduce((sum, row) => {
-            const value = parseFloat(row[measureIndex]);
-            return sum + (isNaN(value) ? 0 : value);
-          }, 0);
-        });
-      } else {
-        return selectedXAxisValues[0].map((mainCategory) => {
-          return selectedXAxisValues[1].map((subCategory) => {
+    
+      if (xAxisDimensions.length === 2) {
+        const mainCategories = selectedXAxisValues[0];
+        const subCategories = selectedXAxisValues[1];
+        
+        return mainCategories.flatMap((mainCat) => 
+          subCategories.map((subCat) => {
             const categoryRows = filteredRows.filter(
               (row) =>
-                row[xAxisDimensionIndices[0]]?.toString() === mainCategory &&
-                row[xAxisDimensionIndices[1]]?.toString() === subCategory
+                row[xAxisDimensionIndices[0]]?.toString() === mainCat &&
+                row[xAxisDimensionIndices[1]]?.toString() === subCat &&
+                (!seriesValue || row[seriesDimensionIndex]?.toString() === seriesValue)
             );
             return categoryRows.reduce((sum, row) => {
               const value = parseFloat(row[measureIndex]);
               return sum + (isNaN(value) ? 0 : value);
             }, 0);
-          });
-        });
+          })
+        );
       }
+    
+      return selectedXAxisValues[0].map((category) => {
+        const categoryRows = filteredRows.filter(
+          (row) =>
+            row[xAxisDimensionIndices[0]]?.toString() === category &&
+            (!seriesValue || row[seriesDimensionIndex]?.toString() === seriesValue)
+        );
+        return categoryRows.reduce((sum, row) => {
+          const value = parseFloat(row[measureIndex]);
+          return sum + (isNaN(value) ? 0 : value);
+        }, 0);
+      });
     };
-
+  
     const seriesData: any[] = [];
-    const selectedMeasures = measures.filter((measure) => measure.isSelected);
-
-    if (selectedMeasures.length === 1) {
-      const measure = selectedMeasures[0];
-      const data = aggregateMeasureData(measure.name);
-      seriesData.push({
-        name: `${measure.name}${measure.unit ? ` (${measure.unit})` : ""}`,
-        type: chartType,
-        data: xAxisDimensions.length === 2 ? data.flat() : data,
-        color: chartType === "column" ? "blue" : "red",
+  
+    if (seriesDimension) {
+      seriesCategories.forEach((seriesValue, index) => {
+        measures
+          .filter((measure) => measure.isSelected)
+          .forEach((measure) => {
+            seriesData.push({
+              name: `${seriesValue} - ${measure.name}`,
+              type: chartType,
+              data: aggregateMeasureData(measure.name, seriesValue),
+              color: Highcharts.getOptions().colors?.[index % 10] || undefined,
+            });
+          });
       });
     } else {
-      if (barMeasure) {
-        const barData = aggregateMeasureData(barMeasure);
-        seriesData.push({
-          name: `${barMeasure}`,
-          type: "column",
-          data: xAxisDimensions.length === 2 ? barData.flat() : barData,
-          color: "blue",
-          yAxis: 0,
+      measures
+        .filter((measure) => measure.isSelected)
+        .forEach((measure, index) => {
+          seriesData.push({
+            name: measure.name,
+            type: chartType,
+            data: aggregateMeasureData(measure.name, null),
+            color: Highcharts.getOptions().colors?.[index % 10] || undefined,
+          });
         });
-      }
-
-      if (lineMeasure) {
-        const lineData = aggregateMeasureData(lineMeasure);
-        seriesData.push({
-          name: `${lineMeasure}`,
-          type: "spline",
-          data: xAxisDimensions.length === 2 ? lineData.flat() : lineData,
-          color: "red",
-          yAxis: 1,
-        });
-      }
     }
-
+  
     const categories =
-      xAxisDimensions.length === 2
-        ? selectedXAxisValues[0].map((mainCategory) => ({
-            name: mainCategory,
-            categories: selectedXAxisValues[1],
-          }))
-        : selectedXAxisValues[0];
-
+    xAxisDimensions.length === 2
+      ? selectedXAxisValues[0].map((mainCategory) => ({
+          name: mainCategory,
+          categories: selectedXAxisValues[1].map((subCategory) => subCategory),
+        }))
+      : selectedXAxisValues[0];
+  
+  
+  
+  
     chart.xAxis[0].update({
       categories: categories,
-      labels: {
-        groupedOptions: xAxisDimensions.length === 2 ? {} : undefined,
-      },
     });
-
-    const selectedMeasure = measures.find((measure) => measure.isSelected);
-
-    chart.yAxis[0].update({
-      title: {
-        text:
-          selectedMeasures.length === 1
-            ? `${selectedMeasure?.name}${
-                selectedMeasure?.unit ? ` (${selectedMeasure.unit})` : ""
-              }`
-            : barMeasure || "",
-        style: { color: "blue" },
-      },
-    });
-
-    chart.yAxis[1].update({
-      title: {
-        text: lineMeasure ? `${lineMeasure}` : "",
-        style: { color: "red" },
-      },
-    });
-
+  
     chart.series.forEach((series: any) => series.remove(false));
     seriesData.forEach((series) => chart.addSeries(series, false));
     chart.redraw();
@@ -314,9 +291,11 @@ const StatistikGränssnitt: React.FC = () => {
     setBarMeasure,
     lineMeasure,
     setLineMeasure,
+    seriesDimension, 
+    setSeriesDimension,    
     handleGenerateChart,
     containerRef
   );
-};
+}
 
 export default StatistikGränssnitt;
