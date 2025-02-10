@@ -1,31 +1,10 @@
 import React from "react";
-import { Dimension, Measure } from "./Gränssnitt";
+import { Measure } from "./Gränssnitt";
 
-export function selectAllOptions(setSelectedDimensions: React.Dispatch<React.SetStateAction<Dimension[]>>, dimensions: Dimension[], setMeasures: React.Dispatch<React.SetStateAction<Measure[]>>, measures: Measure[]) {
-  const handleSelectAllDimensions = () => {
-    setSelectedDimensions(
-      dimensions.map((dim) => ({ ...dim, selectedValues: [] }))
-    );
-  };
-
-  const handleDeselectAllDimensions = () => {
-    setSelectedDimensions([]);
-  };
-
-  const handleSelectAllDimensionValues = (dimensionName: string) => {
-    setSelectedDimensions((prev) => prev.map((dim) => dim.name === dimensionName
-      ? { ...dim, selectedValues: [...dim.allValues] }
-      : dim
-    )
-    );
-  };
-
-  const handleDeselectAllDimensionValues = (dimensionName: string) => {
-    setSelectedDimensions((prev) => prev.map((dim) => dim.name === dimensionName ? { ...dim, selectedValues: [] } : dim
-    )
-    );
-  };
-
+export function selectAllOptions(
+  setMeasures: React.Dispatch<React.SetStateAction<Measure[]>>,
+  measures: Measure[]
+) {
   const handleSelectAllMeasures = () => {
     setMeasures(measures.map((measure) => ({ ...measure, isSelected: true })));
   };
@@ -33,5 +12,6 @@ export function selectAllOptions(setSelectedDimensions: React.Dispatch<React.Set
   const handleDeselectAllMeasures = () => {
     setMeasures(measures.map((measure) => ({ ...measure, isSelected: false })));
   };
-  return { handleSelectAllDimensions, handleDeselectAllDimensions, handleSelectAllDimensionValues, handleDeselectAllDimensionValues, handleSelectAllMeasures, handleDeselectAllMeasures };
+
+  return { handleSelectAllMeasures, handleDeselectAllMeasures };
 }
