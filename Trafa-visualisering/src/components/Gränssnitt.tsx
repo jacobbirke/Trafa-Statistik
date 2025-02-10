@@ -23,7 +23,7 @@ export interface Measure {
 const StatistikGränssnitt: React.FC = () => {
   const [step, setStep] = useState<
     | "input-file"
-    | "select-dimensions"
+    | "select-diagram-type"
     | "filter-dimensions"
     | "select-measures"
     | "chart-configuration"
@@ -33,14 +33,15 @@ const StatistikGränssnitt: React.FC = () => {
   const [seriesDimension, setSeriesDimension] = useState<string | null>(null);
   const [chart, setChart] = useState<any>(null);
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
-  const [selectedDimensions, setSelectedDimensions] = useState<Dimension[]>([]);
   const [measures, setMeasures] = useState<Measure[]>([]);
   const [barMeasure, setBarMeasure] = useState<string | null>(null);
   const [lineMeasure, setLineMeasure] = useState<string | null>(null);
   const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("Diagram utan titel");
   const [jsonData, setJsonData] = useState<any[]>([]);
-  const [chartType, setChartType] = useState<"column" | "line">("column");
+  const [chartType, setChartType] = useState<"column" | "line" | "combo">(
+    "column"
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -119,19 +120,8 @@ const StatistikGränssnitt: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const {
-    handleSelectAllDimensions,
-    handleDeselectAllDimensions,
-    handleSelectAllDimensionValues,
-    handleDeselectAllDimensionValues,
-    handleSelectAllMeasures,
-    handleDeselectAllMeasures,
-  } = selectAllOptions(
-    setSelectedDimensions,
-    dimensions,
-    setMeasures,
-    measures
-  );
+  const { handleSelectAllMeasures, handleDeselectAllMeasures } =
+    selectAllOptions(setMeasures, measures);
 
   const handleGenerateChart = () => {
     if (!chart || !jsonData || xAxisDimensions.length === 0) {
@@ -149,18 +139,17 @@ const StatistikGränssnitt: React.FC = () => {
 
     const seriesCategories =
       seriesDimensionIndex !== -1
-        ? selectedDimensions.find((dim) => dim.name === seriesDimension)
+        ? dimensions.find((dim) => dim.name === seriesDimension)
             ?.selectedValues ?? []
         : [];
 
     const selectedXAxisValues = xAxisDimensions.map(
       (dimName) =>
-        selectedDimensions.find((dim) => dim.name === dimName)
-          ?.selectedValues ?? []
+        dimensions.find((dim) => dim.name === dimName)?.selectedValues ?? []
     );
 
     const filteredRows = jsonData.filter((row) =>
-      selectedDimensions.every((dimension) => {
+      dimensions.every((dimension) => {
         const dimensionIndex = dimensions.findIndex(
           (dim) => dim.name === dimension.name
         );
@@ -234,19 +223,31 @@ const StatistikGränssnitt: React.FC = () => {
     };
 
     const seriesData: any[] = [];
-
     const selectedMeasures = measures.filter((measure) => measure.isSelected);
-    const isSingleMeasure = selectedMeasures.length === 1;
-    
+
+    const getSeriesType = (measure: Measure) => {
+      if (chartType === "combo") {
+        return measure.name === lineMeasure ? "spline" : "column";
+      }
+      return chartType === "line" ? "spline" : "column";
+    };
+
     if (seriesDimension) {
       seriesCategories.forEach((seriesValue, index) => {
         selectedMeasures.forEach((measure) => {
           seriesData.push({
             name: `${seriesValue} - ${measure.name}`,
-            type: isSingleMeasure ? chartType : (measure.name === lineMeasure ? "spline" : "column"), 
+            type: getSeriesType(measure),
             data: aggregateMeasureData(measure.name, seriesValue),
             color: Highcharts.getOptions().colors?.[index % 10] || undefined,
-            yAxis: measure.name === lineMeasure ? 1 : 0, 
+            yAxis:
+              chartType === "combo"
+                ? measure.name === lineMeasure
+                  ? 1
+                  : 0
+                : chartType === "line"
+                ? 1
+                : 0,
           });
         });
       });
@@ -254,16 +255,20 @@ const StatistikGränssnitt: React.FC = () => {
       selectedMeasures.forEach((measure, index) => {
         seriesData.push({
           name: measure.name,
-          type: isSingleMeasure 
-            ? chartType 
-            : (measure.name === lineMeasure ? "spline" : "column"),
+          type: getSeriesType(measure),
           data: aggregateMeasureData(measure.name, null),
           color: Highcharts.getOptions().colors?.[index % 10] || undefined,
-          yAxis: measure.name === lineMeasure ? 1 : 0,
+          yAxis:
+            chartType === "combo"
+              ? measure.name === lineMeasure
+                ? 1
+                : 0
+              : chartType === "line"
+              ? 1
+              : 0,
         });
       });
     }
-    
 
     const categories =
       xAxisDimensions.length === 2
@@ -285,7 +290,10 @@ const StatistikGränssnitt: React.FC = () => {
     chart.setTitle({ text: title || "Diagram" });
     chart.update({
       chart: {
-        type: xAxisDimensions.length === 2 ? "column" : chartType,
+        type:
+          xAxisDimensions.length === 2
+            ? "column"
+            : getSeriesType(selectedMeasures[0]),
       },
     });
   };
@@ -294,13 +302,8 @@ const StatistikGränssnitt: React.FC = () => {
     step,
     handleFileUpload,
     setStep,
-    handleSelectAllDimensions,
-    handleDeselectAllDimensions,
     dimensions,
-    selectedDimensions,
-    setSelectedDimensions,
-    handleSelectAllDimensionValues,
-    handleDeselectAllDimensionValues,
+    setDimensions,
     handleSelectAllMeasures,
     handleDeselectAllMeasures,
     measures,
