@@ -16,7 +16,6 @@ export function userInterface(
   >,
   dimensions: Dimension[],
   setDimensions: React.Dispatch<React.SetStateAction<Dimension[]>>,
-
   handleSelectAllMeasures: () => void,
   handleDeselectAllMeasures: () => void,
   measures: Measure[],
@@ -34,6 +33,7 @@ export function userInterface(
   seriesDimension: string | null,
   setSeriesDimension: React.Dispatch<React.SetStateAction<string | null>>,
   handleGenerateChart: () => void,
+  handleGoBack: () => void, // New parameter
   containerRef: React.MutableRefObject<HTMLDivElement | null>
 ): React.ReactNode {
   return (
@@ -354,6 +354,7 @@ export function userInterface(
 
       {step === "review-generate" && (
         <div>
+          <button onClick={handleGoBack}>Tillbaka</button>
           <button onClick={handleGenerateChart}>Generera diagram</button>
         </div>
       )}
