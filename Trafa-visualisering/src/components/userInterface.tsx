@@ -16,7 +16,6 @@ export function userInterface(
   >,
   dimensions: Dimension[],
   setDimensions: React.Dispatch<React.SetStateAction<Dimension[]>>,
-
   handleSelectAllMeasures: () => void,
   handleDeselectAllMeasures: () => void,
   measures: Measure[],
@@ -24,9 +23,7 @@ export function userInterface(
   xAxisDimensions: string[],
   setXAxisDimensions: React.Dispatch<React.SetStateAction<string[]>>,
   chartType: "column" | "line" | "combo",
-  setChartType: React.Dispatch<
-    React.SetStateAction<"column" | "line" | "combo">
-  >,
+  setChartType: React.Dispatch<React.SetStateAction<"column" | "line" | "combo">>,
   barMeasure: string | null,
   setBarMeasure: React.Dispatch<React.SetStateAction<string | null>>,
   lineMeasure: string | null,
@@ -34,6 +31,7 @@ export function userInterface(
   seriesDimension: string | null,
   setSeriesDimension: React.Dispatch<React.SetStateAction<string | null>>,
   handleGenerateChart: () => void,
+  handleGoBack: () => void, // New parameter
   containerRef: React.MutableRefObject<HTMLDivElement | null>
 ): React.ReactNode {
   return (
@@ -355,6 +353,7 @@ export function userInterface(
       {step === "review-generate" && (
         <div>
           <button onClick={handleGenerateChart}>Generera diagram</button>
+          <button onClick={handleGoBack}>Tillbaka</button>
         </div>
       )}
 

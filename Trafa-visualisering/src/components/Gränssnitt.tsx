@@ -123,6 +123,17 @@ const StatistikGränssnitt: React.FC = () => {
   const { handleSelectAllMeasures, handleDeselectAllMeasures } =
     selectAllOptions(setMeasures, measures);
 
+    const handleGoBack = () => {
+      if (chart) {
+        chart.series.forEach((series: any) => series.remove(false));
+        chart.setTitle({ text: '' });
+        chart.yAxis[0].update({ title: { text: '' } });
+        chart.yAxis[1].update({ title: { text: '' } });
+        chart.redraw();
+      }
+      setStep("chart-configuration");
+    };
+
   const handleGenerateChart = () => {
     if (!chart || !jsonData || xAxisDimensions.length === 0) {
       alert("Välj minst en dimension för x-axeln.");
@@ -319,6 +330,7 @@ const StatistikGränssnitt: React.FC = () => {
     seriesDimension,
     setSeriesDimension,
     handleGenerateChart,
+    handleGoBack, 
     containerRef
   );
 };
