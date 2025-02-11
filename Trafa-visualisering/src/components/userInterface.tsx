@@ -22,9 +22,9 @@ export function userInterface(
   setMeasures: React.Dispatch<React.SetStateAction<Measure[]>>,
   xAxisDimensions: string[],
   setXAxisDimensions: React.Dispatch<React.SetStateAction<string[]>>,
-  chartType: "column" | "line" | "combo",
+  chartType: "column" | "line" | "combo" | "pie",
   setChartType: React.Dispatch<
-    React.SetStateAction<"column" | "line" | "combo">
+    React.SetStateAction<"column" | "line" | "combo" | "pie">
   >,
   barMeasure: string | null,
   setBarMeasure: React.Dispatch<React.SetStateAction<string | null>>,
@@ -33,7 +33,7 @@ export function userInterface(
   seriesDimension: string | null,
   setSeriesDimension: React.Dispatch<React.SetStateAction<string | null>>,
   handleGenerateChart: () => void,
-  handleGoBack: () => void, // New parameter
+  handleGoBack: () => void,
   containerRef: React.MutableRefObject<HTMLDivElement | null>
 ): React.ReactNode {
   return (
@@ -82,6 +82,19 @@ export function userInterface(
               onChange={() => setChartType("combo")}
             />
             Kombinerat (Stapel & Linje)
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="diagramType"
+              value="pie"
+              checked={chartType === "pie"}
+              onChange={() => {
+                setChartType("pie");
+                setSeriesDimension(null);
+              }}
+            />
+            Pajdiagram
           </label>
           <div>
             <button onClick={() => setStep("input-file")}>Tillbaka</button>
@@ -180,6 +193,8 @@ export function userInterface(
           <h3>Välj Mått</h3>
           {chartType === "combo" ? (
             <p>För kombinerat diagram, välj exakt två mått.</p>
+          ) : chartType === "pie" ? (
+            <p>För pajdiagram, välj exakt ett mått.</p>
           ) : (
             <p>
               För {chartType === "line" ? "linjediagram" : "stapeldiagram"},
@@ -212,17 +227,23 @@ export function userInterface(
           <button
             onClick={() => {
               const selectedMs = measures.filter((m) => m.isSelected);
-              if (chartType === "column" || chartType === "line") {
-                if (selectedMs.length !== 1) {
-                  alert("För stapel- eller linjediagram, välj exakt ett mått.");
-                  return;
-                }
-              } else if (chartType === "combo") {
+              if (chartType === "combo") {
                 if (selectedMs.length !== 2) {
                   alert("För kombinerat diagram, välj exakt två mått.");
                   return;
                 }
+              } else if (chartType === "pie") {
+                if (selectedMs.length !== 1) {
+                  alert("För pajdiagram, välj exakt ett mått.");
+                  return;
+                }
+              } else {
+                if (selectedMs.length !== 1) {
+                  alert("För stapel- eller linjediagram, välj exakt ett mått.");
+                  return;
+                }
               }
+
               setStep("chart-configuration");
             }}
           >
@@ -234,52 +255,73 @@ export function userInterface(
       {step === "chart-configuration" && (
         <div>
           <h3>Diagramkonfiguration</h3>
-          <div>
-            <h4>Välj kategori för x-axeln (Dimension)</h4>
-            {dimensions.map((dim) => (
-              <div key={dim.name}>
-                <label>
-                  <input
-                    type="checkbox"
-                    name="xAxis"
-                    value={dim.name}
-                    checked={xAxisDimensions.includes(dim.name)}
-                    onChange={() => {
-                      if (xAxisDimensions.includes(dim.name)) {
-                        setXAxisDimensions((prev) =>
-                          prev.filter((name) => name !== dim.name)
-                        );
-                      } else {
-                        if (xAxisDimensions.length < 2) {
-                          setXAxisDimensions((prev) => [...prev, dim.name]);
-                        } else {
-                          alert(
-                            "Du kan bara välja två dimensioner för x-axeln."
-                          );
-                        }
-                      }
-                    }}
-                  />
-                  {dim.name}
-                </label>
-              </div>
-            ))}
-          </div>
-          <div>
-            <h4>Välj Dimension för Serier</h4>
-            <select
-              value={seriesDimension || ""}
-              onChange={(e) => setSeriesDimension(e.target.value || null)}
-            >
-              <option value="">Ingen</option>
+          {chartType === "pie" ? (
+            <div>
+              <h4>Välj dimension för serie</h4>
+              <select
+                value={seriesDimension || ""}
+                onChange={(e) => setSeriesDimension(e.target.value || null)}
+              >
+                <option value="">Ingen</option>
+                {dimensions.map((dim) => (
+                  <option key={dim.name} value={dim.name}>
+                    {dim.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <h4>Välj kategori för x-axeln (Dimension)</h4>
               {dimensions.map((dim) => (
-                <option key={dim.name} value={dim.name}>
-                  {dim.name}
-                </option>
+                <div key={dim.name}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="xAxis"
+                      value={dim.name}
+                      checked={xAxisDimensions.includes(dim.name)}
+                      onChange={() => {
+                        if (xAxisDimensions.includes(dim.name)) {
+                          setXAxisDimensions((prev) =>
+                            prev.filter((name) => name !== dim.name)
+                          );
+                        } else {
+                          const maxAllowed: number = 2;
+                          if (xAxisDimensions.length < maxAllowed) {
+                            setXAxisDimensions((prev) => [...prev, dim.name]);
+                          } else {
+                            alert(
+                              `Du kan bara välja ${maxAllowed} dimension${
+                                maxAllowed === 1 ? "" : "er"
+                              } för x-axeln.`
+                            );
+                          }
+                        }
+                      }}
+                    />
+                    {dim.name}
+                  </label>
+                </div>
               ))}
-            </select>
-          </div>
-
+            </div>
+          )}
+          {chartType !== "pie" && (
+            <div>
+              <h4>Välj Dimension för Serier</h4>
+              <select
+                value={seriesDimension || ""}
+                onChange={(e) => setSeriesDimension(e.target.value || null)}
+              >
+                <option value="">Ingen</option>
+                {dimensions.map((dim) => (
+                  <option key={dim.name} value={dim.name}>
+                    {dim.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {measures.filter((m) => m.isSelected).length > 1 &&
             chartType === "combo" && (
               <div>
@@ -319,7 +361,6 @@ export function userInterface(
                   ))}
               </div>
             )}
-
           {measures.filter((m) => m.isSelected).length === 1 &&
             (chartType === "column" || chartType === "line") && (
               <div>
@@ -329,11 +370,10 @@ export function userInterface(
                 </p>
               </div>
             )}
-
           <button onClick={() => setStep("select-measures")}>Tillbaka</button>
           <button
             onClick={() => {
-              if (xAxisDimensions.length === 0) {
+              if (chartType !== "pie" && xAxisDimensions.length === 0) {
                 alert("Välj minst en dimension för x-axeln.");
                 return;
               } else if (chartType === "combo") {

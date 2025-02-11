@@ -39,18 +39,15 @@ const StatistikGränssnitt: React.FC = () => {
   const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("Diagram utan titel");
   const [jsonData, setJsonData] = useState<any[]>([]);
-  const [chartType, setChartType] = useState<"column" | "line" | "combo">(
-    "column"
-  );
+  const [chartType, setChartType] = useState<
+    "column" | "line" | "combo" | "pie"
+  >("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-
     const newChart = createChart(containerRef.current);
-
     setChart(newChart);
-
     return () => {
       newChart.destroy();
     };
@@ -61,8 +58,6 @@ const StatistikGränssnitt: React.FC = () => {
       chart.reflow();
     }
   }, [step, chart]);
-
-  
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,19 +126,98 @@ const StatistikGränssnitt: React.FC = () => {
   const { handleSelectAllMeasures, handleDeselectAllMeasures } =
     selectAllOptions(setMeasures, measures);
 
-    const handleGoBack = () => {
-      if (chart) {
-        chart.series.forEach((series: any) => series.remove(false));
-        chart.setTitle({ text: '' });
-        chart.yAxis[0].update({ title: { text: '' } });
-        chart.yAxis[1].update({ title: { text: '' } });
-        chart.redraw();
-      }
-      setStep("chart-configuration");
-    };
+  const handleGoBack = () => {
+    if (chart) {
+      chart.series.forEach((series: any) => series.remove(false));
+      chart.setTitle({ text: "" });
+      chart.yAxis[0].update({ title: { text: "" } });
+      chart.yAxis[1].update({ title: { text: "" } });
+      chart.redraw();
+    }
+    setStep("chart-configuration");
+  };
 
   const handleGenerateChart = () => {
-    if (!chart || !jsonData || xAxisDimensions.length === 0) {
+    if (!chart || !jsonData) {
+      alert("Chart or data is missing.");
+      return;
+    }
+
+    if (chartType === "pie") {
+      if (!seriesDimension) {
+        alert("Välj en dimension för serien för pajdiagram.");
+        return;
+      }
+      const seriesDim = dimensions.find((dim) => dim.name === seriesDimension);
+      if (!seriesDim) {
+        alert("Ogiltig dimension för serien.");
+        return;
+      }
+      const selectedMeasuresForPie = measures.filter((m) => m.isSelected);
+      if (selectedMeasuresForPie.length !== 1) {
+        alert("Välj exakt ett mått för pajdiagram.");
+        return;
+      }
+      const measure = selectedMeasuresForPie[0];
+      const measureIndex =
+        dimensions.length + measures.findIndex((m) => m.name === measure.name);
+      const seriesDimIndex = dimensions.findIndex(
+        (dim) => dim.name === seriesDimension
+      );
+
+      const filteredRows = jsonData.filter((row) =>
+        dimensions.every((dimension) => {
+          const dimensionIndex = dimensions.findIndex(
+            (dim) => dim.name === dimension.name
+          );
+          if (dimensionIndex === -1) return true;
+          const rowValue = row[dimensionIndex]?.toString();
+          return dimension.selectedValues.includes(rowValue);
+        })
+      );
+      if (filteredRows.length === 0) {
+        alert("Inga rader matchar de valda filtren.");
+        return;
+      }
+
+      const categorySums: { [key: string]: number } = {};
+      filteredRows.forEach((row) => {
+        const category = row[seriesDimIndex]?.toString();
+        if (seriesDim.selectedValues.includes(category)) {
+          const value = parseFloat(row[measureIndex]) || 0;
+          categorySums[category] = (categorySums[category] || 0) + value;
+        }
+      });
+
+      const seriesData = seriesDim.selectedValues.map((category) => ({
+        name: category,
+        y: categorySums[category] || 0,
+      }));
+
+      chart.update({
+        chart: {
+          type: "pie",
+        },
+        title: {
+          text: title || "Diagram",
+        },
+      });
+
+      chart.xAxis[0].update({ visible: false });
+      chart.yAxis[0].update({ visible: false });
+      if (chart.yAxis[1]) chart.yAxis[1].update({ visible: false });
+
+      chart.series.forEach((series: any) => series.remove(false));
+      chart.addSeries({
+        type: "pie",
+        name: measure.name,
+        data: seriesData,
+      });
+      chart.redraw();
+      return;
+    }
+
+    if (xAxisDimensions.length === 0) {
       alert("Välj minst en dimension för x-axeln.");
       return;
     }
@@ -242,7 +316,9 @@ const StatistikGränssnitt: React.FC = () => {
     };
 
     const seriesData: any[] = [];
-    const selectedMeasures = measures.filter((measure) => measure.isSelected);
+    const selectedMeasuresForOther = measures.filter(
+      (measure) => measure.isSelected
+    );
 
     const getSeriesType = (measure: Measure) => {
       if (chartType === "combo") {
@@ -253,7 +329,7 @@ const StatistikGränssnitt: React.FC = () => {
 
     if (seriesDimension) {
       seriesCategories.forEach((seriesValue, index) => {
-        selectedMeasures.forEach((measure) => {
+        selectedMeasuresForOther.forEach((measure) => {
           seriesData.push({
             name: `${seriesValue} - ${measure.name}`,
             type: getSeriesType(measure),
@@ -271,7 +347,7 @@ const StatistikGränssnitt: React.FC = () => {
         });
       });
     } else {
-      selectedMeasures.forEach((measure, index) => {
+      selectedMeasuresForOther.forEach((measure, index) => {
         seriesData.push({
           name: measure.name,
           type: getSeriesType(measure),
@@ -312,7 +388,7 @@ const StatistikGränssnitt: React.FC = () => {
         type:
           xAxisDimensions.length === 2
             ? "column"
-            : getSeriesType(selectedMeasures[0]),
+            : getSeriesType(selectedMeasuresForOther[0]),
       },
     });
   };
@@ -338,7 +414,7 @@ const StatistikGränssnitt: React.FC = () => {
     seriesDimension,
     setSeriesDimension,
     handleGenerateChart,
-    handleGoBack, 
+    handleGoBack,
     containerRef
   );
 };
