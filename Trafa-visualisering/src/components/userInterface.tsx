@@ -384,6 +384,23 @@ export function userInterface(
                   return;
                 }
               }
+              const filterDims = dimensions.filter(
+                (dim) =>
+                  !xAxisDimensions.includes(dim.name) && dim.name !== seriesDimension
+              );
+              const updatedDims = dimensions.map((dim) => {
+                if (filterDims.some((fd) => fd.name === dim.name)) {
+                  if (dim.selectedValues.length !== 1) {
+                    const newSelected =
+                      dim.selectedValues.length > 0
+                        ? [dim.selectedValues[0]]
+                        : [dim.allValues[0]];
+                    return { ...dim, selectedValues: newSelected };
+                  }
+                }
+                return dim;
+              });
+              setDimensions(updatedDims);
               setStep("review-generate");
             }}
           >
@@ -392,12 +409,42 @@ export function userInterface(
         </div>
       )}
 
-      {step === "review-generate" && (
-        <div>
-          <button onClick={handleGoBack}>Tillbaka</button>
-          <button onClick={handleGenerateChart}>Generera diagram</button>
+{step === "review-generate" && (
+  <div>
+    <h3>Filter</h3>
+    {dimensions
+      .filter(
+        (dim) =>
+          !xAxisDimensions.includes(dim.name) && dim.name !== seriesDimension
+      )
+      .map((dim) => (
+        <div key={dim.name}>
+          <label>{dim.name}</label>
+          <select
+            value={dim.selectedValues[0]}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setDimensions((prev) =>
+                prev.map((d) =>
+                  d.name === dim.name
+                    ? { ...d, selectedValues: [newValue] }
+                    : d
+                )
+              );
+            }}
+          >
+            {dim.allValues.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
+      ))}
+    <button onClick={handleGoBack}>Tillbaka</button>
+    <button onClick={handleGenerateChart}>Generera diagram</button>
+  </div>
+)}
 
       <div
         id="container"

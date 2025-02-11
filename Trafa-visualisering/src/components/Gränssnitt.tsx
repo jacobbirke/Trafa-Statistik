@@ -59,6 +59,12 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [step, chart]);
 
+  useEffect(() => {
+    if (step === "review-generate" && chart) {
+      handleGenerateChart();
+    }
+  }, [dimensions, step, chart]); 
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -379,9 +385,12 @@ const StatistikGränssnitt: React.FC = () => {
       categories: categories,
     });
 
-    chart.series.forEach((series: any) => series.remove(false));
+    while (chart.series.length > 0) {
+      chart.series[0].remove(false);
+    }
     seriesData.forEach((series) => chart.addSeries(series, false));
     chart.redraw();
+    
     chart.setTitle({ text: title || "Diagram" });
     chart.update({
       chart: {
