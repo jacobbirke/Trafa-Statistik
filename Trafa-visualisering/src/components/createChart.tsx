@@ -28,4 +28,5 @@ export function createChart(element: HTMLDivElement) {
     },
     series: [],
   });
+  
 }

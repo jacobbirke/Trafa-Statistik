@@ -56,6 +56,14 @@ const StatistikGränssnitt: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (step === "review-generate" && chart) {
+      chart.reflow();
+    }
+  }, [step, chart]);
+
+  
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
