@@ -39,22 +39,20 @@ const StatistikGränssnitt: React.FC = () => {
   const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("Diagram utan titel");
   const [jsonData, setJsonData] = useState<any[]>([]);
-  const [chartType, setChartType] = useState<
-    "column" | "line" | "combo" | "pie"
-  >("column");
+  const [chartType, setChartType] = useState<"column" | "line" | "combo" | "pie" | "stacked">("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!containerRef.current) return;
+    if (!chart) {
+      const newChart = createChart(containerRef.current);
+      setChart(newChart);
+    }
     if (step === "review-generate" && chart) {
       chart.reflow();
     }
-  }, [step, chart]);
 
-  useEffect(() => {
-    if (step === "review-generate" && chart) {
-      handleGenerateChart();
-    }
-  }, [dimensions, chart]);
+  }, [step, chart]);
 
   useEffect(() => {
     if (step !== "review-generate" && chart) {
@@ -94,20 +92,18 @@ const StatistikGränssnitt: React.FC = () => {
           }
         });
 
-        const dimensionsData: Dimension[] = dimensionHeaders.map(
-          (header, index) => {
-            const uniqueValues = new Set<string>();
-            parsedData.forEach((row, rowIndex) => {
-              if (rowIndex > 2) uniqueValues.add(row[index]?.toString() || "");
-            });
-            return {
-              name: header,
-              allValues: Array.from(uniqueValues),
-              selectedValues: [],
-              unit: units[index] || "",
-            };
-          }
-        );
+        const dimensionsData: Dimension[] = dimensionHeaders.map((header, index) => {
+          const uniqueValues = new Set<string>();
+          parsedData.forEach((row, rowIndex) => {
+            if (rowIndex > 2) uniqueValues.add(row[index]?.toString() || "");
+          });
+          return {
+            name: header,
+            allValues: Array.from(uniqueValues),
+            selectedValues: [],
+            unit: units[index] || "",
+          };
+        });
 
         const measuresData: Measure[] = measureHeaders.map((header, index) => ({
           name: header.replace("_M", ""),
@@ -149,10 +145,9 @@ const StatistikGränssnitt: React.FC = () => {
       alert("Diagramområdet saknas.");
       return;
     }
-
-    if (!chart) {
-      const newChart = createChart(containerRef.current);
-      setChart(newChart);
+    if (!currentChart) {
+      currentChart = createChart(containerRef.current);
+      setChart(currentChart);
     }
 
     if (chartType === "pie") {
@@ -171,17 +166,12 @@ const StatistikGränssnitt: React.FC = () => {
         return;
       }
       const measure = selectedMeasuresForPie[0];
-      const measureIndex =
-        dimensions.length + measures.findIndex((m) => m.name === measure.name);
-      const seriesDimIndex = dimensions.findIndex(
-        (dim) => dim.name === seriesDimension
-      );
+      const measureIndex = dimensions.length + measures.findIndex((m) => m.name === measure.name);
+      const seriesDimIndex = dimensions.findIndex((dim) => dim.name === seriesDimension);
 
       const filteredRows = jsonData.filter((row) =>
         dimensions.every((dimension) => {
-          const dimensionIndex = dimensions.findIndex(
-            (dim) => dim.name === dimension.name
-          );
+          const dimensionIndex = dimensions.findIndex((dim) => dim.name === dimension.name);
           if (dimensionIndex === -1) return true;
           const rowValue = row[dimensionIndex]?.toString();
           return dimension.selectedValues.includes(rowValue);
@@ -207,25 +197,103 @@ const StatistikGränssnitt: React.FC = () => {
       }));
 
       currentChart.update({
-        chart: {
-          type: "pie",
-        },
-        title: {
-          text: title || "Diagram",
-        },
+        chart: { type: "pie" },
+        title: { text: title || "Diagram" },
       });
-
       currentChart.xAxis[0].update({ visible: false });
       currentChart.yAxis[0].update({ visible: false });
-      if (currentChart.yAxis[1])
+      if (currentChart.yAxis[1]) {
         currentChart.yAxis[1].update({ visible: false });
-
-      currentChart.series.forEach((series: any) => series.remove(false));
+      }
+      while (currentChart.series.length > 0) {
+        currentChart.series[0].remove(false);
+      }
       currentChart.addSeries({
         type: "pie",
         name: measure.name,
         data: seriesData,
       });
+      currentChart.redraw();
+      return;
+    }
+
+    if (chartType === "stacked") {
+      if (xAxisDimensions.length !== 1) {
+        alert("För staplat diagram, välj exakt en dimension för x-axeln.");
+        return;
+      }
+      if (!seriesDimension) {
+        alert("För staplat diagram, välj exakt en dimension för serier.");
+        return;
+      }
+      const selectedMeasuresForStacked = measures.filter((m) => m.isSelected);
+      if (selectedMeasuresForStacked.length !== 1) {
+        alert("För staplat diagram, välj exakt ett mått.");
+        return;
+      }
+      const measure = selectedMeasuresForStacked[0];
+      const measureIndex = dimensions.length + measures.findIndex((m) => m.name === measure.name);
+      const xAxisIndex = dimensions.findIndex((dim) => dim.name === xAxisDimensions[0]);
+      const seriesDimIndex = dimensions.findIndex((dim) => dim.name === seriesDimension);
+
+      const filteredRows = jsonData.filter((row) =>
+        dimensions.every((dimension) => {
+          const dimensionIndex = dimensions.findIndex((dim) => dim.name === dimension.name);
+          if (dimensionIndex === -1) return true;
+          const rowValue = row[dimensionIndex]?.toString();
+          return dimension.selectedValues.includes(rowValue);
+        })
+      );
+      if (filteredRows.length === 0) {
+        alert("Inga rader matchar de valda filtren.");
+        return;
+      }
+
+      const categories = dimensions.find(dim => dim.name === xAxisDimensions[0])?.selectedValues;
+      if (!categories || categories.length === 0) {
+        alert("Ingen kategori vald för x-axeln.");
+        return;
+      }
+      const seriesCategories = dimensions.find(dim => dim.name === seriesDimension)?.selectedValues;
+      if (!seriesCategories || seriesCategories.length === 0) {
+        alert("Ingen serie vald för serier.");
+        return;
+      }
+      const seriesData: any[] = [];
+      seriesCategories.forEach((seriesValue, seriesIndex) => {
+        const data: number[] = [];
+        categories.forEach((category) => {
+          const total = filteredRows
+            .filter((row) => {
+              const cat = row[xAxisIndex]?.toString();
+              const seriesVal = row[seriesDimIndex]?.toString();
+              return cat === category && seriesVal === seriesValue;
+            })
+            .reduce((sum, row) => {
+              const value = parseFloat(row[measureIndex]);
+              return sum + (isNaN(value) ? 0 : value);
+            }, 0);
+          data.push(total);
+        });
+        seriesData.push({
+          name: seriesValue,
+          data,
+          type: "column",
+        });
+      });
+
+      currentChart.update({
+        chart: { type: "column" },
+        title: { text: title || "Diagram" },
+        plotOptions: {
+          column: { stacking: "normal" }
+        }
+      });
+      currentChart.xAxis[0].update({ categories });
+      while (currentChart.series.length > 0) {
+        currentChart.series[0].remove(false);
+      }
+      seriesData.forEach((serie) => currentChart.addSeries(serie, false));
       currentChart.redraw();
       return;
     }
@@ -254,7 +322,7 @@ const StatistikGränssnitt: React.FC = () => {
         dimensions.find((dim) => dim.name === dimName)?.selectedValues ?? []
     );
 
-    const filteredRows = jsonData.filter((row) =>
+    const filteredRowsGeneral = jsonData.filter((row) =>
       dimensions.every((dimension) => {
         const dimensionIndex = dimensions.findIndex(
           (dim) => dim.name === dimension.name
@@ -265,7 +333,7 @@ const StatistikGränssnitt: React.FC = () => {
       })
     );
 
-    if (filteredRows.length === 0) {
+    if (filteredRowsGeneral.length === 0) {
       alert("Inga rader matchar de valda filtren.");
       return;
     }
@@ -276,7 +344,6 @@ const StatistikGränssnitt: React.FC = () => {
         style: { color: "blue" },
       },
     });
-
     currentChart.yAxis[1].update({
       title: {
         text: lineMeasure ? lineMeasure : "",
@@ -299,7 +366,7 @@ const StatistikGränssnitt: React.FC = () => {
 
         return mainCategories.flatMap((mainCat) =>
           subCategories.map((subCat) => {
-            const categoryRows = filteredRows.filter(
+            const categoryRows = filteredRowsGeneral.filter(
               (row) =>
                 row[xAxisDimensionIndices[0]]?.toString() === mainCat &&
                 row[xAxisDimensionIndices[1]]?.toString() === subCat &&
@@ -315,7 +382,7 @@ const StatistikGränssnitt: React.FC = () => {
       }
 
       return selectedXAxisValues[0].map((category) => {
-        const categoryRows = filteredRows.filter(
+        const categoryRows = filteredRowsGeneral.filter(
           (row) =>
             row[xAxisDimensionIndices[0]]?.toString() === category &&
             (!seriesValue ||
@@ -378,26 +445,20 @@ const StatistikGränssnitt: React.FC = () => {
       });
     }
 
-    const categories =
+    const categoriesGeneral =
       xAxisDimensions.length === 2
         ? selectedXAxisValues[0].map((mainCategory) => ({
             name: mainCategory,
-            categories: selectedXAxisValues[1].map(
-              (subCategory) => subCategory
-            ),
+            categories: selectedXAxisValues[1].map((subCategory) => subCategory),
           }))
         : selectedXAxisValues[0];
 
-    currentChart.xAxis[0].update({
-      categories: categories,
-    });
-
+    currentChart.xAxis[0].update({ categories: categoriesGeneral });
     while (currentChart.series.length > 0) {
       currentChart.series[0].remove(false);
     }
     seriesData.forEach((series) => currentChart.addSeries(series, false));
     currentChart.redraw();
-
     currentChart.setTitle({ text: title || "Diagram" });
     currentChart.update({
       chart: {
