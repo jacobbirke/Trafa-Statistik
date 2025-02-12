@@ -43,6 +43,7 @@ const StatistikGränssnitt: React.FC = () => {
     "column" | "line" | "combo" | "pie"
   >("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const prevStepRef = useRef<string>(step); // to keep track of previous step
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -61,9 +62,14 @@ const StatistikGränssnitt: React.FC = () => {
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
+      if (prevStepRef.current !== "review-generate") {
+        prevStepRef.current = step;
+        return;
+      }
       handleGenerateChart();
     }
-  }, [dimensions, step, chart]); 
+    prevStepRef.current = step;
+  }, [dimensions, step, chart]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -390,7 +396,7 @@ const StatistikGränssnitt: React.FC = () => {
     }
     seriesData.forEach((series) => chart.addSeries(series, false));
     chart.redraw();
-    
+
     chart.setTitle({ text: title || "Diagram" });
     chart.update({
       chart: {
