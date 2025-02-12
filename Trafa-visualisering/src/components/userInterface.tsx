@@ -272,7 +272,7 @@ export function userInterface(
             </div>
           ) : (
             <div>
-              <h4>Välj kategori för x-axeln (Dimension)</h4>
+              <h4>Välj kategorier för x-axeln (Dimensioner)</h4>
               {dimensions.map((dim) => (
                 <div key={dim.name}>
                   <label>
@@ -300,7 +300,13 @@ export function userInterface(
                         }
                       }}
                     />
-                    {dim.name}
+                    {dim.name}{" "}
+                    {xAxisDimensions[0] === dim.name && (
+                      <strong>- Huvudkategori</strong>
+                    )}
+                    {xAxisDimensions[1] === dim.name && (
+                      <strong>- Underkategori</strong>
+                    )}
                   </label>
                 </div>
               ))}
