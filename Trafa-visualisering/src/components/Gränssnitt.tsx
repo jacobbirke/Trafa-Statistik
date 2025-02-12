@@ -43,16 +43,6 @@ const StatistikGränssnitt: React.FC = () => {
     "column" | "line" | "combo" | "pie"
   >("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const prevStepRef = useRef<string>(step); // to keep track of previous step
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const newChart = createChart(containerRef.current);
-    setChart(newChart);
-    return () => {
-      newChart.destroy();
-    };
-  }, []);
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -62,14 +52,16 @@ const StatistikGränssnitt: React.FC = () => {
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
-      if (prevStepRef.current !== "review-generate") {
-        prevStepRef.current = step;
-        return;
-      }
       handleGenerateChart();
     }
-    prevStepRef.current = step;
-  }, [dimensions, step, chart]);
+  }, [dimensions, chart]);
+
+  useEffect(() => {
+    if (step !== "review-generate" && chart) {
+      chart.destroy();
+      setChart(null);
+    }
+  }, [step]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -140,19 +132,27 @@ const StatistikGränssnitt: React.FC = () => {
 
   const handleGoBack = () => {
     if (chart) {
-      chart.series.forEach((series: any) => series.remove(false));
-      chart.setTitle({ text: "" });
-      chart.yAxis[0].update({ title: { text: "" } });
-      chart.yAxis[1].update({ title: { text: "" } });
-      chart.redraw();
+      chart.destroy();
+      setChart(null);
     }
     setStep("chart-configuration");
   };
 
   const handleGenerateChart = () => {
-    if (!chart || !jsonData) {
-      alert("Chart or data is missing.");
+    if (!jsonData) {
+      alert("Data is missing.");
       return;
+    }
+
+    let currentChart = chart;
+    if (!containerRef.current) {
+      alert("Diagramområdet saknas.");
+      return;
+    }
+
+    if (!chart) {
+      const newChart = createChart(containerRef.current);
+      setChart(newChart);
     }
 
     if (chartType === "pie") {
@@ -206,7 +206,7 @@ const StatistikGränssnitt: React.FC = () => {
         y: categorySums[category] || 0,
       }));
 
-      chart.update({
+      currentChart.update({
         chart: {
           type: "pie",
         },
@@ -215,17 +215,18 @@ const StatistikGränssnitt: React.FC = () => {
         },
       });
 
-      chart.xAxis[0].update({ visible: false });
-      chart.yAxis[0].update({ visible: false });
-      if (chart.yAxis[1]) chart.yAxis[1].update({ visible: false });
+      currentChart.xAxis[0].update({ visible: false });
+      currentChart.yAxis[0].update({ visible: false });
+      if (currentChart.yAxis[1])
+        currentChart.yAxis[1].update({ visible: false });
 
-      chart.series.forEach((series: any) => series.remove(false));
-      chart.addSeries({
+      currentChart.series.forEach((series: any) => series.remove(false));
+      currentChart.addSeries({
         type: "pie",
         name: measure.name,
         data: seriesData,
       });
-      chart.redraw();
+      currentChart.redraw();
       return;
     }
 
@@ -269,14 +270,14 @@ const StatistikGränssnitt: React.FC = () => {
       return;
     }
 
-    chart.yAxis[0].update({
+    currentChart.yAxis[0].update({
       title: {
         text: barMeasure ? barMeasure : "",
         style: { color: "blue" },
       },
     });
 
-    chart.yAxis[1].update({
+    currentChart.yAxis[1].update({
       title: {
         text: lineMeasure ? lineMeasure : "",
         style: { color: "red" },
@@ -387,18 +388,18 @@ const StatistikGränssnitt: React.FC = () => {
           }))
         : selectedXAxisValues[0];
 
-    chart.xAxis[0].update({
+    currentChart.xAxis[0].update({
       categories: categories,
     });
 
-    while (chart.series.length > 0) {
-      chart.series[0].remove(false);
+    while (currentChart.series.length > 0) {
+      currentChart.series[0].remove(false);
     }
-    seriesData.forEach((series) => chart.addSeries(series, false));
-    chart.redraw();
+    seriesData.forEach((series) => currentChart.addSeries(series, false));
+    currentChart.redraw();
 
-    chart.setTitle({ text: title || "Diagram" });
-    chart.update({
+    currentChart.setTitle({ text: title || "Diagram" });
+    currentChart.update({
       chart: {
         type:
           xAxisDimensions.length === 2
@@ -406,6 +407,7 @@ const StatistikGränssnitt: React.FC = () => {
             : getSeriesType(selectedMeasuresForOther[0]),
       },
     });
+    currentChart.redraw();
   };
 
   return userInterface(

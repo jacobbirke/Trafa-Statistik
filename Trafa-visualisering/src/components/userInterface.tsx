@@ -386,7 +386,8 @@ export function userInterface(
               }
               const filterDims = dimensions.filter(
                 (dim) =>
-                  !xAxisDimensions.includes(dim.name) && dim.name !== seriesDimension
+                  !xAxisDimensions.includes(dim.name) &&
+                  dim.name !== seriesDimension
               );
               const updatedDims = dimensions.map((dim) => {
                 if (filterDims.some((fd) => fd.name === dim.name)) {
@@ -409,48 +410,48 @@ export function userInterface(
         </div>
       )}
 
-{step === "review-generate" && (
-  <div>
-    <h3>Filter</h3>
-    {dimensions
-      .filter(
-        (dim) =>
-          !xAxisDimensions.includes(dim.name) && dim.name !== seriesDimension
-      )
-      .map((dim) => (
-        <div key={dim.name}>
-          <label>{dim.name}</label>
-          <select
-            value={dim.selectedValues[0]}
-            onChange={(e) => {
-              const newValue = e.target.value;
-              setDimensions((prev) =>
-                prev.map((d) =>
-                  d.name === dim.name
-                    ? { ...d, selectedValues: [newValue] }
-                    : d
-                )
-              );
-            }}
-          >
-            {dim.allValues.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
+      {step === "review-generate" && (
+        <div>
+          <h3>Filter</h3>
+          {dimensions
+            .filter(
+              (dim) =>
+                !xAxisDimensions.includes(dim.name) &&
+                dim.name !== seriesDimension
+            )
+            .map((dim) => (
+              <div key={dim.name}>
+                <label>{dim.name}</label>
+                <select
+                  value={dim.selectedValues[0]}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setDimensions((prev) =>
+                      prev.map((d) =>
+                        d.name === dim.name
+                          ? { ...d, selectedValues: [newValue] }
+                          : d
+                      )
+                    );
+                  }}
+                >
+                  {dim.allValues.map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
             ))}
-          </select>
+          <button onClick={handleGoBack}>Tillbaka</button>
+          <button onClick={handleGenerateChart}>Generera diagram</button>
+          <div
+            id="container"
+            ref={containerRef}
+            style={{ width: "100%", height: "600px" }}
+          />
         </div>
-      ))}
-    <button onClick={handleGoBack}>Tillbaka</button>
-    <button onClick={handleGenerateChart}>Generera diagram</button>
-  </div>
-)}
-
-      <div
-        id="container"
-        ref={containerRef}
-        style={{ width: "100%", height: "600px" }}
-      />
+      )}
     </div>
   );
 }
