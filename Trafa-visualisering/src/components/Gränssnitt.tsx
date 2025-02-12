@@ -260,7 +260,7 @@ const StatistikGränssnitt: React.FC = () => {
         return;
       }
       const seriesData: any[] = [];
-      seriesCategories.forEach((seriesValue, seriesIndex) => {
+      seriesCategories.forEach((seriesValue) => {
         const data: number[] = [];
         categories.forEach((category) => {
           const total = filteredRows
