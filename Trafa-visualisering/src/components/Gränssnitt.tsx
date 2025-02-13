@@ -39,20 +39,23 @@ const StatistikGränssnitt: React.FC = () => {
   const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("Diagram utan titel");
   const [jsonData, setJsonData] = useState<any[]>([]);
-  const [chartType, setChartType] = useState<"column" | "line" | "combo" | "pie" | "stacked">("column");
+  const [chartType, setChartType] = useState<
+    "column" | "line" | "combo" | "pie" | "stacked"
+  >("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    if (!chart) {
-      const newChart = createChart(containerRef.current);
-      setChart(newChart);
-    }
     if (step === "review-generate" && chart) {
       chart.reflow();
     }
-
   }, [step, chart]);
+
+  //Upddaterar diagramet när filtervärde ändras
+  useEffect(() => {
+    if (step === "review-generate" && chart) {
+      handleGenerateChart();
+    }
+  }, [dimensions, chart]);
 
   useEffect(() => {
     if (step !== "review-generate" && chart) {
@@ -92,18 +95,20 @@ const StatistikGränssnitt: React.FC = () => {
           }
         });
 
-        const dimensionsData: Dimension[] = dimensionHeaders.map((header, index) => {
-          const uniqueValues = new Set<string>();
-          parsedData.forEach((row, rowIndex) => {
-            if (rowIndex > 2) uniqueValues.add(row[index]?.toString() || "");
-          });
-          return {
-            name: header,
-            allValues: Array.from(uniqueValues),
-            selectedValues: [],
-            unit: units[index] || "",
-          };
-        });
+        const dimensionsData: Dimension[] = dimensionHeaders.map(
+          (header, index) => {
+            const uniqueValues = new Set<string>();
+            parsedData.forEach((row, rowIndex) => {
+              if (rowIndex > 2) uniqueValues.add(row[index]?.toString() || "");
+            });
+            return {
+              name: header,
+              allValues: Array.from(uniqueValues),
+              selectedValues: [],
+              unit: units[index] || "",
+            };
+          }
+        );
 
         const measuresData: Measure[] = measureHeaders.map((header, index) => ({
           name: header.replace("_M", ""),
@@ -166,12 +171,17 @@ const StatistikGränssnitt: React.FC = () => {
         return;
       }
       const measure = selectedMeasuresForPie[0];
-      const measureIndex = dimensions.length + measures.findIndex((m) => m.name === measure.name);
-      const seriesDimIndex = dimensions.findIndex((dim) => dim.name === seriesDimension);
+      const measureIndex =
+        dimensions.length + measures.findIndex((m) => m.name === measure.name);
+      const seriesDimIndex = dimensions.findIndex(
+        (dim) => dim.name === seriesDimension
+      );
 
       const filteredRows = jsonData.filter((row) =>
         dimensions.every((dimension) => {
-          const dimensionIndex = dimensions.findIndex((dim) => dim.name === dimension.name);
+          const dimensionIndex = dimensions.findIndex(
+            (dim) => dim.name === dimension.name
+          );
           if (dimensionIndex === -1) return true;
           const rowValue = row[dimensionIndex]?.toString();
           return dimension.selectedValues.includes(rowValue);
@@ -232,13 +242,20 @@ const StatistikGränssnitt: React.FC = () => {
         return;
       }
       const measure = selectedMeasuresForStacked[0];
-      const measureIndex = dimensions.length + measures.findIndex((m) => m.name === measure.name);
-      const xAxisIndex = dimensions.findIndex((dim) => dim.name === xAxisDimensions[0]);
-      const seriesDimIndex = dimensions.findIndex((dim) => dim.name === seriesDimension);
+      const measureIndex =
+        dimensions.length + measures.findIndex((m) => m.name === measure.name);
+      const xAxisIndex = dimensions.findIndex(
+        (dim) => dim.name === xAxisDimensions[0]
+      );
+      const seriesDimIndex = dimensions.findIndex(
+        (dim) => dim.name === seriesDimension
+      );
 
       const filteredRows = jsonData.filter((row) =>
         dimensions.every((dimension) => {
-          const dimensionIndex = dimensions.findIndex((dim) => dim.name === dimension.name);
+          const dimensionIndex = dimensions.findIndex(
+            (dim) => dim.name === dimension.name
+          );
           if (dimensionIndex === -1) return true;
           const rowValue = row[dimensionIndex]?.toString();
           return dimension.selectedValues.includes(rowValue);
@@ -249,12 +266,16 @@ const StatistikGränssnitt: React.FC = () => {
         return;
       }
 
-      const categories = dimensions.find(dim => dim.name === xAxisDimensions[0])?.selectedValues;
+      const categories = dimensions.find(
+        (dim) => dim.name === xAxisDimensions[0]
+      )?.selectedValues;
       if (!categories || categories.length === 0) {
         alert("Ingen kategori vald för x-axeln.");
         return;
       }
-      const seriesCategories = dimensions.find(dim => dim.name === seriesDimension)?.selectedValues;
+      const seriesCategories = dimensions.find(
+        (dim) => dim.name === seriesDimension
+      )?.selectedValues;
       if (!seriesCategories || seriesCategories.length === 0) {
         alert("Ingen serie vald för serier.");
         return;
@@ -286,8 +307,8 @@ const StatistikGränssnitt: React.FC = () => {
         chart: { type: "column" },
         title: { text: title || "Diagram" },
         plotOptions: {
-          column: { stacking: "normal" }
-        }
+          column: { stacking: "normal" },
+        },
       });
       currentChart.xAxis[0].update({ categories });
       while (currentChart.series.length > 0) {
@@ -449,7 +470,9 @@ const StatistikGränssnitt: React.FC = () => {
       xAxisDimensions.length === 2
         ? selectedXAxisValues[0].map((mainCategory) => ({
             name: mainCategory,
-            categories: selectedXAxisValues[1].map((subCategory) => subCategory),
+            categories: selectedXAxisValues[1].map(
+              (subCategory) => subCategory
+            ),
           }))
         : selectedXAxisValues[0];
 
