@@ -22,9 +22,9 @@ export function userInterface(
   setMeasures: React.Dispatch<React.SetStateAction<Measure[]>>,
   xAxisDimensions: string[],
   setXAxisDimensions: React.Dispatch<React.SetStateAction<string[]>>,
-  chartType: "column" | "line" | "combo" | "pie",
+  chartType: "column" | "line" | "combo" | "pie" | "stacked",
   setChartType: React.Dispatch<
-    React.SetStateAction<"column" | "line" | "combo" | "pie">
+    React.SetStateAction<"column" | "line" | "combo" | "pie" | "stacked">
   >,
   barMeasure: string | null,
   setBarMeasure: React.Dispatch<React.SetStateAction<string | null>>,
@@ -82,6 +82,16 @@ export function userInterface(
               onChange={() => setChartType("combo")}
             />
             Kombinerat (Stapel & Linje)
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="diagramType"
+              value="stacked"
+              checked={chartType === "stacked"}
+              onChange={() => setChartType("stacked")}
+            />
+            Staplad kolumn
           </label>
           <label>
             <input
@@ -197,8 +207,11 @@ export function userInterface(
             <p>För pajdiagram, välj exakt ett mått.</p>
           ) : (
             <p>
-              För {chartType === "line" ? "linjediagram" : "stapeldiagram"},
-              välj exakt ett mått.
+              För{" "}
+              {chartType === "line" || chartType === "stacked"
+                ? "linjediagram"
+                : "stapeldiagram"}
+              , välj exakt ett mått.
             </p>
           )}
           <button onClick={handleSelectAllMeasures}>Markera alla</button>
@@ -239,11 +252,12 @@ export function userInterface(
                 }
               } else {
                 if (selectedMs.length !== 1) {
-                  alert("För stapel- eller linjediagram, välj exakt ett mått.");
+                  alert(
+                    "För stapel-, linje- eller staplat diagram, välj exakt ett mått."
+                  );
                   return;
                 }
               }
-
               setStep("chart-configuration");
             }}
           >
@@ -272,7 +286,10 @@ export function userInterface(
             </div>
           ) : (
             <div>
-              <h4>Välj kategorier för x-axeln (Dimensioner)</h4>
+              <h4>
+                Välj kategori{chartType === "stacked" ? "" : "er"} för x-axeln
+                (Dimension)
+              </h4>
               {dimensions.map((dim) => (
                 <div key={dim.name}>
                   <label>
@@ -282,12 +299,13 @@ export function userInterface(
                       value={dim.name}
                       checked={xAxisDimensions.includes(dim.name)}
                       onChange={() => {
+                        const maxAllowed: number =
+                          chartType === "stacked" ? 1 : 2;
                         if (xAxisDimensions.includes(dim.name)) {
                           setXAxisDimensions((prev) =>
                             prev.filter((name) => name !== dim.name)
                           );
                         } else {
-                          const maxAllowed: number = 2;
                           if (xAxisDimensions.length < maxAllowed) {
                             setXAxisDimensions((prev) => [...prev, dim.name]);
                           } else {
@@ -301,9 +319,10 @@ export function userInterface(
                       }}
                     />
                     {dim.name}{" "}
-                    {xAxisDimensions[0] === dim.name && (
-                      <strong>- Huvudkategori</strong>
-                    )}
+                    {xAxisDimensions[0] === dim.name &&
+                      chartType !== "stacked" && (
+                        <strong>- Huvudkategori</strong>
+                      )}
                     {xAxisDimensions[1] === dim.name && (
                       <strong>- Underkategori</strong>
                     )}
@@ -368,11 +387,17 @@ export function userInterface(
               </div>
             )}
           {measures.filter((m) => m.isSelected).length === 1 &&
-            (chartType === "column" || chartType === "line") && (
+            (chartType === "column" ||
+              chartType === "line" ||
+              chartType === "stacked") && (
               <div>
                 <h4>Valt diagramtyp:</h4>
                 <p>
-                  {chartType === "column" ? "Stapeldiagram" : "Linjediagram"}
+                  {chartType === "column"
+                    ? "Stapeldiagram"
+                    : chartType === "line"
+                    ? "Linjediagram"
+                    : "Staplat diagram"}
                 </p>
               </div>
             )}
@@ -386,6 +411,19 @@ export function userInterface(
                 if (!barMeasure || !lineMeasure) {
                   alert(
                     "Välj mått för både stapel- och linjediagram när kombinerat diagram är valt."
+                  );
+                  return;
+                }
+              } else if (chartType === "stacked") {
+                if (xAxisDimensions.length !== 1) {
+                  alert(
+                    "För staplat diagram, välj exakt en dimension för x-axeln."
+                  );
+                  return;
+                }
+                if (!seriesDimension) {
+                  alert(
+                    "För staplat diagram, välj exakt en dimension för serier."
                   );
                   return;
                 }
