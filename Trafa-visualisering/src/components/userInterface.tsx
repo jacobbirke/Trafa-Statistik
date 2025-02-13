@@ -36,6 +36,43 @@ export function userInterface(
   handleGoBack: () => void,
   containerRef: React.MutableRefObject<HTMLDivElement | null>
 ): React.ReactNode {
+  const getDimensionRole = (
+    dimName: string
+  ): "main" | "sub" | "series" | "filter" => {
+    if (xAxisDimensions[0] === dimName) return "main";
+    if (xAxisDimensions[1] === dimName) return "sub";
+    if (seriesDimension === dimName) return "series";
+    return "filter";
+  };
+  const handleDimensionRoleChange = (
+    dimName: string,
+    newRole: "main" | "sub" | "series" | "filter"
+  ) => {
+    setDimensions((prev) => {
+      let updatedXAxis = [...xAxisDimensions];
+      updatedXAxis = updatedXAxis.filter((name) => name !== dimName);
+      let updatedSeriesDim =
+        seriesDimension === dimName ? null : seriesDimension;
+
+      if (newRole === "main") {
+        updatedXAxis[0] = dimName;
+        if (updatedXAxis[1] === dimName) updatedXAxis[1] = "";
+      } else if (newRole === "sub") {
+        if (!updatedXAxis[0]) {
+          updatedXAxis[0] = "";
+        }
+        updatedXAxis[1] = dimName;
+      } else if (newRole === "series") {
+        updatedSeriesDim = dimName;
+      }
+      updatedXAxis = updatedXAxis.filter(Boolean);
+
+      setXAxisDimensions(updatedXAxis);
+      setSeriesDimension(updatedSeriesDim);
+
+      return prev;
+    });
+  };
   return (
     <div>
       {step === "input-file" && (
@@ -287,8 +324,7 @@ export function userInterface(
           ) : (
             <div>
               <h4>
-                Välj kategori{chartType === "stacked" ? "" : "er"} för x-axeln
-                (Dimension)
+                Välj kategori{chartType === "stacked" ? "" : "er"} för x-axeln {chartType === "stacked" ? "" : "(första valet blir huvudkategori, om du väljer en till så blir den underkategori)"}
               </h4>
               {dimensions.map((dim) => (
                 <div key={dim.name}>
@@ -456,6 +492,143 @@ export function userInterface(
 
       {step === "review-generate" && (
         <div>
+          <div
+            style={{
+              border: "2px solid",
+              padding: "1rem",
+            }}
+          >
+            <h3>Snabbkonfiguration</h3>
+            <h4>Dimensioner & Roller</h4>
+            {dimensions.map((dim) => {
+              const currentRole = getDimensionRole(dim.name);
+              return (
+                <div key={dim.name}>
+                  <strong>{dim.name}</strong>{" "}
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "main"}
+                        onChange={() =>
+                          handleDimensionRoleChange(dim.name, "main")
+                        }
+                      />
+                      Huvudkategori
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "sub"}
+                        onChange={() =>
+                          handleDimensionRoleChange(dim.name, "sub")
+                        }
+                      />
+                      Underkategori
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "series"}
+                        onChange={() =>
+                          handleDimensionRoleChange(dim.name, "series")
+                        }
+                      />
+                      Serie
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "filter"}
+                        onChange={() =>
+                          handleDimensionRoleChange(dim.name, "filter")
+                        }
+                      />
+                      Filter
+                    </label>
+                  </div>
+                </div>
+              );
+            })}
+            <h4>Filtrera Värden</h4>
+            {dimensions.map((dim) => (
+              <div key={dim.name}>
+                <strong>{dim.name}</strong>
+                <div>
+                  {dim.allValues.map((value) => (
+                    <label key={value}>
+                      <input
+                        type="checkbox"
+                        checked={dim.selectedValues.includes(value)}
+                        onChange={(e) => {
+                          setDimensions((prev) =>
+                            prev.map((d) => {
+                              if (d.name !== dim.name) return d;
+                              if (e.target.checked) {
+                                return {
+                                  ...d,
+                                  selectedValues: [...d.selectedValues, value],
+                                };
+                              } else {
+                                return {
+                                  ...d,
+                                  selectedValues: d.selectedValues.filter(
+                                    (v) => v !== value
+                                  ),
+                                };
+                              }
+                            })
+                          );
+                        }}
+                      />
+                      {value}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <h4>Mått</h4>
+            <div>
+              <button onClick={handleSelectAllMeasures}>
+                Markera alla mått
+              </button>{" "}
+              <button onClick={handleDeselectAllMeasures}>
+                Ta bort alla mått
+              </button>
+            </div>
+            {measures.map((measure) => (
+              <div key={measure.name}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={measure.isSelected}
+                    onChange={(e) =>
+                      setMeasures((prev) =>
+                        prev.map((m) =>
+                          m.name === measure.name
+                            ? { ...m, isSelected: e.target.checked }
+                            : m
+                        )
+                      )
+                    }
+                  />
+                  {measure.name} {measure.unit && `(${measure.unit})`}
+                </label>
+              </div>
+            ))}{" "}
+            <br />
+            <button onClick={handleGoBack}>Tillbaka</button>
+            <button onClick={() => setStep("select-diagram-type")}>
+              Börja om
+            </button>
+            <br />
+            <button onClick={handleGenerateChart}>Generera diagram</button>
+          </div>
+
           <h3>Filter</h3>
           {dimensions
             .filter(
@@ -487,8 +660,7 @@ export function userInterface(
                 </select>
               </div>
             ))}
-          <button onClick={handleGoBack}>Tillbaka</button>
-          <button onClick={handleGenerateChart}>Generera diagram</button>
+
           <div
             id="container"
             ref={containerRef}
