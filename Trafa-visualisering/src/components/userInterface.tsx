@@ -563,7 +563,9 @@ export function userInterface(
                 <strong>{dim.name}</strong>
                 <div>
                   {dim.allValues.map((value) => (
-                    <label key={value}>
+                    <label
+                      key={value}
+                    >
                       <input
                         type="checkbox"
                         checked={dim.selectedValues.includes(value)}
@@ -594,6 +596,7 @@ export function userInterface(
                 </div>
               </div>
             ))}
+
             <h4>Mått</h4>
             {measures.map((measure) => (
               <div key={measure.name}>
@@ -712,6 +715,7 @@ export function userInterface(
                           : d
                       )
                     );
+                    handleGenerateChart();
                   }}
                 >
                   {dim.allValues.map((value) => (
