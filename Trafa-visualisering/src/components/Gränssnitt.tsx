@@ -362,13 +362,13 @@ const StatistikGränssnitt: React.FC = () => {
     currentChart.yAxis[0].update({
       title: {
         text: barMeasure ? barMeasure : "",
-        style: { color: "blue" },
+        style: { color: "DodgerBlue" },
       },
     });
     currentChart.yAxis[1].update({
       title: {
         text: lineMeasure ? lineMeasure : "",
-        style: { color: "red" },
+        style: { color: "purple" },
       },
       opposite: true,
     });

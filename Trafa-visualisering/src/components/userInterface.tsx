@@ -324,7 +324,10 @@ export function userInterface(
           ) : (
             <div>
               <h4>
-                Välj kategori{chartType === "stacked" ? "" : "er"} för x-axeln {chartType === "stacked" ? "" : "(första valet blir huvudkategori, om du väljer en till så blir den underkategori)"}
+                Välj kategori{chartType === "stacked" ? "" : "er"} för x-axeln{" "}
+                {chartType === "stacked"
+                  ? ""
+                  : "(första valet blir huvudkategori, om du väljer en till så blir den underkategori)"}
               </h4>
               {dimensions.map((dim) => (
                 <div key={dim.name}>
@@ -592,34 +595,93 @@ export function userInterface(
               </div>
             ))}
             <h4>Mått</h4>
-            <div>
-              <button onClick={handleSelectAllMeasures}>
-                Markera alla mått
-              </button>{" "}
-              <button onClick={handleDeselectAllMeasures}>
-                Ta bort alla mått
-              </button>
-            </div>
             {measures.map((measure) => (
               <div key={measure.name}>
                 <label>
                   <input
                     type="checkbox"
                     checked={measure.isSelected}
-                    onChange={(e) =>
-                      setMeasures((prev) =>
-                        prev.map((m) =>
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setMeasures((prevMeasures) => {
+                        const newMeasures = prevMeasures.map((m) =>
                           m.name === measure.name
-                            ? { ...m, isSelected: e.target.checked }
+                            ? { ...m, isSelected: isChecked }
                             : m
-                        )
-                      )
-                    }
+                        );
+
+                        const selected = newMeasures.filter(
+                          (m) => m.isSelected
+                        );
+
+                        if (chartType === "combo") {
+                          if (selected.length > 2) {
+                            alert(
+                              "För kombinerat diagram, välj exakt två mått."
+                            );
+                            return prevMeasures;
+                          }
+                        } else if (chartType === "pie") {
+                          if (selected.length > 1) {
+                            alert("För pajdiagram, välj exakt ett mått.");
+                            return prevMeasures;
+                          }
+                        } else {
+                          if (selected.length > 1) {
+                            alert(
+                              "För stapel-, linje- eller staplat diagram, välj exakt ett mått."
+                            );
+                            return prevMeasures;
+                          }
+                        }
+                        return newMeasures;
+                      });
+                    }}
                   />
                   {measure.name} {measure.unit && `(${measure.unit})`}
                 </label>
               </div>
-            ))}{" "}
+            ))}
+
+            {chartType === "combo" && (
+              <div>
+                <h4>Välj Mått för Stapeldiagram</h4>
+                {measures
+                  .filter((m) => m.isSelected)
+                  .map((measure) => (
+                    <div key={measure.name}>
+                      <label>
+                        <input
+                          type="radio"
+                          name="barMeasure"
+                          value={measure.name}
+                          checked={barMeasure === measure.name}
+                          onChange={() => setBarMeasure(measure.name)}
+                        />
+                        {measure.name}
+                      </label>
+                    </div>
+                  ))}
+                <h4>Välj Mått för Linjediagram</h4>
+                {measures
+                  .filter((m) => m.isSelected)
+                  .map((measure) => (
+                    <div key={measure.name}>
+                      <label>
+                        <input
+                          type="radio"
+                          name="lineMeasure"
+                          value={measure.name}
+                          checked={lineMeasure === measure.name}
+                          onChange={() => setLineMeasure(measure.name)}
+                        />
+                        {measure.name}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            )}
+
             <br />
             <button onClick={handleGoBack}>Tillbaka</button>
             <button onClick={() => setStep("select-diagram-type")}>
