@@ -50,12 +50,12 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [step, chart]);
 
-  //Upddaterar diagramet när filtervärde ändras
-  useEffect(() => {
-    if (step === "review-generate" && chart) {
-      handleGenerateChart();
-    }
-  }, [dimensions, chart]);
+  // //Upddaterar diagramet när filtervärde ändras
+  // useEffect(() => {
+  //   if (step === "review-generate" && chart) {
+  //     handleGenerateChart();
+  //   }
+  // }, [dimensions, chart]);
 
   useEffect(() => {
     if (step !== "review-generate" && chart) {
