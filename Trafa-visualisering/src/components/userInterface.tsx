@@ -374,7 +374,7 @@ export function userInterface(
           )}
           {chartType !== "pie" && (
             <div>
-              <h4>Välj Dimension för Serier</h4>
+              <h4>Välj dimension för serie</h4>
               <select
                 value={seriesDimension || ""}
                 onChange={(e) => setSeriesDimension(e.target.value || null)}
@@ -464,7 +464,7 @@ export function userInterface(
                 }
                 if (!seriesDimension) {
                   alert(
-                    "För staplat diagram, välj exakt en dimension för serier."
+                    "För staplat diagram, välj exakt en dimension för serie."
                   );
                   return;
                 }
