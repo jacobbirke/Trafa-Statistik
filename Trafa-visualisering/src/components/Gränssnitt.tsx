@@ -169,7 +169,7 @@ const StatistikGränssnitt: React.FC = () => {
           options3d: {
             enabled: true,
             alpha: 5,
-            beta: 15,
+            beta: 10,
             depth: 50,
             viewDistance: 25,
           },
