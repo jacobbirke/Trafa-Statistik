@@ -34,7 +34,9 @@ export function userInterface(
   setSeriesDimension: React.Dispatch<React.SetStateAction<string | null>>,
   handleGenerateChart: () => void,
   handleGoBack: () => void,
-  containerRef: React.MutableRefObject<HTMLDivElement | null>
+  containerRef: React.MutableRefObject<HTMLDivElement | null>,
+  is3D: boolean,
+  setIs3D: React.Dispatch<React.SetStateAction<boolean>>
 ): React.ReactNode {
   const getDimensionRole = (
     dimName: string
@@ -563,9 +565,7 @@ export function userInterface(
                 <strong>{dim.name}</strong>
                 <div>
                   {dim.allValues.map((value) => (
-                    <label
-                      key={value}
-                    >
+                    <label key={value}>
                       <input
                         type="checkbox"
                         checked={dim.selectedValues.includes(value)}
@@ -726,6 +726,22 @@ export function userInterface(
                 </select>
               </div>
             ))}
+
+          {(chartType === "column" ||
+            chartType === "pie" ||
+            chartType === "combo" ||
+            chartType === "stacked") && (
+            <div style={{ marginBottom: "1rem" }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={is3D}
+                  onChange={(e) => setIs3D(e.target.checked)}
+                />
+                Visa i 3D
+              </label>
+            </div>
+          )}
 
           <div
             id="container"
