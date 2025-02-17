@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
 import HighchartsGroupedCategories from "highcharts-grouped-categories";
+import Highcharts3D from "highcharts/highcharts-3d";
 import { createChart } from "./createChart";
 import { userInterface } from "./userInterface";
 import { selectAllOptions } from "./selectAllOptions";
 HighchartsGroupedCategories(Highcharts);
+Highcharts3D(Highcharts);
 
 export interface Dimension {
   name: string;
@@ -43,6 +45,7 @@ const StatistikGränssnitt: React.FC = () => {
     "column" | "line" | "combo" | "pie" | "stacked"
   >("column");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [is3D, setIs3D] = useState<boolean>(false);
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -63,6 +66,12 @@ const StatistikGränssnitt: React.FC = () => {
       setChart(null);
     }
   }, [step]);
+
+  useEffect(() => {
+    if (step === "review-generate" && chart) {
+      handleGenerateChart();
+    }
+  }, [is3D]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -155,6 +164,18 @@ const StatistikGränssnitt: React.FC = () => {
       setChart(currentChart);
     }
 
+    const threeDOptions = is3D
+      ? {
+          options3d: {
+            enabled: true,
+            alpha: 5,
+            beta: 10,
+            depth: 50,
+            viewDistance: 25,
+          },
+        }
+      : { options3d: { enabled: false } };
+
     if (chartType === "pie") {
       if (!seriesDimension) {
         alert("Välj en dimension för serien för pajdiagram.");
@@ -206,9 +227,35 @@ const StatistikGränssnitt: React.FC = () => {
         y: categorySums[category] || 0,
       }));
 
+      const pieThreeDOptions = is3D
+        ? {
+            options3d: {
+              enabled: true,
+              alpha: 40,
+              beta: 0,
+              depth: 50,
+              viewDistance: 25,
+            },
+          }
+        : { options3d: { enabled: false } };
+
       currentChart.update({
-        chart: { type: "pie" },
+        chart: {
+          type: "pie",
+          ...pieThreeDOptions,
+        },
         title: { text: title || "Diagram" },
+        plotOptions: {
+          pie: {
+            depth: is3D ? 45 : 0,
+            allowPointSelect: true,
+            cursor: "pointer",
+            dataLabels: {
+              enabled: true,
+              format: "{point.name}",
+            },
+          },
+        },
       });
       currentChart.xAxis[0].update({ visible: false });
       currentChart.yAxis[0].update({ visible: false });
@@ -304,10 +351,19 @@ const StatistikGränssnitt: React.FC = () => {
       });
 
       currentChart.update({
-        chart: { type: "column" },
+        chart: {
+          type: "column",
+          ...threeDOptions,
+        },
         title: { text: title || "Diagram" },
         plotOptions: {
-          column: { stacking: "normal" },
+          column: {
+            stacking: "normal",
+            depth: is3D ? 25 : 0,
+            grouping: true,
+            pointPadding: 0.2,
+            borderWidth: 0,
+          },
         },
       });
       currentChart.xAxis[0].update({ categories });
@@ -488,7 +544,21 @@ const StatistikGränssnitt: React.FC = () => {
         type:
           xAxisDimensions.length === 2
             ? "column"
-            : getSeriesType(selectedMeasuresForOther[0]),
+            : chartType === "line"
+            ? "spline"
+            : "column",
+        ...threeDOptions,
+      },
+      plotOptions: {
+        column: {
+          depth: is3D ? 45 : undefined,
+          grouping: true,
+          pointPadding: 0.2,
+          borderWidth: 0,
+        },
+        pie: {
+          depth: is3D ? 45 : undefined,
+        },
       },
     });
     currentChart.redraw();
@@ -516,7 +586,9 @@ const StatistikGränssnitt: React.FC = () => {
     setSeriesDimension,
     handleGenerateChart,
     handleGoBack,
-    containerRef
+    containerRef,
+    is3D,
+    setIs3D
   );
 };
 
