@@ -76,7 +76,7 @@ export function userInterface(
     });
   };
   return (
-    <div>
+    <div >
       {step === "input-file" && (
         <div>
           <h3>Ladda upp fil</h3>
@@ -240,19 +240,6 @@ export function userInterface(
       {step === "select-measures" && (
         <div>
           <h3>Välj Mått</h3>
-          {chartType === "combo" ? (
-            <p>För kombinerat diagram, välj exakt två mått.</p>
-          ) : chartType === "pie" ? (
-            <p>För pajdiagram, välj exakt ett mått.</p>
-          ) : (
-            <p>
-              För{" "}
-              {chartType === "line" || chartType === "stacked"
-                ? "linjediagram"
-                : "stapeldiagram"}
-              , välj exakt ett mått.
-            </p>
-          )}
           <button onClick={handleSelectAllMeasures}>Markera alla</button>
           <button onClick={handleDeselectAllMeasures}>Ta bort alla</button>
           {measures.map((measure) => (
