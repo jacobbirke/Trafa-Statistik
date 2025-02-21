@@ -13,7 +13,7 @@ export function createChart(element: HTMLDivElement) {
       },
       animation: {
         duration: 1000,
-        easing: "easeInOutBounce", 
+        easing: "easeInOutBounce",
       },
     },
     title: { text: "", align: "left" },

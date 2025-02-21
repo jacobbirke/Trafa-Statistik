@@ -3,49 +3,28 @@ import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
 import HighchartsGroupedCategories from "highcharts-grouped-categories";
 import Highcharts3D from "highcharts/highcharts-3d";
-import { createChart } from "./createChart";
-import { userInterface } from "./userInterface";
-import { selectAllOptions } from "./selectAllOptions";
+import { createChart } from "../utils/chartUtils";
+
+import { ChartWizard } from "./ChartWizard/ChartWizard";
+import { ChartType, Dimension, Measure, WizardStep } from "../types/chartTypes";
+
 HighchartsGroupedCategories(Highcharts);
 Highcharts3D(Highcharts);
 
-export interface Dimension {
-  name: string;
-  allValues: string[];
-  selectedValues: string[];
-  unit?: string;
-}
-
-export interface Measure {
-  name: string;
-  unit?: string;
-  isSelected: boolean;
-}
-
 const StatistikGränssnitt: React.FC = () => {
-  const [step, setStep] = useState<
-    | "input-file"
-    | "select-diagram-type"
-    | "filter-dimensions"
-    | "select-measures"
-    | "chart-configuration"
-    | "review-generate"
-  >("input-file");
-
-  const [seriesDimension, setSeriesDimension] = useState<string | null>(null);
-  const [chart, setChart] = useState<any>(null);
+  const [step, setStep] = useState<WizardStep>("input-file");
+  const [chartType, setChartType] = useState<ChartType>("column");
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
   const [measures, setMeasures] = useState<Measure[]>([]);
+  const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
+  const [seriesDimension, setSeriesDimension] = useState<string | null>(null);
   const [barMeasure, setBarMeasure] = useState<string | null>(null);
   const [lineMeasure, setLineMeasure] = useState<string | null>(null);
-  const [xAxisDimensions, setXAxisDimensions] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("Diagram utan titel");
   const [jsonData, setJsonData] = useState<any[]>([]);
-  const [chartType, setChartType] = useState<
-    "column" | "line" | "combo" | "pie" | "stacked"
-  >("column");
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const [is3D, setIs3D] = useState<boolean>(false);
+  const [chart, setChart] = useState<any>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -53,7 +32,7 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [step, chart]);
 
-  // //Upddaterar diagramet när filtervärde ändras
+  // Upddaterar diagramet när filtervärde ändras
   // useEffect(() => {
   //   if (step === "review-generate" && chart) {
   //     handleGenerateChart();
@@ -137,9 +116,6 @@ const StatistikGränssnitt: React.FC = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const { handleSelectAllMeasures, handleDeselectAllMeasures } =
-    selectAllOptions(setMeasures, measures);
-
   const handleGoBack = () => {
     if (chart) {
       chart.destroy();
@@ -153,7 +129,6 @@ const StatistikGränssnitt: React.FC = () => {
       alert("Data is missing.");
       return;
     }
-
     let currentChart = chart;
     if (!containerRef.current) {
       alert("Diagramområdet saknas.");
@@ -561,34 +536,37 @@ const StatistikGränssnitt: React.FC = () => {
         },
       },
     });
+
     currentChart.redraw();
   };
 
-  return userInterface(
-    step,
-    handleFileUpload,
-    setStep,
-    dimensions,
-    setDimensions,
-    handleSelectAllMeasures,
-    handleDeselectAllMeasures,
-    measures,
-    setMeasures,
-    xAxisDimensions,
-    setXAxisDimensions,
-    chartType,
-    setChartType,
-    barMeasure,
-    setBarMeasure,
-    lineMeasure,
-    setLineMeasure,
-    seriesDimension,
-    setSeriesDimension,
-    handleGenerateChart,
-    handleGoBack,
-    containerRef,
-    is3D,
-    setIs3D
+  return (
+    <div className="min-h-screen bg-trafaPrimary">
+      <ChartWizard
+        step={step}
+        chartType={chartType}
+        dimensions={dimensions}
+        measures={measures}
+        xAxisDimensions={xAxisDimensions}
+        seriesDimension={seriesDimension}
+        barMeasure={barMeasure}
+        lineMeasure={lineMeasure}
+        is3D={is3D}
+        containerRef={containerRef}
+        handleFileUpload={handleFileUpload}
+        setStep={setStep}
+        setDimensions={setDimensions}
+        setMeasures={setMeasures}
+        setChartType={setChartType}
+        setXAxisDimensions={setXAxisDimensions}
+        setSeriesDimension={setSeriesDimension}
+        setBarMeasure={setBarMeasure}
+        setLineMeasure={setLineMeasure}
+        handleGenerateChart={handleGenerateChart}
+        handleGoBack={handleGoBack}
+        setIs3D={setIs3D}
+      />
+    </div>
   );
 };
 
