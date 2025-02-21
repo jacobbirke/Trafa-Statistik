@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../../UI/Button";
 import { ChartType, WizardStep } from "../../../types/chartTypes";
+import { Card } from "../../UI/Card";
 
 type Props = {
   chartType: ChartType;
@@ -21,7 +22,7 @@ export const SelectDiagramTypeStep: React.FC<Props> = ({
   setChartType,
   setStep,
 }) => (
-  <div className="bg-white p-6 rounded-lg shadow-md">
+  <Card>
     <h3 className="text-2xl font-bold mb-4">Välj Diagramtyp</h3>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {chartOptions.map((option) => (
@@ -30,7 +31,7 @@ export const SelectDiagramTypeStep: React.FC<Props> = ({
           className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
             chartType === option.value
               ? "border-blue-500 bg-blue-50"
-              : "border-gray-200 hover:border-blue-200"
+              : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
           }`}
         >
           <input
@@ -42,7 +43,7 @@ export const SelectDiagramTypeStep: React.FC<Props> = ({
             className="mr-3 h-5 w-5 text-blue-600"
           />
           <div>
-            <span className="text-lg font-medium text-gray-700">
+            <span className="text-style">
               {option.icon} {option.label}
             </span>
           </div>
@@ -57,5 +58,5 @@ export const SelectDiagramTypeStep: React.FC<Props> = ({
         Nästa
       </Button>
     </div>
-  </div>
+  </Card>
 );

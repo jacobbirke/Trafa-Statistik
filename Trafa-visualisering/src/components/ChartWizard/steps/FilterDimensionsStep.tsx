@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../../UI/Button";
 import { Dimension, WizardStep } from "../../../types/chartTypes";
+import { Card } from "../../UI/Card";
 
 type Props = {
   dimensions: Dimension[];
@@ -28,7 +29,7 @@ export const FilterDimensionsStep: React.FC<Props> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <Card>
       <h3 className="text-2xl font-bold mb-4">Filtrera Dimensioner</h3>
       {dimensions.map((dim) => (
         <div key={dim.name} className="border p-4 mb-4 rounded-lg">
@@ -56,7 +57,7 @@ export const FilterDimensionsStep: React.FC<Props> = ({
                 className={`flex items-center p-2 rounded-md border ${
                   dim.selectedValues.includes(value)
                     ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-200"
+                    : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
                 }`}
               >
                 <input
@@ -82,7 +83,7 @@ export const FilterDimensionsStep: React.FC<Props> = ({
                   }
                   className="mr-2 h-4 w-4 text-blue-600"
                 />
-                <span className="text-gray-700">{value}</span>
+                <span className="text-style">{value}</span>
               </label>
             ))}
           </div>
@@ -111,6 +112,6 @@ export const FilterDimensionsStep: React.FC<Props> = ({
           Nästa
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };

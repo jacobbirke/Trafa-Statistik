@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "../../UI/Button";
 import { WizardStep } from "../../../types/chartTypes";
+import { Card } from "../../UI/Card";
 
 type Props = {
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -11,7 +12,7 @@ export const InputFileStep: React.FC<Props> = ({
   handleFileUpload,
   setStep,
 }) => (
-  <div className="bg-white p-6 rounded-lg shadow-md">
+  <Card>
     <h3 className="text-2xl font-bold mb-4">Ladda upp fil</h3>
     <input
       type="file"
@@ -22,5 +23,5 @@ export const InputFileStep: React.FC<Props> = ({
     <Button onClick={() => setStep("select-diagram-type")} variant="primary">
       Nästa
     </Button>
-  </div>
+  </Card>
 );

@@ -32,7 +32,7 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [step, chart]);
 
-  // //Upddaterar diagramet när filtervärde ändras
+  // Upddaterar diagramet när filtervärde ändras
   // useEffect(() => {
   //   if (step === "review-generate" && chart) {
   //     handleGenerateChart();
@@ -541,7 +541,7 @@ const StatistikGränssnitt: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-trafaPrimary">
       <ChartWizard
         step={step}
         chartType={chartType}

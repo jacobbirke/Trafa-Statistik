@@ -3,10 +3,14 @@
 @import "tailwindcss/utilities";
 
 
-/* @layer base {
+@layer base {
   body {
     @apply bg-trafaPrimary text-black font-sans;
   }
-} */
+}
 
+
+.text-style  {
+  @apply font-medium text-gray-900 text-lg;
+}
   

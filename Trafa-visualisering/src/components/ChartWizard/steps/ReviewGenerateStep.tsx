@@ -6,6 +6,7 @@ import {
   ChartType,
   WizardStep,
 } from "../../../types/chartTypes";
+import { Card } from "../../UI/Card";
 
 interface Props {
   dimensions: Dimension[];
@@ -94,8 +95,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   };
 
   return (
-    <div className="space-y-8">
-      <div className="border-2 border-gray-300 p-4 rounded">
+    <Card>
+      <div className="border-2 border-gray-300 p-4 rounded mb-5">
         <h3 className="text-2xl font-bold mb-4">Snabbkonfiguration</h3>
         <h4 className="text-xl font-semibold mb-2">Dimensioner & Roller</h4>
         {dimensions.map((dim) => {
@@ -286,7 +287,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </Button>
           <Button
             onClick={() => setStep("select-diagram-type")}
-            variant="secondary"
+            className="bg-trafaOrange"
           >
             Börja om
           </Button>
@@ -359,6 +360,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           className="w-full h-[600px] bg-red rounded"
         />
       </div>
-    </div>
+    </Card>
   );
 };
