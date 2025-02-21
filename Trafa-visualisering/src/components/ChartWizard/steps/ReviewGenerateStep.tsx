@@ -303,7 +303,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         </div>
       </div>
       <div>
-        <h3 className="text-2xl font-bold mb-4">Filter</h3>
         {dimensions
           .filter(
             (dim) =>
@@ -312,6 +311,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           )
           .map((dim) => (
             <div key={dim.name} className="mb-4">
+              <h3 className="text-2xl font-bold mb-4">Filter</h3>
               <label className="block font-semibold mb-1">{dim.name}</label>
               <select
                 value={dim.selectedValues[0] || ""}
@@ -336,29 +336,24 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               </select>
             </div>
           ))}
-
         {(chartType === "column" ||
           chartType === "pie" ||
           chartType === "combo" ||
-          chartType === "stacked") && (
-          <div className="mb-4">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={is3D}
-                onChange={(e) => setIs3D(e.target.checked)}
-                className="mr-2"
-              />
-              Visa i 3D
-            </label>
-          </div>
-        )}
-
+          chartType === "stacked") && <div className="mb-4"></div>}
         <div
           id="container"
           ref={containerRef}
           className="w-full h-[600px] bg-red rounded"
-        />
+        />{" "}
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={is3D}
+            onChange={(e) => setIs3D(e.target.checked)}
+            className="mr-2"
+          />
+          Visa i 3D
+        </label>
       </div>
     </Card>
   );
