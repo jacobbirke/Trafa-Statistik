@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../../UI/Button";
 import {
   Dimension,
@@ -51,47 +51,75 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   handleGoBack,
   setStep,
 }) => {
+  const [tempDimensions, setTempDimensions] = useState([...dimensions]);
+  const [tempMeasures, setTempMeasures] = useState([...measures]);
+  const [tempXAxisDimensions, setTempXAxisDimensions] = useState([
+    ...xAxisDimensions,
+  ]);
+  const [tempSeriesDimension, setTempSeriesDimension] =
+    useState(seriesDimension);
+  const [tempBarMeasure, setTempBarMeasure] = useState(barMeasure);
+  const [tempLineMeasure, setTempLineMeasure] = useState(lineMeasure);
+
+  useEffect(() => {
+    setTempDimensions([...dimensions]);
+    setTempMeasures([...measures]);
+    setTempXAxisDimensions([...xAxisDimensions]);
+    setTempSeriesDimension(seriesDimension);
+    setTempBarMeasure(barMeasure);
+    setTempLineMeasure(lineMeasure);
+  }, [
+    dimensions,
+    measures,
+    xAxisDimensions,
+    seriesDimension,
+    barMeasure,
+    lineMeasure,
+  ]);
+
   const getDimensionRole = (
     dimName: string
   ): "main" | "sub" | "series" | "filter" => {
-    if (xAxisDimensions[0] === dimName) return "main";
-    if (xAxisDimensions[1] === dimName) return "sub";
-    if (seriesDimension === dimName) return "series";
+    if (tempXAxisDimensions[0] === dimName) return "main";
+    if (tempXAxisDimensions[1] === dimName) return "sub";
+    if (tempSeriesDimension === dimName) return "series";
     return "filter";
   };
 
-  const handleDimensionRoleChange = (
+  const handleTempDimensionRoleChange = (
     dimName: string,
     newRole: "main" | "sub" | "series" | "filter"
   ) => {
+    let newXAxis = [...tempXAxisDimensions];
+    let newSeries = tempSeriesDimension;
+
     if (newRole === "main") {
-      setXAxisDimensions((prev) => {
-        const newArr = [...prev];
-        newArr[0] = dimName;
-        if (newArr[1] === dimName) newArr.splice(1, 1);
-        return newArr;
-      });
-      if (seriesDimension === dimName) setSeriesDimension(null);
+      newXAxis = [dimName, ...newXAxis.filter((n) => n !== dimName)];
+      if (newSeries === dimName) newSeries = null;
     } else if (newRole === "sub") {
-      setXAxisDimensions((prev) => {
-        let newArr = [...prev];
-        if (newArr.length === 0) {
-          newArr = [dimName];
-        } else if (newArr.length === 1) {
-          newArr.push(dimName);
-        } else {
-          newArr[1] = dimName;
-        }
-        return newArr;
-      });
-      if (seriesDimension === dimName) setSeriesDimension(null);
+      newXAxis = [...newXAxis.slice(0, 1), dimName];
+      if (newSeries === dimName) newSeries = null;
     } else if (newRole === "series") {
-      setSeriesDimension(dimName);
-      setXAxisDimensions((prev) => prev.filter((n) => n !== dimName));
-    } else if (newRole === "filter") {
-      setXAxisDimensions((prev) => prev.filter((n) => n !== dimName));
-      if (seriesDimension === dimName) setSeriesDimension(null);
+      newSeries = dimName;
+      newXAxis = newXAxis.filter((n) => n !== dimName);
+    } else {
+      newXAxis = newXAxis.filter((n) => n !== dimName);
+      if (newSeries === dimName) newSeries = null;
     }
+
+    setTempXAxisDimensions(newXAxis.filter(Boolean));
+    setTempSeriesDimension(newSeries);
+  };
+
+  const handleApplyChanges = () => {
+    setDimensions(tempDimensions);
+    setXAxisDimensions(tempXAxisDimensions);
+    setSeriesDimension(tempSeriesDimension);
+    setMeasures(tempMeasures);
+    setBarMeasure(tempBarMeasure);
+    setLineMeasure(tempLineMeasure);
+
+    handleGenerateChart();
   };
 
   return (
@@ -99,7 +127,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       <div className="border-2 border-gray-300 p-4 rounded mb-5">
         <h3 className="text-2xl font-bold mb-4">Snabbkonfiguration</h3>
         <h4 className="text-xl font-semibold mb-2">Dimensioner & Roller</h4>
-        {dimensions.map((dim) => {
+        {tempDimensions.map((dim) => {
           const currentRole = getDimensionRole(dim.name);
           return (
             <div key={dim.name} className="mb-4">
@@ -110,7 +138,9 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     type="radio"
                     name={`role-${dim.name}`}
                     checked={currentRole === "main"}
-                    onChange={() => handleDimensionRoleChange(dim.name, "main")}
+                    onChange={() =>
+                      handleTempDimensionRoleChange(dim.name, "main")
+                    }
                     className="mr-1"
                   />
                   Huvudkategori
@@ -120,7 +150,9 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     type="radio"
                     name={`role-${dim.name}`}
                     checked={currentRole === "sub"}
-                    onChange={() => handleDimensionRoleChange(dim.name, "sub")}
+                    onChange={() =>
+                      handleTempDimensionRoleChange(dim.name, "sub")
+                    }
                     className="mr-1"
                   />
                   Underkategori
@@ -131,7 +163,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     name={`role-${dim.name}`}
                     checked={currentRole === "series"}
                     onChange={() =>
-                      handleDimensionRoleChange(dim.name, "series")
+                      handleTempDimensionRoleChange(dim.name, "series")
                     }
                     className="mr-1"
                   />
@@ -143,7 +175,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     name={`role-${dim.name}`}
                     checked={currentRole === "filter"}
                     onChange={() =>
-                      handleDimensionRoleChange(dim.name, "filter")
+                      handleTempDimensionRoleChange(dim.name, "filter")
                     }
                     className="mr-1"
                   />
@@ -154,7 +186,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           );
         })}
         <h4 className="text-xl font-semibold mb-2">Filtrera Värden</h4>
-        {dimensions.map((dim) => (
+        {tempDimensions.map((dim) => (
           <div key={dim.name} className="mb-4">
             <strong className="block mb-1">{dim.name}</strong>
             <div className="space-y-1">
@@ -164,22 +196,20 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     type="checkbox"
                     checked={dim.selectedValues.includes(value)}
                     onChange={(e) => {
-                      setDimensions((prev) =>
+                      setTempDimensions((prev) =>
                         prev.map((d) => {
                           if (d.name !== dim.name) return d;
-                          if (e.target.checked) {
-                            return {
-                              ...d,
-                              selectedValues: [...d.selectedValues, value],
-                            };
-                          } else {
-                            return {
-                              ...d,
-                              selectedValues: d.selectedValues.filter(
-                                (v) => v !== value
-                              ),
-                            };
-                          }
+                          return e.target.checked
+                            ? {
+                                ...d,
+                                selectedValues: [...d.selectedValues, value],
+                              }
+                            : {
+                                ...d,
+                                selectedValues: d.selectedValues.filter(
+                                  (v) => v !== value
+                                ),
+                              };
                         })
                       );
                     }}
@@ -193,41 +223,20 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         ))}
 
         <h4 className="text-xl font-semibold mb-2">Mått</h4>
-        {measures.map((measure) => (
+        {tempMeasures.map((measure) => (
           <div key={measure.name} className="mb-2">
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={measure.isSelected}
                 onChange={(e) => {
-                  const isChecked = e.target.checked;
-                  setMeasures((prevMeasures) => {
-                    const newMeasures = prevMeasures.map((m) =>
+                  setTempMeasures((prev) =>
+                    prev.map((m) =>
                       m.name === measure.name
-                        ? { ...m, isSelected: isChecked }
+                        ? { ...m, isSelected: e.target.checked }
                         : m
-                    );
-                    const selected = newMeasures.filter((m) => m.isSelected);
-                    if (chartType === "combo") {
-                      if (selected.length > 2) {
-                        alert("För kombinerat diagram, välj exakt två mått.");
-                        return prevMeasures;
-                      }
-                    } else if (chartType === "pie") {
-                      if (selected.length > 1) {
-                        alert("För pajdiagram, välj exakt ett mått.");
-                        return prevMeasures;
-                      }
-                    } else {
-                      if (selected.length > 1) {
-                        alert(
-                          "För stapel-, linje- eller staplat diagram, välj exakt ett mått."
-                        );
-                        return prevMeasures;
-                      }
-                    }
-                    return newMeasures;
-                  });
+                    )
+                  );
                 }}
                 className="mr-2"
               />
@@ -241,7 +250,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             <h4 className="text-xl font-semibold mb-2">
               Välj Mått för Stapeldiagram
             </h4>
-            {measures
+            {tempMeasures
               .filter((m) => m.isSelected)
               .map((measure) => (
                 <div key={measure.name} className="flex items-center mb-2">
@@ -250,8 +259,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       type="radio"
                       name="barMeasure"
                       value={measure.name}
-                      checked={barMeasure === measure.name}
-                      onChange={() => setBarMeasure(measure.name)}
+                      checked={tempBarMeasure === measure.name}
+                      onChange={() => setTempBarMeasure(measure.name)}
                       className="mr-2"
                     />
                     {measure.name}
@@ -261,7 +270,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             <h4 className="text-xl font-semibold mb-2">
               Välj Mått för Linjediagram
             </h4>
-            {measures
+            {tempMeasures
               .filter((m) => m.isSelected)
               .map((measure) => (
                 <div key={measure.name} className="flex items-center mb-2">
@@ -270,8 +279,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       type="radio"
                       name="lineMeasure"
                       value={measure.name}
-                      checked={lineMeasure === measure.name}
-                      onChange={() => setLineMeasure(measure.name)}
+                      checked={tempLineMeasure === measure.name}
+                      onChange={() => setTempLineMeasure(measure.name)}
                       className="mr-2"
                     />
                     {measure.name}
@@ -294,7 +303,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         </div>
         <div className="mt-4">
           <Button
-            onClick={handleGenerateChart}
+            onClick={handleApplyChanges} 
             variant="primary"
             className="w-full"
           >
@@ -324,7 +333,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         : d
                     )
                   );
-                  handleGenerateChart();
                 }}
                 className="border rounded px-2 py-1"
               >
@@ -336,10 +344,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               </select>
             </div>
           ))}
-        {(chartType === "column" ||
-          chartType === "pie" ||
-          chartType === "combo" ||
-          chartType === "stacked") && <div className="mb-4"></div>}
         <div
           id="container"
           ref={containerRef}
