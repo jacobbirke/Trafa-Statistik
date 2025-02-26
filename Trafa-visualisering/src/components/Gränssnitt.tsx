@@ -40,6 +40,12 @@ const StatistikGränssnitt: React.FC = () => {
   // }, [dimensions, chart]);
 
   useEffect(() => {
+    if (step === 'review-generate') {
+      handleGenerateChart();
+    }
+  }, [dimensions]); 
+
+  useEffect(() => {
     if (step !== "review-generate" && chart) {
       chart.destroy();
       setChart(null);
