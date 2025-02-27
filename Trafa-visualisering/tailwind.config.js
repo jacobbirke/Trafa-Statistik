@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        trafaPrimary: "#b90066", // your primary color
+        trafaPrimary: "#b90066",
         trafaGreen: "#52af32",
         trafaBlue: "#0083ab",
         trafaOrange: "#ec6608",

@@ -345,38 +345,39 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         </div>
       </div>
       <div>
-        {dimensions
-          .filter(
-            (dim) =>
-              !xAxisDimensions.includes(dim.name) &&
-              dim.name !== seriesDimension
-          )
-          .map((dim) => (
-            <div key={dim.name} className="mb-4">
-              {/* <h3 className="text-2xl font-bold mb-4">Filter</h3> */}
-              <label className="block font-semibold mb-1">{dim.name}</label>
-              <select
-                value={dim.selectedValues[0] || ""}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setDimensions((prev) =>
-                    prev.map((d) =>
-                      d.name === dim.name
-                        ? { ...d, selectedValues: [newValue] }
-                        : d
-                    )
-                  );
-                }}
-                className="border rounded px-2 py-1"
-              >
-                {dim.allValues.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
+        <div className="flex justify-center items-center gap-4 flex-wrap mt-10">
+          {dimensions
+            .filter(
+              (dim) =>
+                !xAxisDimensions.includes(dim.name) &&
+                dim.name !== seriesDimension
+            )
+            .map((dim) => (
+              <div key={dim.name} className="mb-4 flex flex-col items-start">
+                <label className="block font-semibold mb-1">{dim.name}</label>
+                <select
+                  value={dim.selectedValues[0] || ""}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setDimensions((prev) =>
+                      prev.map((d) =>
+                        d.name === dim.name
+                          ? { ...d, selectedValues: [newValue] }
+                          : d
+                      )
+                    );
+                  }}
+                  className="border rounded px-2 py-1"
+                >
+                  {dim.allValues.map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+        </div>
         <div
           id="container"
           ref={containerRef}
