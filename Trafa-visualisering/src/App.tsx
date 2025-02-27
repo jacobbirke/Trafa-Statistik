@@ -6,6 +6,8 @@ import PunktlighetTagtyper from "./tidigare arbete/PunktlighetTagtyper";
 import Järnvägstransport from "./tidigare arbete/JärnvägstransportAPI";
 import StatisticsInterface from "./tidigare arbete/Struktur";
 import StatistikGränssnitt from "./components/Gränssnitt";
+import EmbedPage from "./components/EmbedPage";
+
 
 const App: React.FC = () => {
   return (
@@ -16,6 +18,8 @@ const App: React.FC = () => {
         <Route path="/tågtyper" element={<PunktlighetTagtyper />} />
         <Route path="/struktur" element={<StatisticsInterface />} />
         <Route path="/gränssnitt" element={<StatistikGränssnitt />} />
+        <Route path="/embed" element={<EmbedPage />} />
+
       </Routes>
     </Router>
   );

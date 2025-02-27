@@ -28,6 +28,8 @@ interface Props {
   handleGenerateChart: () => void;
   handleGoBack: () => void;
   setStep: (step: WizardStep) => void;
+  jsonData: any[];
+  title: string;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -50,6 +52,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   handleGenerateChart,
   handleGoBack,
   setStep,
+  title,
+  jsonData,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -60,6 +64,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     useState(seriesDimension);
   const [tempBarMeasure, setTempBarMeasure] = useState(barMeasure);
   const [tempLineMeasure, setTempLineMeasure] = useState(lineMeasure);
+  const [embedCode, setEmbedCode] = useState<string>("");
 
   useEffect(() => {
     setTempDimensions([...dimensions]);
@@ -120,6 +125,34 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     setLineMeasure(tempLineMeasure);
 
     handleGenerateChart();
+  };
+
+  const generateEmbedCode = () => {
+    const chartConfig = {
+      dimensions,
+      measures,
+      xAxisDimensions,
+      seriesDimension,
+      chartType,
+      barMeasure,
+      lineMeasure,
+      is3D,
+      title,
+      jsonData,
+    };
+
+    const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
+    const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
+
+    setEmbedCode(`
+      <iframe 
+        src="${embedUrl}" 
+        width="100%" 
+        height="700" 
+        style="border: 1px solid #ddd; border-radius: 8px;"
+      >
+      </iframe>
+    `);
   };
 
   return (
@@ -296,14 +329,14 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </Button>
           <Button
             onClick={() => setStep("select-diagram-type")}
-            className="bg-trafaOrange"
+            variant="danger"
           >
             Börja om
           </Button>
         </div>
         <div className="mt-4">
           <Button
-            onClick={handleApplyChanges} 
+            onClick={handleApplyChanges}
             variant="primary"
             className="w-full"
           >
@@ -320,7 +353,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           )
           .map((dim) => (
             <div key={dim.name} className="mb-4">
-              <h3 className="text-2xl font-bold mb-4">Filter</h3>
+              {/* <h3 className="text-2xl font-bold mb-4">Filter</h3> */}
               <label className="block font-semibold mb-1">{dim.name}</label>
               <select
                 value={dim.selectedValues[0] || ""}
@@ -358,6 +391,22 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           />
           Visa i 3D
         </label>
+        <div className="mt-4">
+          <Button onClick={generateEmbedCode} variant="success">
+            Generera inbädnningskod
+          </Button>
+          {embedCode && (
+            <div className="mt-4">
+              <h3 className="text-xl font-bold mb-2">Inäddningskod</h3>
+              <textarea
+                value={embedCode}
+                readOnly
+                className="w-full h-32 p-2 border rounded"
+                onClick={(e) => e.currentTarget.select()}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </Card>
   );

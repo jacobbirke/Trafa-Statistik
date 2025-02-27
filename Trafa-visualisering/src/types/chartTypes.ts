@@ -43,4 +43,6 @@ export interface ChartWizardProps {
   handleGenerateChart: () => void;
   handleGoBack: () => void;
   setIs3D: React.Dispatch<React.SetStateAction<boolean>>;
+  jsonData: any[];
+  title: string;
 }
