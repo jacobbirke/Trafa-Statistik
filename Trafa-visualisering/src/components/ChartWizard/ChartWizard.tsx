@@ -17,6 +17,8 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   barMeasure,
   lineMeasure,
   is3D,
+  jsonData,
+  title,
   containerRef,
   handleFileUpload,
   setStep,
@@ -101,6 +103,8 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           handleGenerateChart={handleGenerateChart}
           handleGoBack={handleGoBack}
           setStep={setStep}
+          jsonData={jsonData}
+          title={title}
         />
       )}
     </div>
