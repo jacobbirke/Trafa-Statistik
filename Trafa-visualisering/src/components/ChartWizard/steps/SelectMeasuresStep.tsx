@@ -69,7 +69,6 @@ export const SelectMeasuresStep: React.FC<Props> = ({
   ))}
 </div>
 
-
       <div className="flex justify-between mt-6">
         <Button
           onClick={() => setStep("filter-dimensions")}

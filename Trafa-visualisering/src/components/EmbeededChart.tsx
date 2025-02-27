@@ -62,7 +62,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
             dim.name !== config.seriesDimension
         )
         .map((dim) => (
-          <div key={dim.name} className="mb-4">
+          <div key={dim.name} className="mb-5 flex justify-center items-center gap-4 flex-wrap">
             {/* <h3 className="text-lg font-bold mb-2">Filter</h3> */}
             <label className="block font-semibold mb-1">{dim.name}</label>
             <select
