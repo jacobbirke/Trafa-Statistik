@@ -140,19 +140,21 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       title,
       jsonData,
     };
-
+  
     const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
-    const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
-
-    setEmbedCode(`
-      <iframe 
-        src="${embedUrl}" 
+    // const embedBaseUrl = process.env.REACT_APP_EMBED_URL || window.location.origin;
+    const embedUrl = import.meta.env.PROD 
+    ? "https://jacob-trafa.vercel.app/embed?config=" 
+    : `${window.location.origin}/embed?config=`;
+  
+    setEmbedCode(
+      `<iframe 
+        src="${embedUrl}${encodedConfig}"
         width="100%" 
         height="700" 
-        style="border: 1px solid #ddd; border-radius: 8px;"
-      >
-      </iframe>
-    `);
+        style="border:1px solid #ddd;border-radius:8px"
+      ></iframe>`
+    );
   };
 
   return (
