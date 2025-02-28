@@ -1,18 +1,8 @@
 {
-  "routes": [
-    {
-      "src": "/embed",
-      "dest": "/embed.html",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+  "rewrites": [
+      {
+          "source": "/(.*)",
+          "destination": "/"
       }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
-      }
-    }
   ]
 }
