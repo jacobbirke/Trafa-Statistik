@@ -2,23 +2,28 @@ import React, { useEffect, useState } from "react";
 import EmbeddedChart from "./EmbeededChart";
 
 const EmbedPage: React.FC = () => {
-  const params = new URLSearchParams(window.location.search);
-  const configParam = params.get("config");
-
   const [config, setConfig] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (configParam) {
-      try {
-        const decoded = JSON.parse(decodeURIComponent(configParam));
-        setConfig(decoded);
-      } catch (error) {
-        console.error("Error parsing config:", error);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const configParam = params.get('config');
+      
+      if (!configParam) {
+        throw new Error('Missing config parameter');
       }
-    }
-  }, [configParam]);
 
-  if (!config) return <div>Loading...</div>;
+      const decoded = JSON.parse(decodeURIComponent(configParam));
+      setConfig(decoded);
+    } catch (err) {
+      setError('Invalid embed configuration');
+      console.error('Embed error:', err);
+    }
+  }, []);
+
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (!config) return <div className="p-4">Laddar...</div>;
 
   return (
     <div className="min-h-screen bg-white p-4">
