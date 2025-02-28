@@ -7,7 +7,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
-        embed: './embeed.html'
+        embed: './embed.html'
       }
     }
   }

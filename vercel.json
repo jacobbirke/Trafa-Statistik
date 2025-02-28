@@ -2,7 +2,7 @@
   "routes": [
     {
       "src": "/embed",
-      "dest": "/embeed.html",
+      "dest": "/embed.html",
       "headers": {
         "Cache-Control": "no-cache, no-store, must-revalidate"
       }
