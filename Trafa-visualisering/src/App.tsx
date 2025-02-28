@@ -19,7 +19,6 @@ const App: React.FC = () => {
         <Route path="/struktur" element={<StatisticsInterface />} />
         <Route path="/" element={<StatistikGränssnitt />} />
         <Route path="/embed" element={<EmbedPage />} />
-
       </Routes>
     </Router>
   );
