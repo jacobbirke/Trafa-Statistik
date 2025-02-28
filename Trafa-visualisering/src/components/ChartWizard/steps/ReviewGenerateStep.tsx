@@ -140,18 +140,18 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       title,
       jsonData,
     };
-  
+
     const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
-    const embedBaseUrl = process.env.REACT_APP_EMBED_URL || window.location.origin;
-    const embedUrl = `${embedBaseUrl}/embed?config=${encodedConfig}`;
-  
+    const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
+
     setEmbedCode(`
       <iframe 
         src="${embedUrl}" 
         width="100%" 
         height="700" 
         style="border: 1px solid #ddd; border-radius: 8px;"
-      ></iframe>
+      >
+      </iframe>
     `);
   };
 
