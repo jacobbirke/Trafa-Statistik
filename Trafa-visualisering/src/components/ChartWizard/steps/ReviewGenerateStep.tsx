@@ -142,14 +142,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     };
   
     const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
-    // const embedBaseUrl = process.env.REACT_APP_EMBED_URL || window.location.origin;
-    const embedUrl = import.meta.env.PROD 
-    ? "https://jacob-trafa.vercel.app/embed?config=" 
-    : `${window.location.origin}/embed?config=`;
+    const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
   
     setEmbedCode(
       `<iframe 
-        src="${embedUrl}${encodedConfig}"
+        src="${embedUrl}"
         width="100%" 
         height="700" 
         style="border:1px solid #ddd;border-radius:8px"
