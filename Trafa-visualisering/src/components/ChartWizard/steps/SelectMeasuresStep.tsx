@@ -31,43 +31,41 @@ export const SelectMeasuresStep: React.FC<Props> = ({
   return (
     <Card>
       <h3 className="text-2xl font-bold mb-4 ">Välj Mått</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-        
-      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2"></div>
       <p className="text-gray-600 mb-4">{getInstruction()}</p>
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {measures.map((measure) => (
-    <label
-      key={measure.name}
-      className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-        measure.isSelected
-          ? "border-blue-500 bg-blue-50"
-          : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
-      }`}
-    >
-      <input
-        type="checkbox"
-        checked={measure.isSelected}
-        onChange={(e) =>
-          setMeasures((prev) =>
-            prev.map((m) =>
-              m.name === measure.name
-                ? { ...m, isSelected: e.target.checked }
-                : m
-            )
-          )
-        }
-        className="mr-3 h-5 w-5 text-blue-600"
-      />
-      <div>
-        <span className="text-style">
-          {measure.name} {measure.unit && `(${measure.unit})`}
-        </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {measures.map((measure) => (
+          <label
+            key={measure.name}
+            className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+              measure.isSelected
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={measure.isSelected}
+              onChange={(e) =>
+                setMeasures((prev) =>
+                  prev.map((m) =>
+                    m.name === measure.name
+                      ? { ...m, isSelected: e.target.checked }
+                      : m
+                  )
+                )
+              }
+              className="mr-3 h-5 w-5 text-blue-600"
+            />
+            <div>
+              <span className="text-style">
+                {measure.name} {measure.unit && `(${measure.unit})`}
+              </span>
+            </div>
+          </label>
+        ))}
       </div>
-    </label>
-  ))}
-</div>
 
       <div className="flex justify-between mt-6">
         <Button
