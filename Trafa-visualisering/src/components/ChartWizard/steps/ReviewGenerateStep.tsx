@@ -146,7 +146,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   
     setEmbedCode(
       `<iframe 
-        src="${embedUrl}"
+        src="${embedUrl}${encodedConfig}"
         width="100%" 
         height="700" 
         style="border:1px solid #ddd;border-radius:8px"
