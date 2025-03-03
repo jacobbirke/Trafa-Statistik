@@ -82,6 +82,20 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     lineMeasure,
   ]);
 
+  const handleSelectAll = (dimName: string) => {
+    setTempDimensions((prev) =>
+      prev.map((d) =>
+        d.name === dimName ? { ...d, selectedValues: [...d.allValues] } : d
+      )
+    );
+  };
+
+  const handleDeselectAll = (dimName: string) => {
+    setTempDimensions((prev) =>
+      prev.map((d) => (d.name === dimName ? { ...d, selectedValues: [] } : d))
+    );
+  };
+
   const getDimensionRole = (
     dimName: string
   ): "main" | "sub" | "series" | "filter" => {
@@ -140,10 +154,10 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       title,
       jsonData,
     };
-  
+
     const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
     const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
-  
+
     setEmbedCode(
       `<iframe 
         src="${embedUrl}"
@@ -162,10 +176,12 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         {tempDimensions.map((dim) => {
           const currentRole = getDimensionRole(dim.name);
           return (
-            <div key={dim.name} className="mb-4">
-              <strong className="block mb-1">{dim.name}</strong>
+            <div key={dim.name} className="p- mb-4">
+              <strong className="block mb-1 text-lg font-medium">
+                {dim.name}
+              </strong>
               <div className="flex space-x-4">
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 text-gray-900 text-lg pl-2">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -177,7 +193,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   />
                   Huvudkategori
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 text-lg">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -189,7 +205,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   />
                   Underkategori
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 text-lg">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -201,7 +217,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   />
                   Serie
                 </label>
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 text-lg">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -217,13 +233,37 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             </div>
           );
         })}
+
         <h4 className="text-xl font-semibold mb-2">Filtrera Värden</h4>
         {tempDimensions.map((dim) => (
-          <div key={dim.name} className="mb-4">
-            <strong className="block mb-1">{dim.name}</strong>
-            <div className="space-y-1">
+          <div key={dim.name} className=" p-2 mb-4">
+            <h4 className="text-lg font-semibold mb-2">{dim.name}</h4>
+            <div className="flex gap-2 mb-3">
+              <Button
+                onClick={() => handleSelectAll(dim.name)}
+                variant="success"
+                className="text-sm"
+              >
+                Markera alla
+              </Button>
+              <Button
+                onClick={() => handleDeselectAll(dim.name)}
+                variant="danger"
+                className="text-sm"
+              >
+                Ta bort alla
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               {dim.allValues.map((value) => (
-                <label key={value} className="flex items-center space-x-2">
+                <label
+                  key={value}
+                  className={`flex items-center p-2 rounded-md border ${
+                    dim.selectedValues.includes(value)
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
+                  }`}
+                >
                   <input
                     type="checkbox"
                     checked={dim.selectedValues.includes(value)}
@@ -245,9 +285,9 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         })
                       );
                     }}
-                    className="mr-2"
+                    className="mr-2 h-4 w-4 text-blue-600"
                   />
-                  {value}
+                  <span className="text-style">{value}</span>
                 </label>
               ))}
             </div>
@@ -255,70 +295,91 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         ))}
 
         <h4 className="text-xl font-semibold mb-2">Mått</h4>
-        {tempMeasures.map((measure) => (
-          <div key={measure.name} className="mb-2">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={measure.isSelected}
-                onChange={(e) => {
-                  setTempMeasures((prev) =>
-                    prev.map((m) =>
-                      m.name === measure.name
-                        ? { ...m, isSelected: e.target.checked }
-                        : m
-                    )
-                  );
-                }}
-                className="mr-2"
-              />
-              {measure.name} {measure.unit && `(${measure.unit})`}
-            </label>
+        <div className="p-4 mb-4">
+          <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-2">
+              {tempMeasures.map((measure) => (
+                <label
+                  key={measure.name}
+                  className={`flex items-center p-2 rounded-md border ${
+                    measure.isSelected
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={measure.isSelected}
+                    onChange={(e) => {
+                      setTempMeasures((prev) =>
+                        prev.map((m) =>
+                          m.name === measure.name
+                            ? { ...m, isSelected: e.target.checked }
+                            : m
+                        )
+                      );
+                    }}
+                    className="mr-2 h-4 w-4 text-blue-600"
+                  />
+                  <span className="text-style">
+                    {" "}
+                    {measure.name} {measure.unit && `(${measure.unit})`}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
-        ))}
+        </div>
 
         {chartType === "combo" && (
-          <div className="mb-4">
-            <h4 className="text-xl font-semibold mb-2">
-              Välj Mått för Stapeldiagram
-            </h4>
-            {tempMeasures
-              .filter((m) => m.isSelected)
-              .map((measure) => (
-                <div key={measure.name} className="flex items-center mb-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="barMeasure"
-                      value={measure.name}
-                      checked={tempBarMeasure === measure.name}
-                      onChange={() => setTempBarMeasure(measure.name)}
-                      className="mr-2"
-                    />
-                    {measure.name}
-                  </label>
-                </div>
-              ))}
-            <h4 className="text-xl font-semibold mb-2">
-              Välj Mått för Linjediagram
-            </h4>
-            {tempMeasures
-              .filter((m) => m.isSelected)
-              .map((measure) => (
-                <div key={measure.name} className="flex items-center mb-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="lineMeasure"
-                      value={measure.name}
-                      checked={tempLineMeasure === measure.name}
-                      onChange={() => setTempLineMeasure(measure.name)}
-                      className="mr-2"
-                    />
-                    {measure.name}
-                  </label>
-                </div>
-              ))}
+          <div className="mb-4 p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <h4 className="text-xl font-semibold mb-2">
+                  Välj Mått för Stapeldiagram
+                </h4>
+                {tempMeasures
+                  .filter((m) => m.isSelected)
+                  .map((measure) => (
+                    <div key={measure.name} className="flex items-center mb-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="barMeasure"
+                          value={measure.name}
+                          checked={tempBarMeasure === measure.name}
+                          onChange={() => setTempBarMeasure(measure.name)}
+                          className="mr-2 h-4 w-4 text-blue-600"
+                        />
+                        {measure.name}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+
+              <div className="flex-1">
+                <h4 className="text-xl font-semibold mb-2">
+                  Välj Mått för Linjediagram
+                </h4>
+                {tempMeasures
+                  .filter((m) => m.isSelected)
+                  .map((measure) => (
+                    <div key={measure.name} className="flex items-center mb-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="lineMeasure"
+                          value={measure.name}
+                          checked={tempLineMeasure === measure.name}
+                          onChange={() => setTempLineMeasure(measure.name)}
+                          className="mr-2 h-4 w-4 text-blue-600"
+                        />
+                        {measure.name}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -381,7 +442,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           id="container"
           ref={containerRef}
           className="w-full h-[600px] bg-red rounded"
-        />{" "}
+        />
         <label className="flex items-center space-x-2">
           <input
             type="checkbox"
