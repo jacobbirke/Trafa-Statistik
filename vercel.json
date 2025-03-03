@@ -1,6 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/embed", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
