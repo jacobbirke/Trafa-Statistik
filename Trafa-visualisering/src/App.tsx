@@ -17,8 +17,9 @@ const App: React.FC = () => {
         <Route path="/punktlighetår" element={<ImportPunktlighetPerAr />} />
         <Route path="/tågtyper" element={<PunktlighetTagtyper />} />
         <Route path="/struktur" element={<StatisticsInterface />} />
-        <Route path="/" element={<StatistikGränssnitt />} />
-        <Route path="/embed" element={<EmbedPage />} />
+        <Route path="/embed" element={<StatistikGränssnitt />} />
+        <Route path="/" element={<EmbedPage />} />
+
       </Routes>
     </Router>
   );
