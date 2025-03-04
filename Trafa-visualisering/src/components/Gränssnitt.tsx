@@ -176,6 +176,7 @@ const StatistikGränssnitt: React.FC = () => {
         setIs3D={setIs3D}
         jsonData={jsonData}
         title={title}
+        setTitle={setTitle}
       />
     </div>
   );

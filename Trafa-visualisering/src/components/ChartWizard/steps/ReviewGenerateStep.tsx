@@ -30,6 +30,7 @@ interface Props {
   setStep: (step: WizardStep) => void;
   jsonData: any[];
   title: string;
+  setTitle: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -54,6 +55,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setStep,
   title,
   jsonData,
+  setTitle,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -172,6 +174,18 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     <Card>
       <div className="border-2 border-gray-300 p-4 rounded mb-5">
         <h3 className="text-2xl font-bold mb-4">Snabbkonfiguration</h3>
+        <div className="mb-4">
+          <label className="block text-xl font-semibold mb-2">
+            Diagramtitel
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="border rounded px-2 py-1 w-full"
+          />
+        </div>
+
         <h4 className="text-xl font-semibold mb-2">Dimensioner & Roller</h4>
         {tempDimensions.map((dim) => {
           const currentRole = getDimensionRole(dim.name);

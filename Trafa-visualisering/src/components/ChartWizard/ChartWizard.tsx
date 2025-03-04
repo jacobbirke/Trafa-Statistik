@@ -19,6 +19,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   is3D,
   jsonData,
   title,
+  setTitle,
   containerRef,
   handleFileUpload,
   setStep,
@@ -105,6 +106,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setStep={setStep}
           jsonData={jsonData}
           title={title}
+          setTitle={setTitle}
         />
       )}
     </div>
