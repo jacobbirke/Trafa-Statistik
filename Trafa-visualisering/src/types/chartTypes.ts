@@ -1,5 +1,5 @@
 export type ChartType = "column" | "line" | "combo" | "pie" | "stacked";
-export type WizardStep = 
+export type WizardStep =
   | "input-file"
   | "select-diagram-type"
   | "filter-dimensions"
@@ -45,4 +45,5 @@ export interface ChartWizardProps {
   setIs3D: React.Dispatch<React.SetStateAction<boolean>>;
   jsonData: any[];
   title: string;
+  setTitle: React.Dispatch<React.SetStateAction<string>>;
 }
