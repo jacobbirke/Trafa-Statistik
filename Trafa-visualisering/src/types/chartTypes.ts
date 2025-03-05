@@ -46,4 +46,8 @@ export interface ChartWizardProps {
   jsonData: any[];
   title: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
+  seriesColors: Record<string, string>;
+  setSeriesColors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  measureColors: Record<string, string>;
+  setMeasureColors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
