@@ -28,6 +28,8 @@ const StatistikGränssnitt: React.FC = () => {
   const [seriesColors, setSeriesColors] = useState<Record<string, string>>({});
   const [measureColors, setMeasureColors] = useState<Record<string, string>>({});
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [legendPosition, setLegendPosition] = useState<string>("right");
+
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -56,7 +58,8 @@ const StatistikGränssnitt: React.FC = () => {
         title,
         xAxisDimensions,
         seriesColors,
-        measureColors
+        measureColors,
+        legendPosition,
       },
       containerRef.current
     );
@@ -203,6 +206,8 @@ const StatistikGränssnitt: React.FC = () => {
         measureColors={measureColors}
         setSeriesColors={setSeriesColors}
         setMeasureColors={setMeasureColors}
+        legendPosition={legendPosition}
+        setLegendPosition={setLegendPosition}
       />
     </div>
   );

@@ -37,6 +37,8 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   handleGenerateChart,
   handleGoBack,
   setIs3D,
+  legendPosition,
+  setLegendPosition,
 }) => {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-8">
@@ -110,10 +112,12 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           jsonData={jsonData}
           title={title}
           setTitle={setTitle}
-          seriesColors={seriesColors} 
+          seriesColors={seriesColors}
           setSeriesColors={setSeriesColors}
           measureColors={measureColors}
           setMeasureColors={setMeasureColors}
+          legendPosition={legendPosition}
+          setLegendPosition={setLegendPosition}
         />
       )}
     </div>

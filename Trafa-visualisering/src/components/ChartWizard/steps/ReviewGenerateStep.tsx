@@ -38,6 +38,8 @@ interface Props {
   setMeasureColors: React.Dispatch<
     React.SetStateAction<Record<string, string>>
   >;
+  legendPosition: string;
+  setLegendPosition: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -67,6 +69,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setSeriesColors,
   measureColors,
   setMeasureColors,
+  legendPosition,
+  setLegendPosition,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -187,6 +191,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       jsonData,
       seriesColors,
       measureColors,
+      legendPosition,
     };
     const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
     const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
@@ -329,6 +334,21 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             </div>
           </div>
         )}
+
+        <div className="mb-4">
+          <h4 className="text-xl font-semibold mb-2">Legend position</h4>
+          <select
+            value={legendPosition}
+            onChange={(e) => setLegendPosition(e.target.value)}
+            className="border rounded px-2 py-1 m-1"
+          >
+            <option value="top">Uppe</option>
+            <option value="right">Höger</option>
+            <option value="bottom">Nere</option>
+            <option value="left">Vänster</option>
+            <option value="inside">Inuti diagrammet</option>
+          </select>
+        </div>
 
         <h4 className="text-xl font-semibold mb-2">Dimensioner & Roller</h4>
         {tempDimensions.map((dim) => {

@@ -18,6 +18,7 @@ interface EmbeddedChartProps {
     jsonData: any[];
     seriesColors?: Record<string, string>;
     measureColors?: Record<string, string>;
+    legendPosition: string;
   };
 }
 
@@ -49,6 +50,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           is3D: localIs3D,
           seriesColors,
           measureColors,
+          legendPosition: config.legendPosition || "right",
         },
         containerRef.current!
       );
