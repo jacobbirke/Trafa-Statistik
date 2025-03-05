@@ -31,6 +31,12 @@ interface Props {
   jsonData: any[];
   title: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
+  seriesColors: Record<string, string>;
+  setSeriesColors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  measureColors: Record<string, string>;
+  setMeasureColors: React.Dispatch<
+    React.SetStateAction<Record<string, string>>
+  >;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -56,14 +62,19 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   title,
   jsonData,
   setTitle,
+  seriesColors,
+  setSeriesColors,
+  measureColors,
+  setMeasureColors,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
   const [tempXAxisDimensions, setTempXAxisDimensions] = useState([
     ...xAxisDimensions,
   ]);
-  const [tempSeriesDimension, setTempSeriesDimension] =
-    useState(seriesDimension);
+  const [tempSeriesDimension, setTempSeriesDimension] = useState<string | null>(
+    seriesDimension
+  );
   const [tempBarMeasure, setTempBarMeasure] = useState(barMeasure);
   const [tempLineMeasure, setTempLineMeasure] = useState(lineMeasure);
   const [embedCode, setEmbedCode] = useState<string>("");
@@ -83,6 +94,25 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     barMeasure,
     lineMeasure,
   ]);
+
+  useEffect(() => {
+    if (tempSeriesDimension) {
+      const seriesDim = tempDimensions.find(
+        (d) => d.name === tempSeriesDimension
+      );
+      if (seriesDim) {
+        setSeriesColors((prev) => {
+          const newColors = { ...prev };
+          seriesDim.selectedValues.forEach((val) => {
+            if (!newColors[val]) {
+              newColors[val] = "";
+            }
+          });
+          return newColors;
+        });
+      }
+    }
+  }, [tempSeriesDimension, tempDimensions, setSeriesColors]);
 
   const handleSelectAll = (dimName: string) => {
     setTempDimensions((prev) =>
@@ -155,6 +185,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       is3D,
       title,
       jsonData,
+      seriesColors,
+      measureColors,
     };
 
     const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
@@ -186,16 +218,114 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           />
         </div>
 
+        {tempSeriesDimension && (
+          <div className="mb-4">
+            <h4 className="text-xl font-semibold mb-2">Färgval för serier</h4>
+            <div className="flex gap-4">
+              {tempDimensions
+                .find((d) => d.name === tempSeriesDimension)
+                ?.selectedValues.map((value) => (
+                  <div key={value} className="flex items-center gap-2">
+                    <label className="p-1">{value}</label>
+                    <input
+                      type="color"
+                      value={seriesColors[value] || "#b90066"}
+                      onChange={(e) =>
+                        setSeriesColors((prev) => ({
+                          ...prev,
+                          [value]: e.target.value,
+                        }))
+                      }
+                      className="cursor-pointer"
+                      title={`Klicka för att välja färg för ${value}`}
+                    />
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {!tempSeriesDimension && ["column", "line"].includes(chartType) && (
+          <div className="mb-4">
+            <h4 className="text-xl font-semibold mb-2">Färgval för mått</h4>
+            <div className="flex gap-4">
+              {measures
+                .filter((m) => m.isSelected)
+                .map((measure) => (
+                  <div key={measure.name} className="flex items-center gap-2">
+                    <label className="text-sm">{measure.name}</label>
+                    <input
+                      type="color"
+                      value={measureColors[measure.name] || "#b90066"}
+                      onChange={(e) =>
+                        setMeasureColors((prev: Record<string, string>) => ({
+                          ...prev,
+                          [measure.name]: e.target.value,
+                        }))
+                      }
+                      className="cursor-pointer"
+                      title={`Klicka för att välja färg för ${measure.name}`}
+                    />
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {chartType === "combo" && !tempSeriesDimension && (
+          <div className="mb-4">
+            <h4 className="text-xl font-semibold mb-2">
+              Färgval för line och kolumn
+            </h4>
+            <div className="flex gap-4">
+              {tempBarMeasure && (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm">{tempBarMeasure} (Kolumn)</label>
+                  <input
+                    type="color"
+                    value={measureColors[tempBarMeasure] || "#b90066"}
+                    onChange={(e) =>
+                      setMeasureColors((prev: Record<string, string>) => ({
+                        ...prev,
+                        [tempBarMeasure]: e.target.value,
+                      }))
+                    }
+                    className="cursor-pointer"
+                    title={`Klicka för att välja färg för ${tempBarMeasure} (Kolumn)`}
+                  />
+                </div>
+              )}
+              {tempLineMeasure && (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm">{tempLineMeasure} (Linje)</label>
+                  <input
+                    type="color"
+                    value={measureColors[tempLineMeasure] || "#b90066"}
+                    onChange={(e) =>
+                      setMeasureColors((prev: Record<string, string>) => ({
+                        ...prev,
+                        [tempLineMeasure]: e.target.value,
+                      }))
+                    }
+                    className="cursor-pointer"
+                    title={`Klicka för att välja färg för ${tempLineMeasure} (Linje)`}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <h4 className="text-xl font-semibold mb-2">Dimensioner & Roller</h4>
         {tempDimensions.map((dim) => {
           const currentRole = getDimensionRole(dim.name);
           return (
-            <div key={dim.name} className="p- mb-4">
+            <div key={dim.name} className="p-1 mb-4">
               <strong className="block mb-1 text-lg font-medium">
                 {dim.name}
               </strong>
               <div className="flex space-x-4">
-                <label className="flex items-center space-x-2 text-gray-900 text-lg pl-2">
+                <label className="flex items-center space-x-2 text-gray-900 pl-2">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -207,7 +337,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   />
                   Huvudkategori
                 </label>
-                <label className="flex items-center space-x-2 text-lg">
+                <label className="flex items-center space-x-2">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -219,7 +349,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   />
                   Underkategori
                 </label>
-                <label className="flex items-center space-x-2 text-lg">
+                <label className="flex items-center space-x-2">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -231,7 +361,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   />
                   Serie
                 </label>
-                <label className="flex items-center space-x-2 text-lg">
+                <label className="flex items-center space-x-2">
                   <input
                     type="radio"
                     name={`role-${dim.name}`}
@@ -336,7 +466,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     className="mr-2 h-4 w-4 text-blue-600"
                   />
                   <span className="text-style">
-                    {" "}
                     {measure.name} {measure.unit && `(${measure.unit})`}
                   </span>
                 </label>

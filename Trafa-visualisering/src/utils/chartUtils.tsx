@@ -1,4 +1,13 @@
 import Highcharts from "highcharts";
+import Exporting from "highcharts/modules/exporting";
+import ExportData from "highcharts/modules/export-data";
+import OfflineExporting from "highcharts/modules/offline-exporting";
+import Accessibility from "highcharts/modules/accessibility";
+
+Exporting(Highcharts);
+ExportData(Highcharts);
+OfflineExporting(Highcharts);
+Accessibility(Highcharts);
 
 export function createChart(element: HTMLDivElement) {
   return Highcharts.chart(element, {
@@ -10,6 +19,9 @@ export function createChart(element: HTMLDivElement) {
         beta: 15,
         depth: 50,
         viewDistance: 25,
+      },
+      zooming: {
+        type: "xy",
       },
       animation: {
         duration: 1000,
@@ -48,6 +60,26 @@ export function createChart(element: HTMLDivElement) {
         },
       },
     },
+    exporting: {
+      enabled: true,
+      buttons: {
+        contextButton: {
+          menuItems: [
+            "printChart",
+            "downloadPNG",
+            "downloadJPEG",
+            "downloadPDF",
+            "downloadSVG",
+            "separator",
+            "viewData",
+          ],
+        },
+      },
+    },
+    credits: { enabled: false },
     series: [],
+    accessibility: {
+      enabled: true,
+    },
   });
 }

@@ -12,6 +12,8 @@ type Config = {
   is3D: boolean;
   title: string;
   jsonData: any[];
+  seriesColors: Record<string, string>;
+  measureColors: Record<string, string>;
 };
 
 export const handleGenerateChart = (
@@ -32,7 +34,7 @@ export const handleGenerateChart = (
     title,
   } = config;
 
-  if (!config.jsonData) {
+  if (!jsonData) {
     alert("Data is missing.");
     return;
   }
@@ -54,34 +56,32 @@ export const handleGenerateChart = (
       }
     : { options3d: { enabled: false } };
 
-  if (config.chartType === "pie") {
-    if (!config.seriesDimension) {
+  // Paj
+  if (chartType === "pie") {
+    if (!seriesDimension) {
       alert("Välj en dimension för serien för pajdiagram.");
       return;
     }
-    const seriesDim = config.dimensions.find(
-      (dim) => dim.name === config.seriesDimension
-    );
+    const seriesDim = dimensions.find((dim) => dim.name === seriesDimension);
     if (!seriesDim) {
       alert("Ogiltig dimension för serien.");
       return;
     }
-    const selectedMeasuresForPie = config.measures.filter((m) => m.isSelected);
+    const selectedMeasuresForPie = measures.filter((m) => m.isSelected);
     if (selectedMeasuresForPie.length !== 1) {
       alert("Välj exakt ett mått för pajdiagram.");
       return;
     }
     const measure = selectedMeasuresForPie[0];
     const measureIndex =
-      config.dimensions.length +
-      config.measures.findIndex((m) => m.name === measure.name);
-    const seriesDimIndex = config.dimensions.findIndex(
-      (dim) => dim.name === config.seriesDimension
+      dimensions.length + measures.findIndex((m) => m.name === measure.name);
+    const seriesDimIndex = dimensions.findIndex(
+      (dim) => dim.name === seriesDimension
     );
 
-    const filteredRows = config.jsonData.filter((row) =>
-      config.dimensions.every((dimension) => {
-        const dimensionIndex = config.dimensions.findIndex(
+    const filteredRows = jsonData.filter((row) =>
+      dimensions.every((dimension) => {
+        const dimensionIndex = dimensions.findIndex(
           (dim) => dim.name === dimension.name
         );
         if (dimensionIndex === -1) return true;
@@ -103,12 +103,12 @@ export const handleGenerateChart = (
       }
     });
 
-    const seriesData = seriesDim.selectedValues.map((category) => ({
+    const pieSeriesData = seriesDim.selectedValues.map((category) => ({
       name: category,
       y: categorySums[category] || 0,
     }));
 
-    const pieThreeDOptions = config.is3D
+    const pieThreeDOptions = is3D
       ? {
           options3d: {
             enabled: true,
@@ -149,34 +149,38 @@ export const handleGenerateChart = (
     currentChart.addSeries({
       type: "pie",
       name: measure.name,
-      data: seriesData,
+      data: pieSeriesData.map((point, index) => ({
+        name: point.name,
+        y: point.y,
+        color:
+          config.seriesColors[point.name] ||
+          Highcharts.getOptions().colors?.[index % 10],
+      })),
     });
     currentChart.redraw();
     return;
   }
 
-  if (config.chartType === "stacked") {
-    if (config.xAxisDimensions.length !== 1) {
+  // Staplad kolumn
+  if (chartType === "stacked") {
+    if (xAxisDimensions.length !== 1) {
       alert("För staplat diagram, välj exakt en dimension för x-axeln.");
       return;
     }
-    if (!config.seriesDimension) {
+    if (!seriesDimension) {
       alert("För staplat diagram, välj exakt en dimension för serier.");
       return;
     }
-    const selectedMeasuresForStacked = config.measures.filter(
-      (m) => m.isSelected
-    );
+    const selectedMeasuresForStacked = measures.filter((m) => m.isSelected);
     if (selectedMeasuresForStacked.length !== 1) {
       alert("För staplat diagram, välj exakt ett mått.");
       return;
     }
     const measure = selectedMeasuresForStacked[0];
     const measureIndex =
-      config.dimensions.length +
-      config.measures.findIndex((m) => m.name === measure.name);
-    const xAxisIndex = config.dimensions.findIndex(
-      (dim) => dim.name === config.xAxisDimensions[0]
+      dimensions.length + measures.findIndex((m) => m.name === measure.name);
+    const xAxisIndex = dimensions.findIndex(
+      (dim) => dim.name === xAxisDimensions[0]
     );
     const seriesDimIndex = dimensions.findIndex(
       (dim) => dim.name === seriesDimension
@@ -210,8 +214,8 @@ export const handleGenerateChart = (
       alert("Ingen serie vald för serier.");
       return;
     }
-    const seriesData: any[] = [];
-    seriesCategories.forEach((seriesValue) => {
+    const stackedSeriesData: any[] = [];
+    seriesCategories.forEach((seriesValue, index) => {
       const data: number[] = [];
       categories.forEach((category) => {
         const total = filteredRows
@@ -226,10 +230,13 @@ export const handleGenerateChart = (
           }, 0);
         data.push(total);
       });
-      seriesData.push({
+      stackedSeriesData.push({
         name: seriesValue,
         data,
         type: "column",
+        color:
+          config.seriesColors[seriesValue] ||
+          Highcharts.getOptions().colors?.[index % 10],
       });
     });
 
@@ -253,11 +260,19 @@ export const handleGenerateChart = (
     while (currentChart.series.length > 0) {
       currentChart.series[0].remove(false);
     }
-    seriesData.forEach((serie) => currentChart.addSeries(serie, false));
+    stackedSeriesData.forEach((serie) => currentChart.addSeries(serie, false));
+    stackedSeriesData.forEach((serie) => {
+      if (serie.type === "column") {
+        serie.color = config.measureColors[barMeasure!] || serie.color;
+      } else {
+        serie.color = config.measureColors[lineMeasure!] || serie.color;
+      }
+    });
     currentChart.redraw();
     return;
   }
 
+  // Generellt
   if (xAxisDimensions.length === 0) {
     alert("Välj minst en dimension för x-axeln.");
     return;
@@ -307,7 +322,7 @@ export const handleGenerateChart = (
   currentChart.yAxis[1].update({
     title: {
       text: lineMeasure ? lineMeasure : "",
-      style: { color: "purple" },
+      style: { color: "#b90066" },
     },
     opposite: true,
   });
@@ -355,7 +370,7 @@ export const handleGenerateChart = (
     });
   };
 
-  const seriesData: any[] = [];
+  const generalSeriesData: any[] = [];
   const selectedMeasuresForOther = measures.filter(
     (measure) => measure.isSelected
   );
@@ -368,13 +383,15 @@ export const handleGenerateChart = (
   };
 
   if (seriesDimension) {
-    seriesCategories.forEach((seriesValue, index) => {
+    seriesCategories.forEach((seriesValue, seriesIndex) => {
       selectedMeasuresForOther.forEach((measure) => {
-        seriesData.push({
+        generalSeriesData.push({
           name: `${seriesValue} - ${measure.name}`,
           type: getSeriesType(measure),
           data: aggregateMeasureData(measure.name, seriesValue),
-          color: Highcharts.getOptions().colors?.[index % 10] || undefined,
+          color:
+            config.seriesColors[seriesValue] ||
+            Highcharts.getOptions().colors?.[seriesIndex % 10],
           yAxis:
             chartType === "combo"
               ? measure.name === lineMeasure
@@ -388,11 +405,13 @@ export const handleGenerateChart = (
     });
   } else {
     selectedMeasuresForOther.forEach((measure, index) => {
-      seriesData.push({
+      generalSeriesData.push({
         name: measure.name,
         type: getSeriesType(measure),
         data: aggregateMeasureData(measure.name, null),
-        color: Highcharts.getOptions().colors?.[index % 10] || undefined,
+        color:
+          config.measureColors[measure.name] ||
+          Highcharts.getOptions().colors?.[index % 10],
         yAxis:
           chartType === "combo"
             ? measure.name === lineMeasure
@@ -417,7 +436,7 @@ export const handleGenerateChart = (
   while (currentChart.series.length > 0) {
     currentChart.series[0].remove(false);
   }
-  seriesData.forEach((series) => currentChart.addSeries(series, false));
+  generalSeriesData.forEach((series) => currentChart.addSeries(series, false));
   currentChart.redraw();
   currentChart.setTitle({ text: title || "Diagram" });
   currentChart.update({
@@ -442,6 +461,5 @@ export const handleGenerateChart = (
       },
     },
   });
-
   currentChart.redraw();
 };

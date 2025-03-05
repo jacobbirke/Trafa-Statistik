@@ -30,7 +30,10 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setSeriesDimension,
   setBarMeasure,
   setLineMeasure,
-
+  setSeriesColors,
+  seriesColors,
+  setMeasureColors,
+  measureColors,
   handleGenerateChart,
   handleGoBack,
   setIs3D,
@@ -107,6 +110,10 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           jsonData={jsonData}
           title={title}
           setTitle={setTitle}
+          seriesColors={seriesColors} 
+          setSeriesColors={setSeriesColors}
+          measureColors={measureColors}
+          setMeasureColors={setMeasureColors}
         />
       )}
     </div>

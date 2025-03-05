@@ -25,6 +25,8 @@ const StatistikGränssnitt: React.FC = () => {
   const [jsonData, setJsonData] = useState<any[]>([]);
   const [is3D, setIs3D] = useState<boolean>(false);
   const [chart, setChart] = useState<any>(null);
+  const [seriesColors, setSeriesColors] = useState<Record<string, string>>({});
+  const [measureColors, setMeasureColors] = useState<Record<string, string>>({});
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -53,6 +55,8 @@ const StatistikGränssnitt: React.FC = () => {
         seriesDimension,
         title,
         xAxisDimensions,
+        seriesColors,
+        measureColors
       },
       containerRef.current
     );
@@ -76,6 +80,24 @@ const StatistikGränssnitt: React.FC = () => {
       localHandleGenerateChart();
     }
   }, [is3D]);
+
+  useEffect(() => {
+    if (seriesDimension) {
+      const seriesDim = dimensions.find((d) => d.name === seriesDimension);
+      if (seriesDim) {
+        setSeriesColors((prevColors) => {
+          const newColors = { ...prevColors };
+          seriesDim.selectedValues.forEach((val) => {
+            if (!newColors[val]) {
+              newColors[val] = "";
+            }
+          });
+          return newColors;
+        });
+      }
+    }
+  }, [seriesDimension, dimensions, setSeriesColors]);
+  
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -177,6 +199,10 @@ const StatistikGränssnitt: React.FC = () => {
         jsonData={jsonData}
         title={title}
         setTitle={setTitle}
+        seriesColors={seriesColors}
+        measureColors={measureColors}
+        setSeriesColors={setSeriesColors}
+        setMeasureColors={setMeasureColors}
       />
     </div>
   );
