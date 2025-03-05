@@ -50,7 +50,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           is3D: localIs3D,
           seriesColors,
           measureColors,
-          legendPosition: config.legendPosition || "right",
+          legendPosition: config.legendPosition || "bottom",
         },
         containerRef.current!
       );

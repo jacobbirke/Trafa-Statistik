@@ -28,7 +28,7 @@ const StatistikGränssnitt: React.FC = () => {
   const [seriesColors, setSeriesColors] = useState<Record<string, string>>({});
   const [measureColors, setMeasureColors] = useState<Record<string, string>>({});
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [legendPosition, setLegendPosition] = useState<string>("right");
+  const [legendPosition, setLegendPosition] = useState<string>("bottom");
 
 
   useEffect(() => {
