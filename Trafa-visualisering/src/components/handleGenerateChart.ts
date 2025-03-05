@@ -316,13 +316,13 @@ export const handleGenerateChart = (
   currentChart.yAxis[0].update({
     title: {
       text: barMeasure ? barMeasure : "",
-      style: { color: "DodgerBlue" },
+      style: { color: "" },
     },
   });
   currentChart.yAxis[1].update({
     title: {
       text: lineMeasure ? lineMeasure : "",
-      style: { color: "#b90066" },
+      style: { color: "" },
     },
     opposite: true,
   });
