@@ -35,11 +35,11 @@ export function createChart(element: HTMLDivElement) {
     },
     yAxis: [
       {
-        title: { text: "", style: { color: "DodgerBlue" } },
+        title: { text: "", style: { color: "" } },
         opposite: false,
       },
       {
-        title: { text: "", style: { color: "purple" } },
+        title: { text: "", style: { color: "" } },
         opposite: true,
       },
     ],
