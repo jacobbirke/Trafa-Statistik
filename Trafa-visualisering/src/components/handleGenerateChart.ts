@@ -14,6 +14,7 @@ type Config = {
   jsonData: any[];
   seriesColors: Record<string, string>;
   measureColors: Record<string, string>;
+  legendPosition: string;
 };
 
 export const handleGenerateChart = (
@@ -43,6 +44,51 @@ export const handleGenerateChart = (
     alert("Diagramområdet saknas.");
     return;
   }
+
+  const getLegendOptions = (position: string): Highcharts.LegendOptions => {
+    switch (position) {
+      case "top":
+        return {
+          align: "center",
+          verticalAlign: "top",
+          layout: "horizontal",
+          floating: false,
+        } as Highcharts.LegendOptions;
+      case "bottom":
+        return {
+          align: "center",
+          verticalAlign: "bottom",
+          layout: "horizontal",
+          floating: false,
+        } as Highcharts.LegendOptions;
+      case "left":
+        return {
+          align: "left",
+          verticalAlign: "middle",
+          layout: "vertical",
+          floating: false,
+        } as Highcharts.LegendOptions;
+      case "inside":
+        return {
+          align: "right",
+          verticalAlign: "top",
+          layout: "vertical",
+          floating: true,
+          x: -40,
+          y: 10,
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          borderWidth: 0,
+        } as Highcharts.LegendOptions;
+      case "right":
+      default:
+        return {
+          align: "right",
+          verticalAlign: "middle",
+          layout: "vertical",
+          floating: false,
+        } as Highcharts.LegendOptions;
+    }
+  };
 
   const threeDOptions = is3D
     ? {
@@ -461,5 +507,8 @@ export const handleGenerateChart = (
       },
     },
   });
+  const legendOptions = getLegendOptions(config.legendPosition);
+  currentChart.update({ legend: legendOptions }, false, false);
+
   currentChart.redraw();
 };
