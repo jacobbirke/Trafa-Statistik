@@ -41,7 +41,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setLegendPosition,
 }) => {
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-8">
+    <div className="max-w-7xl mx-auto p-3 space-y-8">
       {step === "input-file" && (
         <InputFileStep handleFileUpload={handleFileUpload} setStep={setStep} />
       )}
