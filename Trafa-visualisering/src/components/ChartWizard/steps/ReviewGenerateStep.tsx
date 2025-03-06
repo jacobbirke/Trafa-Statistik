@@ -197,11 +197,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
     setEmbedCode(
       `<iframe 
-        src="${embedUrl}"
-        width="100%" 
-        height="700" 
-        style="border:1px solid #ddd;border-radius:8px"
-      ></iframe>`
+          src="${embedUrl}"
+          width="100%" 
+          height="700" 
+          style="border:1px solid #ddd;border-radius:8px"
+        ></iframe>`
     );
   };
 
@@ -209,7 +209,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     <Card>
       <div className="border-2 border-gray-300 p-4 rounded mb-5">
         <h3 className="text-2xl font-bold mb-4">Snabbkonfiguration</h3>
-        <div className="mb-4">
+        <div className="mb-1 p-2">
           <label className="block text-xl font-semibold mb-2">
             Diagramtitel
           </label>
@@ -218,18 +218,18 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="border rounded px-2 py-1 w-full"
+            placeholder="Fyll i diagram titel här..."
           />
         </div>
 
         {tempSeriesDimension && (
-          <div className="mb-4">
+          <div className="mb-2 p-1">
             <h4 className="text-xl font-semibold mb-2">Färgval för serier</h4>
-            <div className="flex gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pl-2">
               {tempDimensions
                 .find((d) => d.name === tempSeriesDimension)
                 ?.selectedValues.map((value, idx) => (
                   <div key={value} className="flex items-center gap-2">
-                    <label className="p-1">{value}</label>
                     <input
                       type="color"
                       value={
@@ -245,7 +245,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       }
                       className="cursor-pointer"
                       title={`Klicka för att välja färg för ${value}`}
-                    />
+                    />{" "}
+                    <label className="p-1">{value}</label>
                   </div>
                 ))}
             </div>
@@ -253,7 +254,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         {!tempSeriesDimension && ["column", "line"].includes(chartType) && (
-          <div className="mb-4">
+          <div className="mb-3 p-2">
             <h4 className="text-xl font-semibold mb-2">Färgval för mått</h4>
             <div className="flex gap-4">
               {measures
@@ -284,7 +285,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         {chartType === "combo" && !tempSeriesDimension && (
-          <div className="mb-4">
+          <div className="mb-3 p-2">
             <h4 className="text-xl font-semibold mb-2">
               Färgval för line och kolumn
             </h4>
@@ -335,145 +336,234 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="mb-4">
-          <h4 className="text-xl font-semibold mb-2">Legend position</h4>
-          <select
-            value={legendPosition}
-            onChange={(e) => setLegendPosition(e.target.value)}
-            className="border rounded px-2 py-1 m-1"
-          >
-            <option value="top">Uppe</option>
-            <option value="right">Höger</option>
-            <option value="bottom">Nere</option>
-            <option value="left">Vänster</option>
-            <option value="inside">Inuti diagrammet</option>
-          </select>
+        <div className="mb-2 p-1">
+          <h4 className="text-xl font-semibold mb-2">Legend Position</h4>
+          <div className="grid grid-cols-5 gap-4 pl-2">
+            <button
+              className={`py-2 px-4 rounded-lg text-base ${
+                legendPosition === "top"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setLegendPosition("top")}
+            >
+              Uppe
+            </button>
+            <button
+              className={`py-2 px-4 rounded-lg text-base ${
+                legendPosition === "right"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setLegendPosition("right")}
+            >
+              Höger
+            </button>
+            <button
+              className={`py-2 px-4 rounded-lg text-base ${
+                legendPosition === "bottom"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setLegendPosition("bottom")}
+            >
+              Nere
+            </button>
+            <button
+              className={`py-2 px-4 rounded-lg text-base ${
+                legendPosition === "left"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setLegendPosition("left")}
+            >
+              Vänster
+            </button>
+            <button
+              className={`py-2 px-4 rounded-lg text-base ${
+                legendPosition === "inside"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-black"
+              }`}
+              onClick={() => setLegendPosition("inside")}
+            >
+              Inuti
+            </button>
+          </div>
         </div>
 
-        <h4 className="text-xl font-semibold mb-2">Dimensioner & Roller</h4>
-        {tempDimensions.map((dim) => {
-          const currentRole = getDimensionRole(dim.name);
-          return (
-            <div key={dim.name} className="p-1 mb-4">
-              <strong className="block mb-1 text-lg font-medium">
-                {dim.name}
-              </strong>
-              <div className="flex space-x-4">
-                <label className="flex items-center space-x-2 text-gray-900 pl-2">
-                  <input
-                    type="radio"
-                    name={`role-${dim.name}`}
-                    checked={currentRole === "main"}
-                    onChange={() =>
-                      handleTempDimensionRoleChange(dim.name, "main")
-                    }
-                    className="mr-1"
-                  />
-                  Huvudkategori
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name={`role-${dim.name}`}
-                    checked={currentRole === "sub"}
-                    onChange={() =>
-                      handleTempDimensionRoleChange(dim.name, "sub")
-                    }
-                    className="mr-1"
-                  />
-                  Underkategori
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name={`role-${dim.name}`}
-                    checked={currentRole === "series"}
-                    onChange={() =>
-                      handleTempDimensionRoleChange(dim.name, "series")
-                    }
-                    className="mr-1"
-                  />
-                  Serie
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name={`role-${dim.name}`}
-                    checked={currentRole === "filter"}
-                    onChange={() =>
-                      handleTempDimensionRoleChange(dim.name, "filter")
-                    }
-                    className="mr-1"
-                  />
-                  Filter
-                </label>
+        <div className="mb-2 p-1">
+          <h4 className="text-xl font-semibold mb-4">Dimensioner & Roller</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {tempDimensions.map((dim) => {
+              const currentRole = getDimensionRole(dim.name);
+              return (
+                <div
+                  key={dim.name}
+                  className="p-4 border rounded-lg shadow-sm flex flex-col space-y-4"
+                >
+                  <div className="text-lg font-medium">{dim.name}</div>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex justify-between items-center">
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "main"}
+                        onChange={() =>
+                          handleTempDimensionRoleChange(dim.name, "main")
+                        }
+                        className="hidden"
+                        id={`main-${dim.name}`}
+                      />
+                      <label
+                        htmlFor={`main-${dim.name}`}
+                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
+                          currentRole === "main"
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-black hover:bg-blue-100"
+                        }`}
+                      >
+                        Huvudkategori
+                      </label>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "sub"}
+                        onChange={() =>
+                          handleTempDimensionRoleChange(dim.name, "sub")
+                        }
+                        className="hidden"
+                        id={`sub-${dim.name}`}
+                      />
+                      <label
+                        htmlFor={`sub-${dim.name}`}
+                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
+                          currentRole === "sub"
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-black hover:bg-blue-100"
+                        }`}
+                      >
+                        Underkategori
+                      </label>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "series"}
+                        onChange={() =>
+                          handleTempDimensionRoleChange(dim.name, "series")
+                        }
+                        className="hidden"
+                        id={`series-${dim.name}`}
+                      />
+                      <label
+                        htmlFor={`series-${dim.name}`}
+                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
+                          currentRole === "series"
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-black hover:bg-blue-100"
+                        }`}
+                      >
+                        Serie
+                      </label>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <input
+                        type="radio"
+                        name={`role-${dim.name}`}
+                        checked={currentRole === "filter"}
+                        onChange={() =>
+                          handleTempDimensionRoleChange(dim.name, "filter")
+                        }
+                        className="hidden"
+                        id={`filter-${dim.name}`}
+                      />
+                      <label
+                        htmlFor={`filter-${dim.name}`}
+                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
+                          currentRole === "filter"
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-200 text-black hover:bg-blue-100"
+                        }`}
+                      >
+                        Filter
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mb-2 p-1">
+          <h4 className="text-xl font-semibold mb-2 ">Filtrera Värden</h4>
+          {tempDimensions.map((dim) => (
+            <div key={dim.name} className="p-2 mb-4 border rounded shadow-sm">
+              <div className="flex gap-2 mb-3 pt-1">
+                {" "}
+                <h4 className="text-lg font-semibold mr-4 p-1">{dim.name}</h4>
+                <Button
+                  onClick={() => handleSelectAll(dim.name)}
+                  variant="success"
+                  className="text-sm"
+                >
+                  Markera alla
+                </Button>
+                <Button
+                  onClick={() => handleDeselectAll(dim.name)}
+                  variant="danger"
+                  className="text-sm"
+                >
+                  Ta bort alla
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                {dim.allValues.map((value) => (
+                  <label
+                    key={value}
+                    className={`flex items-center p-2 rounded-md border ${
+                      dim.selectedValues.includes(value)
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={dim.selectedValues.includes(value)}
+                      onChange={(e) => {
+                        setTempDimensions((prev) =>
+                          prev.map((d) => {
+                            if (d.name !== dim.name) return d;
+                            return e.target.checked
+                              ? {
+                                  ...d,
+                                  selectedValues: [...d.selectedValues, value],
+                                }
+                              : {
+                                  ...d,
+                                  selectedValues: d.selectedValues.filter(
+                                    (v) => v !== value
+                                  ),
+                                };
+                          })
+                        );
+                      }}
+                      className="mr-2 h-4 w-4 text-blue-600 hidde"
+                    />
+                    <span className="text-base">{value}</span>
+                  </label>
+                ))}
               </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
 
-        <h4 className="text-xl font-semibold mb-2">Filtrera Värden</h4>
-        {tempDimensions.map((dim) => (
-          <div key={dim.name} className="p-2 mb-4">
-            <h4 className="text-lg font-semibold mb-2">{dim.name}</h4>
-            <div className="flex gap-2 mb-3">
-              <Button
-                onClick={() => handleSelectAll(dim.name)}
-                variant="success"
-                className="text-sm"
-              >
-                Markera alla
-              </Button>
-              <Button
-                onClick={() => handleDeselectAll(dim.name)}
-                variant="danger"
-                className="text-sm"
-              >
-                Ta bort alla
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-              {dim.allValues.map((value) => (
-                <label
-                  key={value}
-                  className={`flex items-center p-2 rounded-md border ${
-                    dim.selectedValues.includes(value)
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={dim.selectedValues.includes(value)}
-                    onChange={(e) => {
-                      setTempDimensions((prev) =>
-                        prev.map((d) => {
-                          if (d.name !== dim.name) return d;
-                          return e.target.checked
-                            ? {
-                                ...d,
-                                selectedValues: [...d.selectedValues, value],
-                              }
-                            : {
-                                ...d,
-                                selectedValues: d.selectedValues.filter(
-                                  (v) => v !== value
-                                ),
-                              };
-                        })
-                      );
-                    }}
-                    className="mr-2 h-4 w-4 text-blue-600"
-                  />
-                  <span className="text-style">{value}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        ))}
-
-        <h4 className="text-xl font-semibold mb-2">Mått</h4>
-        <div className="p-4 mb-4">
+        <div className="p-1 mb-2">
+          <h4 className="text-xl font-semibold mb-2 ">Mått</h4>
           <div className="space-y-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-2">
               {tempMeasures.map((measure) => (
@@ -497,9 +587,9 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         )
                       );
                     }}
-                    className="mr-2 h-4 w-4 text-blue-600"
+                    className="mr-3 h-4 w-4 text-blue-600"
                   />
-                  <span className="text-style">
+                  <span className="text-base">
                     {measure.name} {measure.unit && `(${measure.unit})`}
                   </span>
                 </label>
@@ -509,7 +599,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         </div>
 
         {chartType === "combo" && (
-          <div className="mb-4 p-4">
+          <div className="mb-2 p-1">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <h4 className="text-xl font-semibold mb-2">

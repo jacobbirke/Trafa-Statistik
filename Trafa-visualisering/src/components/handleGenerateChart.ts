@@ -74,8 +74,8 @@ export const handleGenerateChart = (
           verticalAlign: "top",
           layout: "vertical",
           floating: true,
-          x: -40,
-          y: 10,
+          x: -50,
+          y: 15,
           backgroundColor: "rgba(255, 255, 255, 0.8)",
           borderWidth: 0,
         } as Highcharts.LegendOptions;
