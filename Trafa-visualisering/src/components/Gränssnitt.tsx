@@ -3,6 +3,7 @@ import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
 import HighchartsGroupedCategories from "highcharts-grouped-categories";
 import Highcharts3D from "highcharts/highcharts-3d";
+import Variwide from "highcharts/modules/variwide";
 import { createChart } from "../utils/chartUtils";
 
 import { ChartWizard } from "./ChartWizard/ChartWizard";
@@ -11,6 +12,7 @@ import { handleGenerateChart } from "./handleGenerateChart";
 
 HighchartsGroupedCategories(Highcharts);
 Highcharts3D(Highcharts);
+Variwide(Highcharts);
 
 const StatistikGränssnitt: React.FC = () => {
   const [step, setStep] = useState<WizardStep>("input-file");
@@ -26,10 +28,13 @@ const StatistikGränssnitt: React.FC = () => {
   const [is3D, setIs3D] = useState<boolean>(false);
   const [chart, setChart] = useState<any>(null);
   const [seriesColors, setSeriesColors] = useState<Record<string, string>>({});
-  const [measureColors, setMeasureColors] = useState<Record<string, string>>({});
+  const [measureColors, setMeasureColors] = useState<Record<string, string>>(
+    {}
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [legendPosition, setLegendPosition] = useState<string>("bottom");
-
+  const [variwideWidthMeasure, setVariwideWidthMeasure] = useState<string | null>(null);
+  const [variwideHeightMeasure, setVariwideHeightMeasure] = useState<string | null>(null);
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -60,6 +65,8 @@ const StatistikGränssnitt: React.FC = () => {
         seriesColors,
         measureColors,
         legendPosition,
+        variwideWidthMeasure,
+        variwideHeightMeasure,
       },
       containerRef.current
     );
@@ -100,31 +107,25 @@ const StatistikGränssnitt: React.FC = () => {
       }
     }
   }, [seriesDimension, dimensions, setSeriesColors]);
-  
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function (event) {
       const data = event.target?.result;
       if (!(data instanceof ArrayBuffer)) return;
-
       try {
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const parsedData = XLSX.utils.sheet_to_json<any[]>(sheet, {
           header: 1,
         });
-
         const title = parsedData[0][0];
         const headers = parsedData[1];
         const units = parsedData[2];
-
         const dimensionHeaders: string[] = [];
         const measureHeaders: string[] = [];
-
         headers.forEach((header) => {
           if (header.endsWith("_M")) {
             measureHeaders.push(header);
@@ -132,7 +133,6 @@ const StatistikGränssnitt: React.FC = () => {
             dimensionHeaders.push(header);
           }
         });
-
         const dimensionsData: Dimension[] = dimensionHeaders.map(
           (header, index) => {
             const uniqueValues = new Set<string>();
@@ -147,13 +147,11 @@ const StatistikGränssnitt: React.FC = () => {
             };
           }
         );
-
         const measuresData: Measure[] = measureHeaders.map((header, index) => ({
           name: header.replace("_M", ""),
           unit: units[index] || "",
           isSelected: false,
         }));
-
         setTitle(title);
         setDimensions(dimensionsData);
         setMeasures(measuresData);
@@ -162,7 +160,6 @@ const StatistikGränssnitt: React.FC = () => {
         console.error("Error", error);
       }
     };
-
     reader.readAsArrayBuffer(file);
   };
 
@@ -208,6 +205,10 @@ const StatistikGränssnitt: React.FC = () => {
         setMeasureColors={setMeasureColors}
         legendPosition={legendPosition}
         setLegendPosition={setLegendPosition}
+        variwideWidthMeasure={variwideWidthMeasure}
+        setVariwideWidthMeasure={setVariwideWidthMeasure}
+        variwideHeightMeasure={variwideHeightMeasure}
+        setVariwideHeightMeasure={setVariwideHeightMeasure}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-export type ChartType = "column" | "line" | "combo" | "pie" | "stacked";
+export type ChartType = "column" | "line" | "combo" | "pie" | "stacked" | "variwide";
 export type WizardStep =
   | "input-file"
   | "select-diagram-type"
@@ -54,4 +54,8 @@ export interface ChartWizardProps {
   >;
   legendPosition: string;
   setLegendPosition: React.Dispatch<React.SetStateAction<string>>;
+  variwideWidthMeasure: string | null;
+  setVariwideWidthMeasure: React.Dispatch<React.SetStateAction<string | null>>;
+  variwideHeightMeasure: string | null;
+  setVariwideHeightMeasure: React.Dispatch<React.SetStateAction<string | null>>;
 }

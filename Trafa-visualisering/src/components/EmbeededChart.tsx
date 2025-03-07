@@ -19,6 +19,8 @@ interface EmbeddedChartProps {
     seriesColors?: Record<string, string>;
     measureColors?: Record<string, string>;
     legendPosition: string;
+    variwideWidthMeasure: string | null;
+    variwideHeightMeasure: string | null;
   };
 }
 
@@ -51,6 +53,8 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           seriesColors,
           measureColors,
           legendPosition: config.legendPosition || "bottom",
+          variwideWidthMeasure: config.variwideWidthMeasure,
+          variwideHeightMeasure: config.variwideHeightMeasure,
         },
         containerRef.current!
       );
@@ -105,15 +109,17 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
         className="w-full h-[600px] bg-gray-100 rounded"
       />
 
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={localIs3D}
-          onChange={(e) => setLocalIs3D(e.target.checked)}
-          className="mr-2"
-        />
-        Visa i 3D
-      </label>
+      {config.chartType !== "variwide" && (
+        <label className="flex items-center space-x-2 mb-4">
+          <input
+            type="checkbox"
+            checked={localIs3D}
+            onChange={(e) => setLocalIs3D(e.target.checked)}
+            className="mr-2"
+          />
+          Visa i 3D
+        </label>
+      )}
     </div>
   );
 };

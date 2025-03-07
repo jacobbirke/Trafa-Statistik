@@ -21,6 +21,10 @@ type Props = {
   setBarMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   setLineMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   setStep: (step: WizardStep) => void;
+  variwideWidthMeasure: string | null;
+  setVariwideWidthMeasure: React.Dispatch<React.SetStateAction<string | null>>;
+  variwideHeightMeasure: string | null;
+  setVariwideHeightMeasure: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 export const ChartConfigurationStep: React.FC<Props> = ({
@@ -36,18 +40,24 @@ export const ChartConfigurationStep: React.FC<Props> = ({
   setBarMeasure,
   setLineMeasure,
   setStep,
+  variwideWidthMeasure,
+  setVariwideWidthMeasure,
+  variwideHeightMeasure,
+  setVariwideHeightMeasure,
 }) => {
+  // For variwide or stacked charts, only one x-axis dimension (category) is allowed.
+  const maxXAxisAllowed = chartType === "variwide" || chartType === "stacked" ? 1 : 2;
+
   const handleXAxisChange = (dimName: string) => {
-    const maxAllowed = chartType === "stacked" ? 1 : 2;
     if (xAxisDimensions.includes(dimName)) {
       setXAxisDimensions((prev) => prev.filter((name) => name !== dimName));
     } else {
-      if (xAxisDimensions.length < maxAllowed) {
+      if (xAxisDimensions.length < maxXAxisAllowed) {
         setXAxisDimensions((prev) => [...prev, dimName]);
       } else {
         alert(
-          `Du kan bara välja ${maxAllowed} dimension${
-            maxAllowed === 1 ? "" : "er"
+          `Du kan bara välja ${maxXAxisAllowed} dimension${
+            maxXAxisAllowed === 1 ? "" : "er"
           } för x-axeln.`
         );
       }
@@ -57,6 +67,80 @@ export const ChartConfigurationStep: React.FC<Props> = ({
   return (
     <Card>
       <h3 className="text-2xl font-bold mb-4">Diagramkonfiguration</h3>
+      
+      {chartType === "variwide" && (
+        <>
+          <div className="mb-4">
+            <h4 className="text-xl font-semibold mb-2">Välj mått för bredd</h4>
+            {measures
+              .filter((m) => m.isSelected)
+              .map((measure) => (
+                <div key={measure.name} className="flex items-center mb-2">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="variwideWidthMeasure"
+                      value={measure.name}
+                      checked={variwideWidthMeasure === measure.name}
+                      onChange={() => setVariwideWidthMeasure(measure.name)}
+                      disabled={variwideHeightMeasure === measure.name}
+                      className="mr-2"
+                    />
+                    {measure.name}
+                  </label>
+                </div>
+              ))}
+          </div>
+          <div className="mb-6">
+            <h4 className="text-xl font-semibold mb-2">Välj mått för höjd</h4>
+            {measures
+              .filter((m) => m.isSelected)
+              .map((measure) => (
+                <div key={measure.name} className="flex items-center mb-2">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="variwideHeightMeasure"
+                      value={measure.name}
+                      checked={variwideHeightMeasure === measure.name}
+                      onChange={() => setVariwideHeightMeasure(measure.name)}
+                      disabled={variwideWidthMeasure === measure.name}
+                      className="mr-2"
+                    />
+                    {measure.name}
+                  </label>
+                </div>
+              ))}
+          </div>
+          <div className="mb-6">
+            <h4 className="text-xl font-semibold mb-2">
+              Välj kategori för x-axeln
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {dimensions.map((dim) => (
+                <label
+                  key={dim.name}
+                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    xAxisDimensions.includes(dim.name)
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={xAxisDimensions.includes(dim.name)}
+                    onChange={() => handleXAxisChange(dim.name)}
+                    className="mr-3 h-5 w-5 text-blue-600"
+                  />
+                  <div>
+                    <span className="text-style">{dim.name}</span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {chartType === "pie" ? (
         <div className="mb-6">
@@ -76,43 +160,42 @@ export const ChartConfigurationStep: React.FC<Props> = ({
             ))}
           </select>
         </div>
-      ) : (
+      ) : chartType !== "variwide" ? (
         <>
           <div className="mb-6">
             <h4 className="text-xl font-semibold mb-2">
               Välj kategori{chartType === "stacked" ? "" : "er"} för x-axeln
             </h4>
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  {dimensions.map((dim) => (
-    <label
-      key={dim.name}
-      className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-        xAxisDimensions.includes(dim.name)
-          ? "border-blue-500 bg-blue-50"
-          : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
-      }`}
-    >
-      <input
-        type="checkbox"
-        checked={xAxisDimensions.includes(dim.name)}
-        onChange={() => handleXAxisChange(dim.name)}
-        className="mr-3 h-5 w-5 text-blue-600"
-      />
-      <div>
-        <span className="text-style">
-          {dim.name}
-          {xAxisDimensions[0] === dim.name && chartType !== "stacked" && (
-            <span className="ml-2 text-blue-500">- Huvudkategori</span>
-          )}
-          {xAxisDimensions[1] === dim.name && (
-            <span className="ml-2 text-blue-500">- Underkategori</span>
-          )}
-        </span>
-      </div>
-    </label>
-  ))}
-</div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {dimensions.map((dim) => (
+                <label
+                  key={dim.name}
+                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                    xAxisDimensions.includes(dim.name)
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={xAxisDimensions.includes(dim.name)}
+                    onChange={() => handleXAxisChange(dim.name)}
+                    className="mr-3 h-5 w-5 text-blue-600"
+                  />
+                  <div>
+                    <span className="text-style">
+                      {dim.name}
+                      {xAxisDimensions[0] === dim.name && chartType !== "stacked" && (
+                        <span className="ml-2 text-blue-500">- Huvudkategori</span>
+                      )}
+                      {xAxisDimensions[1] === dim.name && (
+                        <span className="ml-2 text-blue-500">- Underkategori</span>
+                      )}
+                    </span>
+                  </div>
+                </label>
+              ))}
+            </div>
           </div>
 
           <div className="mb-6">
@@ -133,7 +216,7 @@ export const ChartConfigurationStep: React.FC<Props> = ({
             </select>
           </div>
         </>
-      )}
+      ) : null}
 
       {chartType === "combo" && (
         <div className="mb-4">
