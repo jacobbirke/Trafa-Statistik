@@ -40,6 +40,10 @@ interface Props {
   >;
   legendPosition: string;
   setLegendPosition: React.Dispatch<React.SetStateAction<string>>;
+  variwideWidthMeasure: string | null;
+  setVariwideWidthMeasure: React.Dispatch<React.SetStateAction<string | null>>;
+  variwideHeightMeasure: string | null;
+  setVariwideHeightMeasure: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -71,6 +75,10 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setMeasureColors,
   legendPosition,
   setLegendPosition,
+  variwideWidthMeasure,
+  setVariwideWidthMeasure,
+  variwideHeightMeasure,
+  setVariwideHeightMeasure,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -174,6 +182,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     setMeasures(tempMeasures);
     setBarMeasure(tempBarMeasure);
     setLineMeasure(tempLineMeasure);
+    setVariwideHeightMeasure(variwideHeightMeasure);
+    setVariwideWidthMeasure(variwideWidthMeasure);
     handleGenerateChart();
   };
 
@@ -192,6 +202,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       seriesColors,
       measureColors,
       legendPosition,
+      variwideWidthMeasure,
+      variwideHeightMeasure,
     };
     const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
     const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
@@ -225,7 +237,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         {tempSeriesDimension && (
           <div className="mb-2 p-1">
             <h4 className="text-xl font-semibold mb-2">Färgval för serier</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 pl-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 pl-2">
               {tempDimensions
                 .find((d) => d.name === tempSeriesDimension)
                 ?.selectedValues.map((value, idx) => (
@@ -336,61 +348,99 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="mb-2 p-1">
-          <h4 className="text-xl font-semibold mb-2">Legend Position</h4>
-          <div className="grid grid-cols-5 gap-4 pl-2">
-            <button
-              className={`py-2 px-4 rounded-lg text-base ${
-                legendPosition === "top"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-              onClick={() => setLegendPosition("top")}
-            >
-              Uppe
-            </button>
-            <button
-              className={`py-2 px-4 rounded-lg text-base ${
-                legendPosition === "right"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-              onClick={() => setLegendPosition("right")}
-            >
-              Höger
-            </button>
-            <button
-              className={`py-2 px-4 rounded-lg text-base ${
-                legendPosition === "bottom"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-              onClick={() => setLegendPosition("bottom")}
-            >
-              Nere
-            </button>
-            <button
-              className={`py-2 px-4 rounded-lg text-base ${
-                legendPosition === "left"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-              onClick={() => setLegendPosition("left")}
-            >
-              Vänster
-            </button>
-            <button
-              className={`py-2 px-4 rounded-lg text-base ${
-                legendPosition === "inside"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-black"
-              }`}
-              onClick={() => setLegendPosition("inside")}
-            >
-              Inuti
-            </button>
+        {chartType === "variwide" && (
+          <div className="mb-4 p-1">
+            <h4 className="text-xl font-semibold mb-2">Variwide Färger</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 pl-2">
+              {dimensions
+                .filter((dim) => dim.name === xAxisDimensions[0])
+                .flatMap((dim) =>
+                  dim.selectedValues.map((value, index) => {
+                    const colorValue =
+                      typeof seriesColors[value] === "string"
+                        ? seriesColors[value]
+                        : Highcharts.getOptions().colors?.[index % 10] ||
+                          "#ff0000";
+                    const validColorValue =
+                      typeof colorValue === "string" ? colorValue : "#ff0000";
+                    return (
+                      <div key={value} className="flex items-center gap-2 mb-2">
+                        <label className="text-sm">{value}</label>
+                        <input
+                          type="color"
+                          value={validColorValue}
+                          onChange={(e) =>
+                            setSeriesColors((prev) => ({
+                              ...prev,
+                              [value]: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                    );
+                  })
+                )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {chartType !== "variwide" && (
+          <div className="mb-2 p-1">
+            <h4 className="text-xl font-semibold mb-2">Legend Position</h4>
+            <div className="grid grid-cols-5 gap-4 pl-2">
+              <button
+                className={`py-2 px-4 rounded-lg text-base ${
+                  legendPosition === "top"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+                onClick={() => setLegendPosition("top")}
+              >
+                Uppe
+              </button>
+              <button
+                className={`py-2 px-4 rounded-lg text-base ${
+                  legendPosition === "right"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+                onClick={() => setLegendPosition("right")}
+              >
+                Höger
+              </button>
+              <button
+                className={`py-2 px-4 rounded-lg text-base ${
+                  legendPosition === "bottom"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+                onClick={() => setLegendPosition("bottom")}
+              >
+                Nere
+              </button>
+              <button
+                className={`py-2 px-4 rounded-lg text-base ${
+                  legendPosition === "left"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+                onClick={() => setLegendPosition("left")}
+              >
+                Vänster
+              </button>
+              <button
+                className={`py-2 px-4 rounded-lg text-base ${
+                  legendPosition === "inside"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-black"
+                }`}
+                onClick={() => setLegendPosition("inside")}
+              >
+                Inuti
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="mb-2 p-1">
           <h4 className="text-xl font-semibold mb-4">Dimensioner & Roller</h4>
@@ -680,7 +730,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 dim.name !== seriesDimension
             )
             .map((dim) => (
-              <div key={dim.name} className="mb-4 flex flex-col items-start">
+              <div key={dim.name} className="mb-4 flex flex-col items-center">
                 <label className="block font-semibold mb-1">{dim.name}</label>
                 <select
                   value={dim.selectedValues[0] || ""}
@@ -694,7 +744,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       )
                     );
                   }}
-                  className="border rounded px-2 py-1"
+                  className="border border-trafaBlue rounded px-2 py-1"
                 >
                   {dim.allValues.map((value) => (
                     <option key={value} value={value}>

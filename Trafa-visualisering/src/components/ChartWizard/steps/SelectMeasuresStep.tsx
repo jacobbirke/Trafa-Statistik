@@ -23,6 +23,8 @@ export const SelectMeasuresStep: React.FC<Props> = ({
         return "För kombinerat diagram, välj exakt två mått.";
       case "pie":
         return "För pajdiagram, välj exakt ett mått.";
+      case "variwide":
+        return "Välj exakt två mått (ett för höjd, ett för bredd)";
       default:
         return "För detta diagram, välj exakt ett mått.";
     }
@@ -78,21 +80,26 @@ export const SelectMeasuresStep: React.FC<Props> = ({
           onClick={() => {
             const selected = measures.filter((m) => m.isSelected);
 
-            if (chartType === "combo" && selected.length !== 2) {
-              alert("För kombinerat diagram, välj exakt två mått.");
-              return;
-            }
-            if (chartType === "pie" && selected.length !== 1) {
-              alert("För pajdiagram, välj exakt ett mått.");
-              return;
-            }
-            if (
-              chartType !== "combo" &&
-              chartType !== "pie" &&
-              selected.length !== 1
-            ) {
-              alert("För detta diagram, välj exakt ett mått.");
-              return;
+            if (chartType === "variwide") {
+              if (selected.length !== 2) {
+                alert("För variwide diagram, välj exakt två mått.");
+                return;
+              }
+            } else if (chartType === "combo") {
+              if (selected.length !== 2) {
+                alert("För kombinerat diagram, välj exakt två mått.");
+                return;
+              }
+            } else if (chartType === "pie") {
+              if (selected.length !== 1) {
+                alert("För pajdiagram, välj exakt ett mått.");
+                return;
+              }
+            } else {
+              if (selected.length !== 1) {
+                alert("För detta diagram, välj exakt ett mått.");
+                return;
+              }
             }
 
             setStep("chart-configuration");

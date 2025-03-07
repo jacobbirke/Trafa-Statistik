@@ -15,6 +15,8 @@ type Config = {
   seriesColors: Record<string, string>;
   measureColors: Record<string, string>;
   legendPosition: string;
+  variwideWidthMeasure: string | null;
+  variwideHeightMeasure: string | null;
 };
 
 export const handleGenerateChart = (
@@ -206,6 +208,123 @@ export const handleGenerateChart = (
     currentChart.redraw();
     return;
   }
+
+  // Variwide
+  if (config.chartType === "variwide") {
+    if (config.xAxisDimensions.length !== 1) {
+      alert("Välj exakt en dimension för x-axeln.");
+      return;
+    }
+
+    const selectedMeasures = config.measures.filter((m) => m.isSelected);
+    if (selectedMeasures.length !== 2) {
+      alert("Välj exakt två mått: ett för höjd och ett för bredd.");
+      return;
+    }
+
+    if (!config.variwideWidthMeasure) {
+      alert("Välj vilket mått som ska användas för bredden.");
+      return;
+    }
+    if (!config.variwideHeightMeasure) {
+      alert("Välj vilket mått som ska användas för höjden.");
+      return;
+    }
+
+    const widthMeasureIndex =
+      config.measures.findIndex((m) => m.name === config.variwideWidthMeasure) +
+      config.dimensions.length;
+    const heightMeasureIndex =
+      config.measures.findIndex(
+        (m) => m.name === config.variwideHeightMeasure
+      ) + config.dimensions.length;
+
+    const filteredRows = config.jsonData.filter((row) =>
+      config.dimensions.every((dimension) => {
+        const dimIndex = config.dimensions.findIndex(
+          (d) => d.name === dimension.name
+        );
+        return (
+          dimIndex === -1 ||
+          dimension.selectedValues.includes(row[dimIndex]?.toString())
+        );
+      })
+    );
+
+    const categoryDim = config.dimensions.find(
+      (d) => d.name === config.xAxisDimensions[0]
+    );
+    if (!categoryDim) {
+      alert("Ingen kategori vald för x-axeln.");
+      return;
+    }
+
+  const seriesData = categoryDim.selectedValues.map((category, index) => {
+    const categoryRows = filteredRows.filter(row => 
+      row[config.dimensions.findIndex(d => d.name === categoryDim.name)] === category
+    );
+
+      return {
+        name: category,
+        y: categoryRows.reduce((sum: number, row) => sum + (parseFloat(row[heightMeasureIndex]) || 0), 0),
+        z: categoryRows.reduce((sum: number, row) => sum + (parseFloat(row[widthMeasureIndex]) || 0), 0),
+        color: config.seriesColors[category] || Highcharts.getOptions().colors?.[index % 10]
+      };
+    });
+
+    while (currentChart.series.length > 0) {
+      currentChart.series[0].remove(false);
+    }
+
+    currentChart.update(
+      {
+        chart: {
+          type: "variwide",
+          options3d: { enabled: false }, 
+        },
+        title: { text: title || "Variwide Diagram" },
+        xAxis: {
+          type: "category",
+          categories: categoryDim.selectedValues,
+        },
+        yAxis: {
+          title: { text: config.variwideHeightMeasure || "Värde" },
+        },
+        legend: {
+          enabled: false,
+        },
+        plotOptions: {
+          variwide: {
+            tooltip: {
+              pointFormat:
+                `${config.variwideWidthMeasure}: <b> {point.z}</b><br>` +
+                `${config.variwideHeightMeasure}: <b>{point.y}</b><br`,
+            },
+          },
+        },
+      },
+      false
+    );
+
+    currentChart.addSeries(
+      {
+        type: "variwide",
+        name: "Variwide Series",
+        data: seriesData,
+        colorByPoint: true,
+        dataLabels: {
+          enabled: true,
+          format: "{point.y:.1f}",
+
+        },
+      },
+      false
+    );
+
+    currentChart.redraw();
+    return;
+  }
+
 
   // Staplad kolumn
   if (chartType === "stacked") {

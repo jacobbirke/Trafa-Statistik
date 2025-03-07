@@ -26,7 +26,7 @@ const EmbedPage: React.FC = () => {
   if (!config) return <div className="p-4">Laddar...</div>;
 
   return (
-    <div className="min-h-screen bg-white p-4">
+    <div className="min-h-screen bg-white p-3">
       <EmbeddedChart config={config} />
     </div>
   );

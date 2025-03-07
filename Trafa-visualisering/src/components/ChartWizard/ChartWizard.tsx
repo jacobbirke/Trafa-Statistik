@@ -39,6 +39,10 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setIs3D,
   legendPosition,
   setLegendPosition,
+  variwideWidthMeasure,
+  setVariwideWidthMeasure,
+  variwideHeightMeasure,
+  setVariwideHeightMeasure,
 }) => {
   return (
     <div className="max-w-7xl mx-auto p-3 space-y-8">
@@ -85,6 +89,10 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setBarMeasure={setBarMeasure}
           setLineMeasure={setLineMeasure}
           setStep={setStep}
+          variwideWidthMeasure={variwideWidthMeasure}
+          setVariwideWidthMeasure={setVariwideWidthMeasure}
+          variwideHeightMeasure={variwideHeightMeasure}
+          setVariwideHeightMeasure={setVariwideHeightMeasure}
         />
       )}
 
@@ -118,6 +126,10 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setMeasureColors={setMeasureColors}
           legendPosition={legendPosition}
           setLegendPosition={setLegendPosition}
+          variwideWidthMeasure={variwideWidthMeasure}
+          setVariwideWidthMeasure={setVariwideWidthMeasure}
+          variwideHeightMeasure={variwideHeightMeasure}
+          setVariwideHeightMeasure={setVariwideHeightMeasure}
         />
       )}
     </div>
