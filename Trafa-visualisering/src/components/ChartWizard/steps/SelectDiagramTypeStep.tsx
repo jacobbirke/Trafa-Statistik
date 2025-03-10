@@ -15,7 +15,8 @@ const chartOptions = [
   { value: "combo", label: "Kombinerat (Stapel & Linje)", icon: "🔀" },
   { value: "stacked", label: "Staplad kolumn", icon: "🟰" },
   { value: "pie", label: "Pajdiagram", icon: "🥧" },
-  { value: "variwide", label: "Variwide Diagram", icon: "📏" }
+  { value: "variwide", label: "Variwide Diagram", icon: "📏" },
+  { value: "stackedArea", label: "Staplad yta", icon: "📊" },
 ];
 
 export const SelectDiagramTypeStep: React.FC<Props> = ({
