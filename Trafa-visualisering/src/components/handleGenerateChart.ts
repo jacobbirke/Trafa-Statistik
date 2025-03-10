@@ -47,6 +47,14 @@ export const handleGenerateChart = (
     return;
   }
 
+  const validateFilteredRows = (rows: any[]): boolean => {
+    if (rows.length === 0) {
+      alert("Ingen data matchar det valda filtret.");
+      return false;
+    }
+    return true;
+  };
+
   const getLegendOptions = (position: string): Highcharts.LegendOptions => {
     switch (position) {
       case "top":
@@ -137,10 +145,7 @@ export const handleGenerateChart = (
         return dimension.selectedValues.includes(rowValue);
       })
     );
-    if (filteredRows.length === 0) {
-      alert("Inga rader matchar de valda filtren.");
-      return;
-    }
+    if (!validateFilteredRows(filteredRows)) return;
 
     const categorySums: { [key: string]: number } = {};
     filteredRows.forEach((row) => {
@@ -259,16 +264,28 @@ export const handleGenerateChart = (
       return;
     }
 
-  const seriesData = categoryDim.selectedValues.map((category, index) => {
-    const categoryRows = filteredRows.filter(row => 
-      row[config.dimensions.findIndex(d => d.name === categoryDim.name)] === category
-    );
+    const seriesData = categoryDim.selectedValues.map((category, index) => {
+      const categoryRows = filteredRows.filter(
+        (row) =>
+          row[
+            config.dimensions.findIndex((d) => d.name === categoryDim.name)
+          ] === category
+      );
 
       return {
         name: category,
-        y: categoryRows.reduce((sum: number, row) => sum + (parseFloat(row[heightMeasureIndex]) || 0), 0),
-        z: categoryRows.reduce((sum: number, row) => sum + (parseFloat(row[widthMeasureIndex]) || 0), 0),
-        color: config.seriesColors[category] || Highcharts.getOptions().colors?.[index % 10]
+        y: categoryRows.reduce(
+          (sum: number, row) =>
+            sum + (parseFloat(row[heightMeasureIndex]) || 0),
+          0
+        ),
+        z: categoryRows.reduce(
+          (sum: number, row) => sum + (parseFloat(row[widthMeasureIndex]) || 0),
+          0
+        ),
+        color:
+          config.seriesColors[category] ||
+          Highcharts.getOptions().colors?.[index % 10],
       };
     });
 
@@ -280,7 +297,7 @@ export const handleGenerateChart = (
       {
         chart: {
           type: "variwide",
-          options3d: { enabled: false }, 
+          options3d: { enabled: false },
         },
         title: { text: title || "Variwide Diagram" },
         xAxis: {
@@ -315,7 +332,6 @@ export const handleGenerateChart = (
         dataLabels: {
           enabled: true,
           format: "{point.y:.1f}",
-
         },
       },
       false
@@ -325,6 +341,108 @@ export const handleGenerateChart = (
     return;
   }
 
+  // Stacked Area
+  if (chartType === "stackedArea") {
+    if (xAxisDimensions.length !== 1) {
+      alert("För staplat områdesdiagram, välj exakt en dimension för x-axeln.");
+      return;
+    }
+    if (!seriesDimension) {
+      alert("För staplat områdesdiagram, välj en dimension för serier.");
+      return;
+    }
+    const selectedMeasuresForStacked = measures.filter((m) => m.isSelected);
+    if (selectedMeasuresForStacked.length !== 1) {
+      alert("För staplat områdesdiagram, välj exakt ett mått.");
+      return;
+    }
+    const measure = selectedMeasuresForStacked[0];
+    const measureIndex =
+      dimensions.length + measures.findIndex((m) => m.name === measure.name);
+    const xAxisIndex = dimensions.findIndex(
+      (dim) => dim.name === xAxisDimensions[0]
+    );
+    const seriesDimIndex = dimensions.findIndex(
+      (dim) => dim.name === seriesDimension
+    );
+    const filteredRows = jsonData.filter((row) =>
+      dimensions.every((dimension) => {
+        const dimensionIndex = dimensions.findIndex(
+          (dim) => dim.name === dimension.name
+        );
+        if (dimensionIndex === -1) return true;
+        const rowValue = row[dimensionIndex]?.toString();
+        return dimension.selectedValues.includes(rowValue);
+      })
+    );
+    if (!validateFilteredRows(filteredRows)) return;
+
+    const categories = dimensions.find(
+      (dim) => dim.name === xAxisDimensions[0]
+    )?.selectedValues;
+    if (!categories || categories.length === 0) {
+      alert("Ingen kategori vald för x-axeln.");
+      return;
+    }
+    const seriesCategories = dimensions.find(
+      (dim) => dim.name === seriesDimension
+    )?.selectedValues;
+    if (!seriesCategories || seriesCategories.length === 0) {
+      alert("Ingen serie vald.");
+      return;
+    }
+    const stackedSeriesData: any[] = [];
+    seriesCategories.forEach((seriesValue, index) => {
+      const data: number[] = [];
+      categories.forEach((category) => {
+        const total = filteredRows
+          .filter((row) => {
+            const cat = row[xAxisIndex]?.toString();
+            const seriesVal = row[seriesDimIndex]?.toString();
+            return cat === category && seriesVal === seriesValue;
+          })
+          .reduce((sum, row) => {
+            const value = parseFloat(row[measureIndex]);
+            return sum + (isNaN(value) ? 0 : value);
+          }, 0);
+        data.push(total);
+      });
+      stackedSeriesData.push({
+        name: seriesValue,
+        data,
+        type: "area",
+        stacking: "normal",
+        color:
+          config.seriesColors[seriesValue] ||
+          Highcharts.getOptions().colors?.[index % 10],
+      });
+    });
+
+    currentChart.update({
+      chart: {
+        type: "area",
+        ...threeDOptions,
+      },
+      title: { text: title || "Diagram" },
+      yAxis: {
+        title: { text: measure.name || "Värde" },
+      },
+      plotOptions: {
+        area: {
+          stacking: "normal",
+        },
+      },
+    });
+    currentChart.xAxis[0].update({ categories });
+    while (currentChart.series.length > 0) {
+      currentChart.series[0].remove(false);
+    }
+    stackedSeriesData.forEach((serie) => currentChart.addSeries(serie, false));
+    const legendOptions = getLegendOptions(config.legendPosition);
+    currentChart.update({ legend: legendOptions }, false, false);
+    currentChart.redraw();
+    return;
+  }
 
   // Staplad kolumn
   if (chartType === "stacked") {
@@ -360,10 +478,7 @@ export const handleGenerateChart = (
         return dimension.selectedValues.includes(rowValue);
       })
     );
-    if (filteredRows.length === 0) {
-      alert("Inga rader matchar de valda filtren.");
-      return;
-    }
+    if (!validateFilteredRows(filteredRows)) return;
 
     const categories = dimensions.find(
       (dim) => dim.name === xAxisDimensions[0]
@@ -433,6 +548,10 @@ export const handleGenerateChart = (
         serie.color = config.measureColors[lineMeasure!] || serie.color;
       }
     });
+
+    const legendOptions = getLegendOptions(config.legendPosition);
+    currentChart.update({ legend: legendOptions }, false, false);
+
     currentChart.redraw();
     return;
   }
@@ -474,7 +593,7 @@ export const handleGenerateChart = (
   );
 
   if (filteredRowsGeneral.length === 0) {
-    alert("Inga rader matchar de valda filtren.");
+    alert("Ingen data matchar det valda filtret.");
     return;
   }
 

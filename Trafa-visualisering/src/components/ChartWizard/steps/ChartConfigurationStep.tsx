@@ -45,8 +45,8 @@ export const ChartConfigurationStep: React.FC<Props> = ({
   variwideHeightMeasure,
   setVariwideHeightMeasure,
 }) => {
-  // For variwide or stacked charts, only one x-axis dimension (category) is allowed.
-  const maxXAxisAllowed = chartType === "variwide" || chartType === "stacked" ? 1 : 2;
+  const maxXAxisAllowed =
+    chartType === "variwide" || chartType === "stacked" || chartType === "stackedArea" ? 1 : 2;
 
   const handleXAxisChange = (dimName: string) => {
     if (xAxisDimensions.includes(dimName)) {
@@ -67,7 +67,7 @@ export const ChartConfigurationStep: React.FC<Props> = ({
   return (
     <Card>
       <h3 className="text-2xl font-bold mb-4">Diagramkonfiguration</h3>
-      
+
       {chartType === "variwide" && (
         <>
           <div className="mb-4">
@@ -185,11 +185,16 @@ export const ChartConfigurationStep: React.FC<Props> = ({
                   <div>
                     <span className="text-style">
                       {dim.name}
-                      {xAxisDimensions[0] === dim.name && chartType !== "stacked" && (
-                        <span className="ml-2 text-blue-500">- Huvudkategori</span>
-                      )}
+                      {xAxisDimensions[0] === dim.name &&
+                        chartType !== "stacked" && (
+                          <span className="ml-2 text-blue-500">
+                            - Huvudkategori
+                          </span>
+                        )}
                       {xAxisDimensions[1] === dim.name && (
-                        <span className="ml-2 text-blue-500">- Underkategori</span>
+                        <span className="ml-2 text-blue-500">
+                          - Underkategori
+                        </span>
                       )}
                     </span>
                   </div>

@@ -221,7 +221,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     <Card>
       <div className="border-2 border-gray-300 p-4 rounded mb-5">
         <h3 className="text-2xl font-bold mb-4">Snabbkonfiguration</h3>
-        <div className="mb-1 p-2">
+        <div className="mb-1 p-1">
           <label className="block text-xl font-semibold mb-2">
             Diagramtitel
           </label>

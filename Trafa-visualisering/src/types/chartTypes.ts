@@ -1,4 +1,4 @@
-export type ChartType = "column" | "line" | "combo" | "pie" | "stacked" | "variwide";
+export type ChartType = "column" | "line" | "combo" | "pie" | "stacked" | "stackedArea" | "variwide";
 export type WizardStep =
   | "input-file"
   | "select-diagram-type"
