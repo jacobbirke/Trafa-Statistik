@@ -208,8 +208,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     try {
       const response = await fetch('https://trafa-statistik-server.vercel.app/api/configs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(chartConfig),
+        credentials: 'include' 
       });
   
       if (!response.ok) {

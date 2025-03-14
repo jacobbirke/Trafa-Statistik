@@ -15,7 +15,7 @@ export const InputFileStep: React.FC<Props> = ({
   return (
     <Card className="p-20 flex flex-col items-center">
       <h3 className="text-2xl font-bold text-center">Ladda upp fil</h3>
-      <h6 className="text-center mb-10">.xlsx, .xls, .csv</h6>
+      <h6 className="text-center mb-10">Möjliga filformat (.xlsx, .xls, .csv)</h6>
 
       <input
         type="file"

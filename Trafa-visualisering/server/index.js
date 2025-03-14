@@ -6,10 +6,16 @@ import ChartConfig from './models/ChartConfig.js';
 
 const app = express();
 
-app.use(cors({
-  origin: 'https://jacob-trafa.vercel.app',
-  credentials: true,
-}));
+app.use((err, req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'https://jacob-trafa.vercel.app');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.status(500).json({ error: 'Internal Server Error' });
+  });
+
+app.options('/api/configs', cors({
+    origin: 'https://jacob-trafa.vercel.app',
+    credentials: true,
+  }));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -47,10 +53,6 @@ app.get('/api/configs/:id', async (req, res) => {
   }
 });
 
-app.options('/api/configs', cors({
-    origin: 'https://jacob-trafa.vercel.app',
-    credentials: true,
-  }));
 
 app.listen(config.PORT, () => {
   console.log(`Server running on port ${config.PORT}`);
