@@ -6,11 +6,10 @@ import ChartConfig from './models/ChartConfig.js';
 
 const app = express();
 
-app.use((err, req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://jacob-trafa.vercel.app');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.status(500).json({ error: 'Internal Server Error' });
-  });
+app.use(cors({
+  origin: 'https://jacob-trafa.vercel.app',
+  credentials: true,
+}));
 
 app.options('/api/configs', cors({
     origin: 'https://jacob-trafa.vercel.app',
