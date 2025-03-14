@@ -7,7 +7,7 @@ import ChartConfig from './models/ChartConfig.js';
 const app = express();
 
 app.use(cors({
-  origin: 'https://jacob-trafa.vercel.app/',
+  origin: 'https://jacob-trafa.vercel.app',
   credentials: true,
 }));
 
@@ -46,6 +46,11 @@ app.get('/api/configs/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.options('/api/configs', cors({
+    origin: 'https://jacob-trafa.vercel.app',
+    credentials: true,
+  }));
 
 app.listen(config.PORT, () => {
   console.log(`Server running on port ${config.PORT}`);
