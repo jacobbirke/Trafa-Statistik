@@ -6,21 +6,31 @@ const EmbedPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const configParam = params.get('config');
-      
-      if (!configParam) {
-        throw new Error('Missing config parameter');
+    const fetchConfig = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const configId = params.get('configId');
+  
+        if (!configId) {
+          throw new Error('Missing config ID');
+        }
+  
+        const response = await fetch(`http://localhost:5000/api/configs/${configId}`);
+        if (!response.ok) {
+          throw new Error('Config not found');
+        }
+  
+        const config = await response.json();
+        setConfig(config);
+      } catch (err) {
+        setError('Invalid or expired embed configuration');
+        console.error('Embed error:', err);
       }
-
-      const decoded = JSON.parse(decodeURIComponent(configParam));
-      setConfig(decoded);
-    } catch (err) {
-      setError('Invalid embed configuration');
-      console.error('Embed error:', err);
-    }
+    };
+  
+    fetchConfig();
   }, []);
+
 
   if (error) return <div className="p-4 text-red-500">{error}</div>;
   if (!config) return <div className="p-4">Laddar...</div>;

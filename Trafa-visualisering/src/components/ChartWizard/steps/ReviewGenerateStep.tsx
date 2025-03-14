@@ -187,7 +187,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     handleGenerateChart();
   };
 
-  const generateEmbedCode = () => {
+  const generateEmbedCode = async () => {
     const chartConfig = {
       dimensions,
       measures,
@@ -205,16 +205,32 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       variwideWidthMeasure,
       variwideHeightMeasure,
     };
-    const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
-    const embedUrl = `${window.location.origin}/embed?config=${encodedConfig}`;
-    setEmbedCode(
-      `<iframe 
+    try {
+      const response = await fetch('http://localhost:5000/api/configs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(chartConfig),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to save config');
+      }
+  
+      const { id } = await response.json();
+      const embedUrl = `${window.location.origin}/embed?configId=${id}`;
+  
+      setEmbedCode(
+        `<iframe 
           src="${embedUrl}"
           width="100%" 
           height="700" 
           style="border:1px solid #ddd;border-radius:8px"
         ></iframe>`
-    );
+      );
+    } catch (error) {
+      console.error('Embed generation failed:', error);
+      alert('Failed to generate embed code. Please try again.');
+    }
   };
 
   return (
