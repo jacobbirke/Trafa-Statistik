@@ -206,7 +206,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       variwideHeightMeasure,
     };
     try {
-      const response = await fetch('http://localhost:5000/api/configs', {
+      const response = await fetch('https://trafa-statistik-server.vercel.app/api/configs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(chartConfig),

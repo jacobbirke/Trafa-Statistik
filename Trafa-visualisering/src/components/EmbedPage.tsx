@@ -15,7 +15,7 @@ const EmbedPage: React.FC = () => {
           throw new Error('Missing config ID');
         }
   
-        const response = await fetch(`http://localhost:5000/api/configs/${configId}`);
+        const response = await fetch(`https://trafa-statistik-server.vercel.app/api/configs/${configId}`);
         if (!response.ok) {
           throw new Error('Config not found');
         }
