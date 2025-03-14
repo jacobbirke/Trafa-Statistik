@@ -10,7 +10,9 @@
       {
         "src": "/api/(.*)",
         "dest": "server/index.js",
-        "methods": ["GET", "POST", "OPTIONS"]
+        "methods": ["GET", "POST", "OPTIONS"],
+              "headers": {
+        "Access-Control-Allow-Origin": "*"}
       }
     ]
   }
