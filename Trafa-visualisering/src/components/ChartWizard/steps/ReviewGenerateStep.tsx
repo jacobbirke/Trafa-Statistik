@@ -205,11 +205,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       variwideWidthMeasure,
       variwideHeightMeasure,
     };
+
     try {
       const backendUrl =
         import.meta.env.VITE_API_URL_PROD || import.meta.env.VITE_API_URL_DEV;
-        console.log("Backend URL:", backendUrl); 
-
+      console.log("Backend URL:", backendUrl); 
 
       if (!backendUrl) {
         throw new Error("Backend URL is not defined");
@@ -224,7 +224,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         credentials: "include",
       });
 
+      console.log("Response status:", response.status); 
+
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData); 
         throw new Error("Failed to save config");
       }
 
@@ -233,11 +237,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
       setEmbedCode(
         `<iframe 
-            src="${embedUrl}"
-            width="100%" 
-            height="700" 
-            style="border:1px solid #ddd;border-radius:8px"
-          ></iframe>`
+          src="${embedUrl}"
+          width="100%" 
+          height="700" 
+          style="border:1px solid #ddd;border-radius:8px"
+        ></iframe>`
       );
     } catch (error) {
       console.error("Embed generation failed:", error);
