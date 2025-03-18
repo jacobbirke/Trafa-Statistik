@@ -206,9 +206,14 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       variwideHeightMeasure,
     };
     try {
-      const backendUrl = import.meta.env.PROD
-        ? import.meta.env.VITE_API_URL_PROD
-        : import.meta.env.VITE_API_URL_DEV;
+      const backendUrl =
+        import.meta.env.VITE_API_URL_PROD || import.meta.env.VITE_API_URL_DEV;
+        console.log("Backend URL:", backendUrl); 
+
+
+      if (!backendUrl) {
+        throw new Error("Backend URL is not defined");
+      }
 
       const response = await fetch(`${backendUrl}/api/configs`, {
         method: "POST",
@@ -228,11 +233,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
       setEmbedCode(
         `<iframe 
-          src="${embedUrl}"
-          width="100%" 
-          height="700" 
-          style="border:1px solid #ddd;border-radius:8px"
-        ></iframe>`
+            src="${embedUrl}"
+            width="100%" 
+            height="700" 
+            style="border:1px solid #ddd;border-radius:8px"
+          ></iframe>`
       );
     } catch (error) {
       console.error("Embed generation failed:", error);
