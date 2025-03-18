@@ -6,7 +6,7 @@
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "client": "vite",
-    "server": "node server/index.js",
+    "server": "cd ../server && npm start",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
