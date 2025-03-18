@@ -15,7 +15,6 @@ mongoose
 const allowedOrigins = [
   "https://jacob-trafa.vercel.app",
   "http://localhost:5173",
-  "http://localhost:5000",
 ];
 
 app.use(

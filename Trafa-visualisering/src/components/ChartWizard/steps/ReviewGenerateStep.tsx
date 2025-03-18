@@ -209,11 +209,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     try {
       const backendUrl =
         import.meta.env.VITE_API_URL_PROD || import.meta.env.VITE_API_URL_DEV;
-      console.log("Backend URL:", backendUrl); 
-
-      if (!backendUrl) {
-        throw new Error("Backend URL is not defined");
-      }
 
       const response = await fetch(`${backendUrl}/api/configs`, {
         method: "POST",
@@ -223,14 +218,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         body: JSON.stringify(chartConfig),
         credentials: "include",
       });
-
-      console.log("Response status:", response.status); 
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error response:", errorData); 
-        throw new Error("Failed to save config");
-      }
 
       const { id } = await response.json();
       const embedUrl = `${window.location.origin}/embed?configId=${id}`;
