@@ -206,22 +206,26 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       variwideHeightMeasure,
     };
     try {
-      const response = await fetch('https://trafa-statistik-server.vercel.app/api/configs', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
+      const backendUrl = import.meta.env.PROD
+        ? import.meta.env.VITE_API_URL_PROD
+        : import.meta.env.VITE_API_URL_DEV;
+
+      const response = await fetch(`${backendUrl}/api/configs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(chartConfig),
-        credentials: 'include' 
+        credentials: "include",
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to save config');
+        throw new Error("Failed to save config");
       }
-  
+
       const { id } = await response.json();
       const embedUrl = `${window.location.origin}/embed?configId=${id}`;
-  
+
       setEmbedCode(
         `<iframe 
           src="${embedUrl}"
@@ -231,8 +235,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         ></iframe>`
       );
     } catch (error) {
-      console.error('Embed generation failed:', error);
-      alert('Failed to generate embed code. Please try again.');
+      console.error("Embed generation failed:", error);
+      alert("Failed to generate embed code. Please try again.");
     }
   };
 
