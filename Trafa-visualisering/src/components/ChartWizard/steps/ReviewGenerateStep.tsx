@@ -384,7 +384,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       typeof colorValue === "string" ? colorValue : "#ff0000";
                     return (
                       <div key={value} className="flex items-center gap-2 mb-2">
-                        <label className="text-sm">{value}</label>
                         <input
                           type="color"
                           value={validColorValue}
@@ -394,7 +393,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                               [value]: e.target.value,
                             }))
                           }
-                        />
+                        />{" "}
+                        <label className="text-sm">{value}</label>
                       </div>
                     );
                   })
@@ -672,7 +672,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <h4 className="text-xl font-semibold mb-2">
-                  Välj Mått för Stapeldiagram
+                  Välj Mått för Stapel
                 </h4>
                 {tempMeasures
                   .filter((m) => m.isSelected)
@@ -695,7 +695,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
               <div className="flex-1">
                 <h4 className="text-xl font-semibold mb-2">
-                  Välj Mått för Linjediagram
+                  Välj Mått för Linje
                 </h4>
                 {tempMeasures
                   .filter((m) => m.isSelected)
@@ -717,6 +717,69 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               </div>
             </div>
           </div>
+        )}
+
+        {chartType === "variwide" && (
+          <>
+            <div className="mb-2 p-1">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <h4 className="text-xl font-semibold mb-2">
+                    Välj mått för bredd
+                  </h4>
+                  {measures
+                    .filter((m) => m.isSelected)
+                    .map((measure) => (
+                      <div
+                        key={measure.name}
+                        className="flex items-center mb-2"
+                      >
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            name="variwideWidthMeasure"
+                            value={measure.name}
+                            checked={variwideWidthMeasure === measure.name}
+                            onChange={() =>
+                              setVariwideWidthMeasure(measure.name)
+                            }
+                            className="mr-2"
+                          />
+                          {measure.name}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-xl font-semibold mb-2">
+                    Välj mått för höjd
+                  </h4>
+                  {measures
+                    .filter((m) => m.isSelected)
+                    .map((measure) => (
+                      <div
+                        key={measure.name}
+                        className="flex items-center mb-2"
+                      >
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            name="variwideHeightMeasure"
+                            value={measure.name}
+                            checked={variwideHeightMeasure === measure.name}
+                            onChange={() =>
+                              setVariwideHeightMeasure(measure.name)
+                            }
+                            className="mr-2"
+                          />
+                          {measure.name}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </>
         )}
 
         <div className="flex space-x-4 mt-4">

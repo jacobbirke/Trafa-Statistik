@@ -264,6 +264,22 @@ export const handleGenerateChart = (
       return;
     }
 
+    const filteredRowsGeneral = jsonData.filter((row) =>
+      dimensions.every((dimension) => {
+        const dimensionIndex = dimensions.findIndex(
+          (dim) => dim.name === dimension.name
+        );
+        if (dimensionIndex === -1) return true;
+        const rowValue = row[dimensionIndex]?.toString();
+        return dimension.selectedValues.includes(rowValue);
+      })
+    );
+
+    if (filteredRowsGeneral.length === 0) {
+      alert("Ingen data matchar det valda filtret.");
+      return;
+    }
+
     const seriesData = categoryDim.selectedValues.map((category, index) => {
       const categoryRows = filteredRows.filter(
         (row) =>
@@ -314,8 +330,8 @@ export const handleGenerateChart = (
           variwide: {
             tooltip: {
               pointFormat:
-                `${config.variwideWidthMeasure}: <b> {point.z}</b><br>` +
-                `${config.variwideHeightMeasure}: <b>{point.y}</b><br`,
+                `Höjd: ${config.variwideHeightMeasure}: <b>{point.y}</b><br` +
+                `Bredd: ${config.variwideWidthMeasure}: <b> {point.z}</b><br>`,
             },
           },
         },
