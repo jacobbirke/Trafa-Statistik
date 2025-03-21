@@ -33,8 +33,32 @@ const StatistikGränssnitt: React.FC = () => {
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [legendPosition, setLegendPosition] = useState<string>("bottom");
-  const [variwideWidthMeasure, setVariwideWidthMeasure] = useState<string | null>(null);
-  const [variwideHeightMeasure, setVariwideHeightMeasure] = useState<string | null>(null);
+  const [variwideWidthMeasure, setVariwideWidthMeasure] = useState<
+    string | null
+  >(null);
+  const [variwideHeightMeasure, setVariwideHeightMeasure] = useState<
+    string | null
+  >(null);
+  const [yAxisPrimaryTitle, setYAxisPrimaryTitle] = useState("");
+  const [yAxisSecondaryTitle, setYAxisSecondaryTitle] = useState("");
+  const [yAxisPrimaryMin, setYAxisPrimaryMin] = useState<number | undefined>(
+    undefined
+  );
+  const [yAxisPrimaryMax, setYAxisPrimaryMax] = useState<number | undefined>(
+    undefined
+  );
+  const [yAxisPrimaryTick, setYAxisPrimaryTick] = useState<number | undefined>(
+    undefined
+  );
+  const [yAxisSecondaryMin, setYAxisSecondaryMin] = useState<
+    number | undefined
+  >(undefined);
+  const [yAxisSecondaryMax, setYAxisSecondaryMax] = useState<
+    number | undefined
+  >(undefined);
+  const [yAxisSecondaryTick, setYAxisSecondaryTick] = useState<
+    number | undefined
+  >(undefined);
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -67,6 +91,14 @@ const StatistikGränssnitt: React.FC = () => {
         legendPosition,
         variwideWidthMeasure,
         variwideHeightMeasure,
+        yAxisPrimaryTitle,
+        yAxisSecondaryTitle,
+        yAxisPrimaryMin,
+        yAxisPrimaryMax,
+        yAxisPrimaryTick,
+        yAxisSecondaryMin,
+        yAxisSecondaryMax,
+        yAxisSecondaryTick,
       },
       containerRef.current
     );
@@ -209,6 +241,22 @@ const StatistikGränssnitt: React.FC = () => {
         setVariwideWidthMeasure={setVariwideWidthMeasure}
         variwideHeightMeasure={variwideHeightMeasure}
         setVariwideHeightMeasure={setVariwideHeightMeasure}
+        yAxisPrimaryTitle={yAxisPrimaryTitle}
+        setYAxisPrimaryTitle={setYAxisPrimaryTitle}
+        yAxisSecondaryTitle={yAxisSecondaryTitle}
+        setYAxisSecondaryTitle={setYAxisSecondaryTitle}
+        yAxisPrimaryMin={yAxisPrimaryMin}
+        setYAxisPrimaryMin={setYAxisPrimaryMin}
+        yAxisPrimaryMax={yAxisPrimaryMax}
+        setYAxisPrimaryMax={setYAxisPrimaryMax}
+        yAxisPrimaryTick={yAxisPrimaryTick}
+        setYAxisPrimaryTick={setYAxisPrimaryTick}
+        yAxisSecondaryMin={yAxisSecondaryMin}
+        setYAxisSecondaryMin={setYAxisSecondaryMin}
+        yAxisSecondaryMax={yAxisSecondaryMax}
+        setYAxisSecondaryMax={setYAxisSecondaryMax}
+        yAxisSecondaryTick={yAxisSecondaryTick}
+        setYAxisSecondaryTick={setYAxisSecondaryTick}
       />
     </div>
   );

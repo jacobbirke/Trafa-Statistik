@@ -26,7 +26,7 @@ interface Props {
   is3D: boolean;
   setIs3D: React.Dispatch<React.SetStateAction<boolean>>;
   containerRef: React.RefObject<HTMLDivElement>;
-  handleGenerateChart: () => void;
+  handleGenerateChart: (config: any) => void;
   handleGoBack: () => void;
   setStep: (step: WizardStep) => void;
   jsonData: any[];
@@ -44,6 +44,28 @@ interface Props {
   setVariwideWidthMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   variwideHeightMeasure: string | null;
   setVariwideHeightMeasure: React.Dispatch<React.SetStateAction<string | null>>;
+  yAxisPrimaryTitle: string;
+  setYAxisPrimaryTitle: React.Dispatch<React.SetStateAction<string>>;
+  yAxisSecondaryTitle: string;
+  setYAxisSecondaryTitle: React.Dispatch<React.SetStateAction<string>>;
+  yAxisPrimaryMin?: number;
+  setYAxisPrimaryMin: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisPrimaryMax?: number;
+  setYAxisPrimaryMax: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisPrimaryTick?: number;
+  setYAxisPrimaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisSecondaryMin?: number;
+  setYAxisSecondaryMin: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
+  yAxisSecondaryMax?: number;
+  setYAxisSecondaryMax: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
+  yAxisSecondaryTick?: number;
+  setYAxisSecondaryTick: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -79,6 +101,22 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setVariwideWidthMeasure,
   variwideHeightMeasure,
   setVariwideHeightMeasure,
+  yAxisPrimaryTitle,
+  setYAxisPrimaryTitle,
+  yAxisSecondaryTitle,
+  setYAxisSecondaryTitle,
+  yAxisPrimaryMin,
+  setYAxisPrimaryMin,
+  yAxisPrimaryMax,
+  setYAxisPrimaryMax,
+  yAxisPrimaryTick,
+  setYAxisPrimaryTick,
+  yAxisSecondaryMin,
+  setYAxisSecondaryMin,
+  yAxisSecondaryMax,
+  setYAxisSecondaryMax,
+  yAxisSecondaryTick,
+  setYAxisSecondaryTick,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -92,6 +130,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   const [tempLineMeasure, setTempLineMeasure] = useState(lineMeasure);
   const [embedCode, setEmbedCode] = useState<string>("");
   const defaultColors = Highcharts.getOptions().colors as string[];
+  const [isYAxisTitleEdited, setIsYAxisTitleEdited] = useState(false);
 
   useEffect(() => {
     setTempDimensions([...dimensions]);
@@ -108,6 +147,53 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     barMeasure,
     lineMeasure,
   ]);
+
+  useEffect(() => {
+    if (!isYAxisTitleEdited) {
+      let defaultTitle = "";
+      const selectedMeasures = measures.filter((m) => m.isSelected);
+
+      switch (chartType) {
+        case "line":
+          defaultTitle = lineMeasure || selectedMeasures[0]?.name || "";
+          break;
+        case "column":
+        case "stacked":
+        case "stackedArea":
+          defaultTitle = barMeasure || selectedMeasures[0]?.name || "";
+          break;
+        case "variwide":
+          defaultTitle = variwideHeightMeasure || "";
+          break;
+        case "combo":
+          break;
+        default:
+          defaultTitle = selectedMeasures[0]?.name || "";
+      }
+
+      if (defaultTitle) {
+        setYAxisPrimaryTitle(defaultTitle);
+      }
+    }
+  }, [
+    chartType,
+    barMeasure,
+    lineMeasure,
+    measures,
+    variwideHeightMeasure,
+    yAxisPrimaryTitle,
+    isYAxisTitleEdited,
+  ]);
+
+  useEffect(() => {
+    setIsYAxisTitleEdited(false);
+  }, [barMeasure, lineMeasure, variwideHeightMeasure]);
+
+  useEffect(() => {
+    if (chartType === "combo" && !yAxisSecondaryTitle && lineMeasure) {
+      setYAxisSecondaryTitle(lineMeasure);
+    }
+  }, [chartType, lineMeasure, yAxisSecondaryTitle, setYAxisSecondaryTitle]);
 
   useEffect(() => {
     if (tempSeriesDimension) {
@@ -184,7 +270,33 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     setLineMeasure(tempLineMeasure);
     setVariwideHeightMeasure(variwideHeightMeasure);
     setVariwideWidthMeasure(variwideWidthMeasure);
-    handleGenerateChart();
+
+    const updatedConfig = {
+      dimensions: tempDimensions,
+      measures: tempMeasures,
+      xAxisDimensions: tempXAxisDimensions,
+      seriesDimension: tempSeriesDimension,
+      chartType,
+      barMeasure: tempBarMeasure,
+      lineMeasure: tempLineMeasure,
+      is3D,
+      title,
+      jsonData,
+      seriesColors,
+      measureColors,
+      legendPosition,
+      variwideWidthMeasure,
+      variwideHeightMeasure,
+      yAxisPrimaryTitle,
+      yAxisPrimaryMin,
+      yAxisPrimaryMax,
+      yAxisPrimaryTick,
+      yAxisSecondaryMin,
+      yAxisSecondaryMax,
+      yAxisSecondaryTick,
+    };
+
+    handleGenerateChart(updatedConfig);
   };
 
   const generateEmbedCode = async () => {
@@ -204,6 +316,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       legendPosition,
       variwideWidthMeasure,
       variwideHeightMeasure,
+      yAxisPrimaryTitle,
+      yAxisSecondaryTitle,
     };
 
     try {
@@ -411,7 +525,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 className={`py-2 px-4 rounded-lg text-base ${
                   legendPosition === "top"
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
+                    : "bg-gray-200 text-black hover:bg-blue-100"
                 }`}
                 onClick={() => setLegendPosition("top")}
               >
@@ -421,7 +535,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 className={`py-2 px-4 rounded-lg text-base ${
                   legendPosition === "right"
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
+                    : "bg-gray-200 text-black hover:bg-blue-100"
                 }`}
                 onClick={() => setLegendPosition("right")}
               >
@@ -431,7 +545,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 className={`py-2 px-4 rounded-lg text-base ${
                   legendPosition === "bottom"
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
+                    : "bg-gray-200 text-black hover:bg-blue-100"
                 }`}
                 onClick={() => setLegendPosition("bottom")}
               >
@@ -441,7 +555,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 className={`py-2 px-4 rounded-lg text-base ${
                   legendPosition === "left"
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
+                    : "bg-gray-200 text-black hover:bg-blue-100"
                 }`}
                 onClick={() => setLegendPosition("left")}
               >
@@ -451,7 +565,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 className={`py-2 px-4 rounded-lg text-base ${
                   legendPosition === "inside"
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
+                    : "bg-gray-200 text-black hover:bg-blue-100"
                 }`}
                 onClick={() => setLegendPosition("inside")}
               >
@@ -718,6 +832,148 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             </div>
           </div>
         )}
+
+        <div className="mb-4 p-1 ">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1 font-medium">Y-Axel Titel</label>
+              <input
+                type="text"
+                value={yAxisPrimaryTitle}
+                onChange={(e) => {
+                  setYAxisPrimaryTitle(e.target.value);
+                  setIsYAxisTitleEdited(true);
+                }}
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Titel för primär Y-Axis"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">
+                Y-Axel Värde Minimum
+              </label>
+              <input
+                type="number"
+                value={yAxisPrimaryMin !== undefined ? yAxisPrimaryMin : ""}
+                onChange={(e) =>
+                  setYAxisPrimaryMin(
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
+                }
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Minvärde"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">
+                Y-Axel Värde Max
+              </label>
+              <input
+                type="number"
+                value={yAxisPrimaryMax !== undefined ? yAxisPrimaryMax : ""}
+                onChange={(e) =>
+                  setYAxisPrimaryMax(
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
+                }
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Maxvärde"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">
+                Y-axel Intervall
+              </label>
+              <input
+                type="number"
+                value={yAxisPrimaryTick !== undefined ? yAxisPrimaryTick : ""}
+                onChange={(e) =>
+                  setYAxisPrimaryTick(
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
+                }
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Tick Interval"
+              />
+            </div>
+          </div>
+
+          {chartType === "combo" && (
+            <div className="mt-4">
+              <h5 className="text-lg font-semibold mb-2">
+                Sekundär Y-Axis Inställningar
+              </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Sekundär Y-Axis Titel
+                  </label>
+                  <input
+                    type="text"
+                    value={yAxisSecondaryTitle}
+                    onChange={(e) => setYAxisSecondaryTitle(e.target.value)}
+                    className="border rounded px-2 py-1 w-full"
+                    placeholder="Titel för sekundär Y-Axis"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Sekundär Y-Axis Min
+                  </label>
+                  <input
+                    type="number"
+                    value={
+                      yAxisSecondaryMin !== undefined ? yAxisSecondaryMin : ""
+                    }
+                    onChange={(e) =>
+                      setYAxisSecondaryMin(
+                        e.target.value ? parseFloat(e.target.value) : undefined
+                      )
+                    }
+                    className="border rounded px-2 py-1 w-full"
+                    placeholder="Minvärde"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Sekundär Y-Axis Max
+                  </label>
+                  <input
+                    type="number"
+                    value={
+                      yAxisSecondaryMax !== undefined ? yAxisSecondaryMax : ""
+                    }
+                    onChange={(e) =>
+                      setYAxisSecondaryMax(
+                        e.target.value ? parseFloat(e.target.value) : undefined
+                      )
+                    }
+                    className="border rounded px-2 py-1 w-full"
+                    placeholder="Maxvärde"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Sekundär Tick Intervall
+                  </label>
+                  <input
+                    type="number"
+                    value={
+                      yAxisSecondaryTick !== undefined ? yAxisSecondaryTick : ""
+                    }
+                    onChange={(e) =>
+                      setYAxisSecondaryTick(
+                        e.target.value ? parseFloat(e.target.value) : undefined
+                      )
+                    }
+                    className="border rounded px-2 py-1 w-full"
+                    placeholder="Tick Interval"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex space-x-4 mt-4">
           <Button onClick={handleGoBack} variant="secondary">

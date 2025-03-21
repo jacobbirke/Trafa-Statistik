@@ -17,6 +17,14 @@ type Config = {
   legendPosition: string;
   variwideWidthMeasure: string | null;
   variwideHeightMeasure: string | null;
+  yAxisPrimaryTitle: string;
+  yAxisSecondaryTitle: string;
+  yAxisPrimaryMin?: number;
+  yAxisPrimaryMax?: number;
+  yAxisPrimaryTick?: number;
+  yAxisSecondaryMin?: number;
+  yAxisSecondaryMax?: number;
+  yAxisSecondaryTick?: number;
 };
 
 export const handleGenerateChart = (
@@ -314,8 +322,8 @@ export const handleGenerateChart = (
           variwide: {
             tooltip: {
               pointFormat:
-                `${config.variwideWidthMeasure}: <b> {point.z}</b><br>` +
-                `${config.variwideHeightMeasure}: <b>{point.y}</b><br`,
+                `Höjd <b>${config.variwideHeightMeasure}: {point.y}</b><br>` +
+                `Bredd: <b> ${config.variwideWidthMeasure}: {point.z}</b>`,
             },
           },
         },
@@ -323,16 +331,26 @@ export const handleGenerateChart = (
       false
     );
 
+    currentChart.yAxis[0].update({
+      title: {
+        text: config.yAxisPrimaryTitle || "",
+        style: { color: "" },
+      },
+      min: config.yAxisPrimaryMin,
+      max: config.yAxisPrimaryMax,
+      tickInterval: config.yAxisPrimaryTick,
+    });
+
     currentChart.addSeries(
       {
         type: "variwide",
         name: "Variwide Series",
         data: seriesData,
         colorByPoint: true,
-        dataLabels: {
-          enabled: true,
-          format: "{point.y:.1f}",
-        },
+        // dataLabels: {
+        //   enabled: true,
+        //   format: "{point.y:.1f}",
+        // },
       },
       false
     );
@@ -433,6 +451,17 @@ export const handleGenerateChart = (
         },
       },
     });
+
+    currentChart.yAxis[0].update({
+      title: {
+        text: config.yAxisPrimaryTitle || "",
+        style: { color: "" },
+      },
+      min: config.yAxisPrimaryMin,
+      max: config.yAxisPrimaryMax,
+      tickInterval: config.yAxisPrimaryTick,
+    });
+
     currentChart.xAxis[0].update({ categories });
     while (currentChart.series.length > 0) {
       currentChart.series[0].remove(false);
@@ -597,19 +626,39 @@ export const handleGenerateChart = (
     return;
   }
 
-  currentChart.yAxis[0].update({
-    title: {
-      text: barMeasure ? barMeasure : "",
-      style: { color: "" },
-    },
-  });
-  currentChart.yAxis[1].update({
-    title: {
-      text: lineMeasure ? lineMeasure : "",
-      style: { color: "" },
-    },
-    opposite: true,
-  });
+  if (config.chartType === "line") {
+    currentChart.yAxis[0].update({
+      title: {
+        text: config.yAxisPrimaryTitle || "Default Title",
+        style: { color: "" },
+      },
+      min: config.yAxisPrimaryMin,
+      max: config.yAxisPrimaryMax,
+      tickInterval: config.yAxisPrimaryTick,
+    });
+  } else {
+    currentChart.yAxis[0].update({
+      title: {
+        text: config.yAxisPrimaryTitle || (barMeasure ? barMeasure : ""),
+        style: { color: "" },
+      },
+      min: config.yAxisPrimaryMin,
+      max: config.yAxisPrimaryMax,
+      tickInterval: config.yAxisPrimaryTick,
+    });
+    if (config.chartType === "combo" && currentChart.yAxis[1]) {
+      currentChart.yAxis[1].update({
+        title: {
+          text: config.yAxisSecondaryTitle || (lineMeasure ? lineMeasure : ""),
+          style: { color: "" },
+        },
+        min: config.yAxisSecondaryMin,
+        max: config.yAxisSecondaryMax,
+        tickInterval: config.yAxisSecondaryTick,
+        opposite: true,
+      });
+    }
+  }
 
   const aggregateMeasureData = (
     measureName: string,
@@ -677,13 +726,7 @@ export const handleGenerateChart = (
             config.seriesColors[seriesValue] ||
             Highcharts.getOptions().colors?.[seriesIndex % 10],
           yAxis:
-            chartType === "combo"
-              ? measure.name === lineMeasure
-                ? 1
-                : 0
-              : chartType === "line"
-              ? 1
-              : 0,
+            chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
         });
       });
     });
@@ -697,13 +740,7 @@ export const handleGenerateChart = (
           config.measureColors[measure.name] ||
           Highcharts.getOptions().colors?.[index % 10],
         yAxis:
-          chartType === "combo"
-            ? measure.name === lineMeasure
-              ? 1
-              : 0
-            : chartType === "line"
-            ? 1
-            : 0,
+          chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
       });
     });
   }

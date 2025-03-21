@@ -1,4 +1,11 @@
-export type ChartType = "column" | "line" | "combo" | "pie" | "stacked" | "stackedArea" | "variwide";
+export type ChartType =
+  | "column"
+  | "line"
+  | "combo"
+  | "pie"
+  | "stacked"
+  | "stackedArea"
+  | "variwide";
 export type WizardStep =
   | "input-file"
   | "select-diagram-type"
@@ -58,4 +65,20 @@ export interface ChartWizardProps {
   setVariwideWidthMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   variwideHeightMeasure: string | null;
   setVariwideHeightMeasure: React.Dispatch<React.SetStateAction<string | null>>;
+  yAxisPrimaryTitle: string;
+  setYAxisPrimaryTitle: React.Dispatch<React.SetStateAction<string>>;
+  yAxisSecondaryTitle: string;
+  setYAxisSecondaryTitle: React.Dispatch<React.SetStateAction<string>>;
+  yAxisPrimaryMin?: number;
+  setYAxisPrimaryMin: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisPrimaryMax?: number;
+  setYAxisPrimaryMax: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisPrimaryTick?: number;
+  setYAxisPrimaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisSecondaryMin?: number;
+  setYAxisSecondaryMin: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisSecondaryMax?: number;
+  setYAxisSecondaryMax: React.Dispatch<React.SetStateAction<number | undefined>>;
+  yAxisSecondaryTick?: number;
+  setYAxisSecondaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
 }
