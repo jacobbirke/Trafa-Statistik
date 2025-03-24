@@ -216,6 +216,28 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     }
   }, [tempSeriesDimension, tempDimensions, setSeriesColors, defaultColors]);
 
+  useEffect(() => {
+    setTempDimensions((prevDims) =>
+      prevDims.map((dim) => {
+        const role = getDimensionRole(dim.name);
+        if (role === "filter") {
+          if (dim.selectedValues.length === 1) return dim;
+          const firstValue =
+            dim.selectedValues.length > 0
+              ? [dim.selectedValues[0]]
+              : dim.allValues.length > 0
+              ? [dim.allValues[0]]
+              : [];
+          return {
+            ...dim,
+            selectedValues: firstValue,
+          };
+        }
+        return dim;
+      })
+    );
+  }, []);
+
   const handleSelectAll = (dimName: string) => {
     setTempDimensions((prev) =>
       prev.map((d) =>
@@ -245,6 +267,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   ) => {
     let newXAxis = [...tempXAxisDimensions];
     let newSeries = tempSeriesDimension;
+
     if (newRole === "main") {
       newXAxis = [dimName, ...newXAxis.filter((n) => n !== dimName)];
       if (newSeries === dimName) newSeries = null;
@@ -258,8 +281,29 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       newXAxis = newXAxis.filter((n) => n !== dimName);
       if (newSeries === dimName) newSeries = null;
     }
+
     setTempXAxisDimensions(newXAxis.filter(Boolean));
     setTempSeriesDimension(newSeries);
+
+    if (newRole === "filter") {
+      setTempDimensions((prevDims) =>
+        prevDims.map((dim) => {
+          if (dim.name === dimName) {
+            const firstValue =
+              dim.selectedValues.length > 0
+                ? [dim.selectedValues[0]]
+                : dim.allValues.length > 0
+                ? [dim.allValues[0]]
+                : [];
+            return {
+              ...dim,
+              selectedValues: firstValue,
+            };
+          }
+          return dim;
+        })
+      );
+    }
   };
 
   const handleApplyChanges = () => {
@@ -400,14 +444,13 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         {!tempSeriesDimension && ["column", "line"].includes(chartType) && (
-          <div className="mb-3 p-2">
+          <div className="mb-2 p-1">
             <h4 className="text-xl font-semibold mb-2">Färgval för mått</h4>
-            <div className="flex gap-4">
+            <div className="flex gap-4 pl-2">
               {measures
                 .filter((m) => m.isSelected)
                 .map((measure, idx) => (
                   <div key={measure.name} className="flex items-center gap-2">
-                    <label className="text-sm">{measure.name}</label>
                     <input
                       type="color"
                       value={
@@ -424,6 +467,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       className="cursor-pointer"
                       title={`Klicka för att välja färg för ${measure.name}`}
                     />
+                    <label className="p-1">{measure.name}</label>
                   </div>
                 ))}
             </div>
@@ -431,11 +475,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         {chartType === "combo" && !tempSeriesDimension && (
-          <div className="mb-3 p-2">
+          <div className="mb-2 p-1">
             <h4 className="text-xl font-semibold mb-2">
-              Färgval för line och kolumn
+              Färgval för linje och kolumn
             </h4>
-            <div className="flex gap-4">
+            <div className="flex gap-4 pl-2">
               {tempBarMeasure && (
                 <div className="flex items-center gap-2">
                   <label className="text-sm">{tempBarMeasure} (Kolumn)</label>
@@ -483,7 +527,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         {chartType === "variwide" && (
-          <div className="mb-4 p-1">
+          <div className="mb-2 p-1">
             <h4 className="text-xl font-semibold mb-2">Variwide Färger</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 pl-2">
               {dimensions
@@ -835,9 +879,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         <div className="mb-4 p-1 ">
-        <h5 className="text-lg font-semibold mb-2">
-                Y-axel Inställningar
-              </h5>
+          <h5 className="text-lg font-semibold mb-2">Y-axel Inställningar</h5>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
             <div>
               <label className="block mb-1 font-medium">Y-axel titel</label>

@@ -581,6 +581,17 @@ export const handleGenerateChart = (
         },
       },
     });
+
+    currentChart.yAxis[0].update({
+      title: {
+        text: config.yAxisPrimaryTitle || "",
+        style: { color: "" },
+      },
+      min: config.yAxisPrimaryMin,
+      max: config.yAxisPrimaryMax,
+      tickInterval: config.yAxisPrimaryTick,
+    });
+
     currentChart.xAxis[0].update({ categories });
     while (currentChart.series.length > 0) {
       currentChart.series[0].remove(false);
@@ -645,7 +656,7 @@ export const handleGenerateChart = (
   if (config.chartType === "line") {
     currentChart.yAxis[0].update({
       title: {
-        text: config.yAxisPrimaryTitle || "Default Title",
+        text: config.yAxisPrimaryTitle || "",
         style: { color: "" },
       },
       min: config.yAxisPrimaryMin,
