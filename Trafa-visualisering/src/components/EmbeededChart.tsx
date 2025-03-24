@@ -21,6 +21,14 @@ interface EmbeddedChartProps {
     legendPosition: string;
     variwideWidthMeasure: string | null;
     variwideHeightMeasure: string | null;
+    yAxisPrimaryTitle: string;
+    yAxisSecondaryTitle: string;
+    yAxisPrimaryMin?: number;
+    yAxisPrimaryMax?: number;
+    yAxisPrimaryTick?: number;
+    yAxisSecondaryMin?: number;
+    yAxisSecondaryMax?: number;
+    yAxisSecondaryTick?: number;
   };
 }
 
@@ -55,6 +63,14 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           legendPosition: config.legendPosition || "bottom",
           variwideWidthMeasure: config.variwideWidthMeasure,
           variwideHeightMeasure: config.variwideHeightMeasure,
+          yAxisPrimaryTitle: config.yAxisPrimaryTitle,
+          yAxisPrimaryMin: config.yAxisPrimaryMin,
+          yAxisPrimaryMax: config.yAxisPrimaryMax,
+          yAxisPrimaryTick: config.yAxisPrimaryTick,
+          yAxisSecondaryTitle: config.yAxisSecondaryTitle,
+          yAxisSecondaryMin: config.yAxisSecondaryMin,
+          yAxisSecondaryMax: config.yAxisSecondaryMax,
+          yAxisSecondaryTick: config.yAxisSecondaryTick,
         },
         containerRef.current!
       );
