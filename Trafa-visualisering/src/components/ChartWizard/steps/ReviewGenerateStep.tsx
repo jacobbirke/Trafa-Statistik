@@ -166,6 +166,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           defaultTitle = variwideHeightMeasure || "";
           break;
         case "combo":
+          defaultTitle = barMeasure || selectedMeasures[0]?.name || "";
           break;
         default:
           defaultTitle = selectedMeasures[0]?.name || "";
@@ -834,7 +835,10 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         <div className="mb-4 p-1 ">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h5 className="text-lg font-semibold mb-2">
+                Y-axel Inställningar
+              </h5>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
             <div>
               <label className="block mb-1 font-medium">Y-axel titel</label>
               <input
@@ -854,7 +858,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               </label>
               <input
                 type="number"
-                value={yAxisPrimaryMin !== undefined ? yAxisPrimaryMin : ""}
+                value={yAxisPrimaryMin}
                 onChange={(e) =>
                   setYAxisPrimaryMin(
                     e.target.value ? parseFloat(e.target.value) : undefined
@@ -865,12 +869,10 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium">
-                Y-axel Värde Max
-              </label>
+              <label className="block mb-1 font-medium">Y-axel Värde Max</label>
               <input
                 type="number"
-                value={yAxisPrimaryMax !== undefined ? yAxisPrimaryMax : ""}
+                value={yAxisPrimaryMax}
                 onChange={(e) =>
                   setYAxisPrimaryMax(
                     e.target.value ? parseFloat(e.target.value) : undefined
@@ -881,19 +883,17 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium">
-                Y-axel Intervall
-              </label>
+              <label className="block mb-1 font-medium">Y-axel Intervall</label>
               <input
                 type="number"
-                value={yAxisPrimaryTick !== undefined ? yAxisPrimaryTick : ""}
+                value={yAxisPrimaryTick}
                 onChange={(e) =>
                   setYAxisPrimaryTick(
                     e.target.value ? parseFloat(e.target.value) : undefined
                   )
                 }
                 className="border rounded px-2 py-1 w-full"
-                placeholder="Tick Interval"
+                placeholder="Interval"
               />
             </div>
           </div>
@@ -901,12 +901,12 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           {chartType === "combo" && (
             <div className="mt-4">
               <h5 className="text-lg font-semibold mb-2">
-                Sekundär y-axel Inställningar
+                Sekundär y-axel inställningar
               </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
                 <div>
                   <label className="block mb-1 font-medium">
-                    Sekundär Y-Axel Titel
+                    Sekundär y-axel titel
                   </label>
                   <input
                     type="text"
@@ -922,9 +922,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   </label>
                   <input
                     type="number"
-                    value={
-                      yAxisSecondaryMin !== undefined ? yAxisSecondaryMin : ""
-                    }
+                    value={yAxisSecondaryMin}
                     onChange={(e) =>
                       setYAxisSecondaryMin(
                         e.target.value ? parseFloat(e.target.value) : undefined
@@ -940,9 +938,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   </label>
                   <input
                     type="number"
-                    value={
-                      yAxisSecondaryMax !== undefined ? yAxisSecondaryMax : ""
-                    }
+                    value={yAxisSecondaryMax}
                     onChange={(e) =>
                       setYAxisSecondaryMax(
                         e.target.value ? parseFloat(e.target.value) : undefined
@@ -954,19 +950,18 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 </div>
                 <div>
                   <label className="block mb-1 font-medium">
-                    Sekundär y-axel intervall                  </label>
+                    Sekundär y-axel intervall{" "}
+                  </label>
                   <input
                     type="number"
-                    value={
-                      yAxisSecondaryTick !== undefined ? yAxisSecondaryTick : ""
-                    }
+                    value={yAxisSecondaryTick}
                     onChange={(e) =>
                       setYAxisSecondaryTick(
                         e.target.value ? parseFloat(e.target.value) : undefined
                       )
                     }
                     className="border rounded px-2 py-1 w-full"
-                    placeholder="Tick Interval"
+                    placeholder="Interval"
                   />
                 </div>
               </div>
