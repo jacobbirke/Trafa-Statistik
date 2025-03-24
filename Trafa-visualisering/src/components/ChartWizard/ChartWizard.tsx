@@ -43,6 +43,23 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setVariwideWidthMeasure,
   variwideHeightMeasure,
   setVariwideHeightMeasure,
+  yAxisPrimaryTitle,
+  setYAxisPrimaryTitle,
+  yAxisSecondaryTitle,
+  setYAxisSecondaryTitle,
+  yAxisPrimaryMin,
+  setYAxisPrimaryMin,
+  yAxisPrimaryMax,
+  setYAxisPrimaryMax,
+  yAxisPrimaryTick,
+  setYAxisPrimaryTick,
+  yAxisSecondaryMin,
+  setYAxisSecondaryMin,
+  yAxisSecondaryMax,
+  setYAxisSecondaryMax,
+  yAxisSecondaryTick,
+  setYAxisSecondaryTick
+
 }) => {
   return (
     <div className="max-w-7xl mx-auto p-3 space-y-8">
@@ -130,6 +147,22 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setVariwideWidthMeasure={setVariwideWidthMeasure}
           variwideHeightMeasure={variwideHeightMeasure}
           setVariwideHeightMeasure={setVariwideHeightMeasure}
+          yAxisPrimaryTitle={yAxisPrimaryTitle}
+          setYAxisPrimaryTitle={setYAxisPrimaryTitle}
+          yAxisSecondaryTitle={yAxisSecondaryTitle}
+          setYAxisSecondaryTitle={setYAxisSecondaryTitle}
+          yAxisPrimaryMin={yAxisPrimaryMin}
+          setYAxisPrimaryMin={setYAxisPrimaryMin}
+          yAxisPrimaryMax={yAxisPrimaryMax}
+          setYAxisPrimaryMax={setYAxisPrimaryMax}
+          yAxisPrimaryTick={yAxisPrimaryTick}
+          setYAxisPrimaryTick={setYAxisPrimaryTick}
+          yAxisSecondaryMin={yAxisSecondaryMin}
+          setYAxisSecondaryMin={setYAxisSecondaryMin}
+          yAxisSecondaryMax={yAxisSecondaryMax}
+          setYAxisSecondaryMax={setYAxisSecondaryMax}
+          yAxisSecondaryTick={yAxisSecondaryTick}
+          setYAxisSecondaryTick={setYAxisSecondaryTick}
         />
       )}
     </div>
