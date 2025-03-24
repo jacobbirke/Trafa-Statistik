@@ -7,7 +7,6 @@ import {
   WizardStep,
 } from "../../../types/chartTypes";
 import { Card } from "../../UI/Card";
-import Highcharts from "highcharts";
 
 interface Props {
   dimensions: Dimension[];
@@ -129,8 +128,25 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   const [tempBarMeasure, setTempBarMeasure] = useState(barMeasure);
   const [tempLineMeasure, setTempLineMeasure] = useState(lineMeasure);
   const [embedCode, setEmbedCode] = useState<string>("");
-  const defaultColors = Highcharts.getOptions().colors as string[];
   const [isYAxisTitleEdited, setIsYAxisTitleEdited] = useState(false);
+  const customDefaultColors = [
+    "#4C5CC5",
+    "#52AF32",
+    "#EC6608",
+    "#0083AB",
+    "#66B5CD",
+    "#98CF84",
+    "#437A2F",
+    "#266174",
+    "#004155",
+    "#763304",
+    "#295719",
+    "#212A67",
+    "#F9A164",
+    "#A3D2E1",
+    "#C1E2B5",
+  ];
+  const defaultColors = customDefaultColors;
 
   useEffect(() => {
     setTempDimensions([...dimensions]);
@@ -206,15 +222,16 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           const newColors = { ...prev };
           seriesDim.selectedValues.forEach((val, idx) => {
             if (!newColors[val] || newColors[val] === "") {
+              // Use custom colors with modulo to cycle through
               newColors[val] =
-                defaultColors[idx % defaultColors.length] || "#ff0000";
+                customDefaultColors[idx % customDefaultColors.length];
             }
           });
           return newColors;
         });
       }
     }
-  }, [tempSeriesDimension, tempDimensions, setSeriesColors, defaultColors]);
+  }, [tempSeriesDimension, tempDimensions, setSeriesColors]);
 
   useEffect(() => {
     setTempDimensions((prevDims) =>
@@ -455,8 +472,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       type="color"
                       value={
                         measureColors[measure.name] ||
-                        defaultColors[idx % defaultColors.length] ||
-                        "#b90066"
+                        customDefaultColors[idx % customDefaultColors.length]
                       }
                       onChange={(e) =>
                         setMeasureColors((prev: Record<string, string>) => ({
@@ -487,8 +503,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     type="color"
                     value={
                       measureColors[tempBarMeasure] ||
-                      defaultColors[0] ||
-                      "#b90066"
+                      defaultColors[0]
                     }
                     onChange={(e) =>
                       setMeasureColors((prev: Record<string, string>) => ({
@@ -508,8 +523,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     type="color"
                     value={
                       measureColors[tempLineMeasure] ||
-                      defaultColors[1] ||
-                      "#b90066"
+                      defaultColors[1] 
                     }
                     onChange={(e) =>
                       setMeasureColors((prev: Record<string, string>) => ({
@@ -537,10 +551,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     const colorValue =
                       typeof seriesColors[value] === "string"
                         ? seriesColors[value]
-                        : Highcharts.getOptions().colors?.[index % 10] ||
-                          "#ff0000";
+                        : customDefaultColors[
+                            index % customDefaultColors.length
+                          ];
                     const validColorValue =
-                      typeof colorValue === "string" ? colorValue : "#ff0000";
+                      typeof colorValue === "string" ? colorValue : "";
                     return (
                       <div key={value} className="flex items-center gap-2 mb-2">
                         <input
