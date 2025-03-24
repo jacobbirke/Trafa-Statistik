@@ -108,6 +108,24 @@ export const handleGenerateChart = (
     }
   };
 
+  const customDefaultColors = [
+    "#4C5CC5",
+    "#52AF32",
+    "#EC6608",
+    "#0083AB",
+    "#66B5CD",
+    "#98CF84",
+    "#437A2F",
+    "#266174",
+    "#004155",
+    "#763304",
+    "#295719",
+    "#212A67",
+    "#F9A164",
+    "#A3D2E1",
+    "#C1E2B5",
+  ];
+
   const threeDOptions = is3D
     ? {
         options3d: {
@@ -215,7 +233,7 @@ export const handleGenerateChart = (
         y: point.y,
         color:
           config.seriesColors[point.name] ||
-          Highcharts.getOptions().colors?.[index % 10],
+          customDefaultColors[index % customDefaultColors.length],
       })),
     });
     currentChart.redraw();
@@ -309,7 +327,7 @@ export const handleGenerateChart = (
         ),
         color:
           config.seriesColors[category] ||
-          Highcharts.getOptions().colors?.[index % 10],
+          customDefaultColors[index % customDefaultColors.length],
       };
     });
 
@@ -338,8 +356,8 @@ export const handleGenerateChart = (
           variwide: {
             tooltip: {
               pointFormat:
-                `Höjd <b>${config.variwideHeightMeasure}: {point.y}</b><br>` +
-                `Bredd: <b> ${config.variwideWidthMeasure}: {point.z}</b>`,
+              `Höjd: <b><u>{point.y}</u></b>  (${config.variwideHeightMeasure})<br>` +
+              `Bredd: <b><u>{point.z}</u></b>  (${config.variwideWidthMeasure})`
             },
           },
         },
@@ -448,7 +466,7 @@ export const handleGenerateChart = (
         stacking: "normal",
         color:
           config.seriesColors[seriesValue] ||
-          Highcharts.getOptions().colors?.[index % 10],
+          customDefaultColors[index % customDefaultColors.length],
       });
     });
 
@@ -561,7 +579,7 @@ export const handleGenerateChart = (
         type: "column",
         color:
           config.seriesColors[seriesValue] ||
-          Highcharts.getOptions().colors?.[index % 10],
+          customDefaultColors[index % customDefaultColors.length],
       });
     });
 
@@ -751,7 +769,7 @@ export const handleGenerateChart = (
           data: aggregateMeasureData(measure.name, seriesValue),
           color:
             config.seriesColors[seriesValue] ||
-            Highcharts.getOptions().colors?.[seriesIndex % 10],
+            customDefaultColors[seriesIndex % customDefaultColors.length],
           yAxis:
             chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
         });
@@ -764,8 +782,9 @@ export const handleGenerateChart = (
         type: getSeriesType(measure),
         data: aggregateMeasureData(measure.name, null),
         color:
-          config.measureColors[measure.name] ||
-          Highcharts.getOptions().colors?.[index % 10],
+          config.seriesColors[measure.name] ||
+          customDefaultColors[index % customDefaultColors.length],
+
         yAxis:
           chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
       });
