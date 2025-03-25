@@ -25,6 +25,7 @@ type Config = {
   yAxisSecondaryMin?: number;
   yAxisSecondaryMax?: number;
   yAxisSecondaryTick?: number;
+  seriesIcons: Record<string, string>;
 };
 
 export const handleGenerateChart = (
@@ -356,8 +357,8 @@ export const handleGenerateChart = (
           variwide: {
             tooltip: {
               pointFormat:
-              `Höjd: <b><u>{point.y}</u></b>  (${config.variwideHeightMeasure})<br>` +
-              `Bredd: <b><u>{point.z}</u></b>  (${config.variwideWidthMeasure})`
+                `Höjd: <b><u>{point.y}</u></b>  (${config.variwideHeightMeasure})<br>` +
+                `Bredd: <b><u>{point.z}</u></b>  (${config.variwideWidthMeasure})`,
             },
           },
         },
@@ -761,9 +762,26 @@ export const handleGenerateChart = (
   };
 
   if (seriesDimension) {
-    seriesCategories.forEach((seriesValue, seriesIndex) => {
+    seriesCategories.forEach((seriesValue) => {
       selectedMeasuresForOther.forEach((measure) => {
-        generalSeriesData.push({
+        const applyMarker =
+          chartType === "line" ||
+          (chartType === "combo" && measure.name === lineMeasure);
+        const defaultMarkerSymbols = [
+          "circle",
+          "square",
+          "diamond",
+          "triangle",
+          "triangle-down",
+        ];
+        const seriesIndex = seriesCategories.indexOf(seriesValue);
+        const defaultIcon =
+          defaultMarkerSymbols[seriesIndex % defaultMarkerSymbols.length];
+        const chosenIcon =
+          config.seriesIcons[seriesValue] === undefined
+            ? defaultIcon
+            : config.seriesIcons[seriesValue];
+        const seriesData: any = {
           name: `${seriesValue} - ${measure.name}`,
           type: getSeriesType(measure),
           data: aggregateMeasureData(measure.name, seriesValue),
@@ -772,22 +790,57 @@ export const handleGenerateChart = (
             customDefaultColors[seriesIndex % customDefaultColors.length],
           yAxis:
             chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
-        });
+        };
+        if (applyMarker) {
+          seriesData.marker =
+            chosenIcon === ""
+              ? { enabled: false }
+              : {
+                  enabled: true,
+                  symbol: chosenIcon,
+                };
+        }
+        generalSeriesData.push(seriesData);
       });
     });
   } else {
     selectedMeasuresForOther.forEach((measure, index) => {
-      generalSeriesData.push({
+      const includeMarker =
+        chartType === "line" ||
+        (chartType === "combo" && measure.name === lineMeasure);
+      const defaultMarkerSymbols = [
+        "circle",
+        "square",
+        "diamond",
+        "triangle",
+        "triangle-down",
+      ];
+      const defaultIcon =
+        defaultMarkerSymbols[index % defaultMarkerSymbols.length];
+      const chosenIcon =
+        config.seriesIcons[measure.name] === undefined
+          ? defaultIcon
+          : config.seriesIcons[measure.name];
+      const seriesData: any = {
         name: measure.name,
         type: getSeriesType(measure),
         data: aggregateMeasureData(measure.name, null),
         color:
-          config.seriesColors[measure.name] ||
+          config.measureColors[measure.name] ||
           customDefaultColors[index % customDefaultColors.length],
-
         yAxis:
           chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
-      });
+      };
+      if (includeMarker) {
+        seriesData.marker =
+          chosenIcon === ""
+            ? { enabled: false }
+            : {
+                enabled: true,
+                symbol: chosenIcon,
+              };
+      }
+      generalSeriesData.push(seriesData);
     });
   }
 
@@ -816,6 +869,7 @@ export const handleGenerateChart = (
           : "column",
       ...threeDOptions,
     },
+
     plotOptions: {
       column: {
         depth: is3D ? 45 : undefined,
@@ -825,6 +879,12 @@ export const handleGenerateChart = (
       },
       pie: {
         depth: is3D ? 45 : undefined,
+      },
+      series: {
+        marker: {
+          enabled: true,
+          radius: 6,
+        },
       },
     },
   });

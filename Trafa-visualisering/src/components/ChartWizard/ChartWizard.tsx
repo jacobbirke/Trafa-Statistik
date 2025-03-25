@@ -58,7 +58,9 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   yAxisSecondaryMax,
   setYAxisSecondaryMax,
   yAxisSecondaryTick,
-  setYAxisSecondaryTick
+  setYAxisSecondaryTick,
+  seriesIcons,
+  setSeriesIcons
 
 }) => {
   return (
@@ -163,6 +165,8 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setYAxisSecondaryMax={setYAxisSecondaryMax}
           yAxisSecondaryTick={yAxisSecondaryTick}
           setYAxisSecondaryTick={setYAxisSecondaryTick}
+          seriesIcons={seriesIcons}
+          setSeriesIcons={setSeriesIcons}
         />
       )}
     </div>
