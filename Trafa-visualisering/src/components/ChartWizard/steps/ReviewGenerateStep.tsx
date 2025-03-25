@@ -359,7 +359,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       yAxisSecondaryMin,
       yAxisSecondaryMax,
       yAxisSecondaryTick,
-      seriesIcons: {},
+      seriesIcons: seriesIcons
     };
 
     handleGenerateChart(updatedConfig);
