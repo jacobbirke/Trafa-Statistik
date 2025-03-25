@@ -154,7 +154,18 @@ const StatistikGränssnitt: React.FC = () => {
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const parsedData = XLSX.utils.sheet_to_json<any[]>(sheet, {
           header: 1,
+          raw: false, 
         });
+
+        const processedData = parsedData.map(row => 
+          row.map(cell => {
+            if (typeof cell === 'string' && cell.includes(',')) {
+              return parseFloat(cell.replace(',', '.')) || cell;
+            }
+            return cell;
+          })
+        );
+
         const title = parsedData[0][0];
         const headers = parsedData[1];
         const units = parsedData[2];
@@ -190,6 +201,7 @@ const StatistikGränssnitt: React.FC = () => {
         setDimensions(dimensionsData);
         setMeasures(measuresData);
         setJsonData(parsedData.slice(3));
+        setJsonData(processedData.slice(3));
       } catch (error) {
         console.error("Error", error);
       }

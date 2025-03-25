@@ -33,6 +33,16 @@ export const handleGenerateChart = (
   config: Config,
   container: HTMLElement
 ) => {
+  Highcharts.setOptions({
+    lang: {
+      decimalPoint: ',',
+      thousandsSep: ' '
+    },
+    tooltip: {
+      valuePrefix: '',
+      valueSuffix: ''
+    }
+  });
   const {
     dimensions,
     measures,
