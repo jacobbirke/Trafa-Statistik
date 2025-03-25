@@ -226,7 +226,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           const newColors = { ...prev };
           seriesDim.selectedValues.forEach((val, idx) => {
             if (!newColors[val] || newColors[val] === "") {
-              // Use custom colors with modulo to cycle through
               newColors[val] =
                 customDefaultColors[idx % customDefaultColors.length];
             }
@@ -360,7 +359,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       yAxisSecondaryMin,
       yAxisSecondaryMax,
       yAxisSecondaryTick,
-      seriesIcons,
+      seriesIcons: {},
     };
 
     handleGenerateChart(updatedConfig);
@@ -385,6 +384,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       variwideHeightMeasure,
       yAxisPrimaryTitle,
       yAxisSecondaryTitle,
+      seriesIcons
     };
 
     try {

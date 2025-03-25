@@ -72,7 +72,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           yAxisSecondaryMin: config.yAxisSecondaryMin,
           yAxisSecondaryMax: config.yAxisSecondaryMax,
           yAxisSecondaryTick: config.yAxisSecondaryTick,
-          seriesIcons: config.seriesIcons,
+          seriesIcons: config.seriesIcons || {},
         },
         containerRef.current!
       );
