@@ -81,4 +81,6 @@ export interface ChartWizardProps {
   setYAxisSecondaryMax: React.Dispatch<React.SetStateAction<number | undefined>>;
   yAxisSecondaryTick?: number;
   setYAxisSecondaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
+  seriesIcons: Record<string, string>;
+  setSeriesIcons: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }

@@ -65,6 +65,8 @@ interface Props {
   setYAxisSecondaryTick: React.Dispatch<
     React.SetStateAction<number | undefined>
   >;
+  seriesIcons: Record<string, string>;
+  setSeriesIcons: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -116,6 +118,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setYAxisSecondaryMax,
   yAxisSecondaryTick,
   setYAxisSecondaryTick,
+  seriesIcons,
+  setSeriesIcons,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -356,6 +360,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       yAxisSecondaryMin,
       yAxisSecondaryMax,
       yAxisSecondaryTick,
+      seriesIcons,
     };
 
     handleGenerateChart(updatedConfig);
@@ -501,10 +506,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   <label className="text-sm">{tempBarMeasure} (Kolumn)</label>
                   <input
                     type="color"
-                    value={
-                      measureColors[tempBarMeasure] ||
-                      defaultColors[0]
-                    }
+                    value={measureColors[tempBarMeasure] || defaultColors[0]}
                     onChange={(e) =>
                       setMeasureColors((prev: Record<string, string>) => ({
                         ...prev,
@@ -521,10 +523,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   <label className="text-sm">{tempLineMeasure} (Linje)</label>
                   <input
                     type="color"
-                    value={
-                      measureColors[tempLineMeasure] ||
-                      defaultColors[1] 
-                    }
+                    value={measureColors[tempLineMeasure] || defaultColors[1]}
                     onChange={(e) =>
                       setMeasureColors((prev: Record<string, string>) => ({
                         ...prev,
@@ -574,6 +573,117 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   })
                 )}
             </div>
+          </div>
+        )}
+
+        {(chartType === "line" || chartType === "combo") && (
+          <div className="mb-2 p-1">
+            <h4 className="text-xl font-semibold mb-2">Marker Icon Options</h4>
+            {tempSeriesDimension ? (
+              (() => {
+                const seriesValues =
+                  tempDimensions.find((d) => d.name === tempSeriesDimension)
+                    ?.selectedValues || [];
+                const defaultMarkerSymbols = [
+                  "circle",
+                  "square",
+                  "diamond",
+                  "triangle",
+                  "triangle-down",
+                ];
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 pl-2">
+                    {seriesValues.map((value, index) => {
+                      const defaultIcon =
+                        defaultMarkerSymbols[
+                          index % defaultMarkerSymbols.length
+                        ];
+                      return (
+                        <div
+                          key={value}
+                          className="flex flex-col items-center gap-2"
+                        >
+                          <select
+                            value={
+                              seriesIcons[value] === undefined
+                                ? defaultIcon
+                                : seriesIcons[value]
+                            }
+                            onChange={(e) =>
+                              setSeriesIcons(
+                                (prev: Record<string, string>) => ({
+                                  ...prev,
+                                  [value]: e.target.value,
+                                })
+                              )
+                            }
+                            className="border rounded px-2 py-1"
+                          >
+                            <option value="circle">● Cirkel</option>
+                            <option value="square">■ Fyrkant</option>
+                            <option value="diamond">◆ Diamant</option>
+                            <option value="triangle">▲ Triangel</option>
+                            <option value="triangle-down">
+                              ▼ Triangel Ner
+                            </option>
+                            <option value="">Ingen ikon</option>
+                          </select>
+                          <span className="text-sm">{value}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 pl-2">
+                {(chartType === "combo"
+                  ? measures.filter(
+                      (m) => m.isSelected && m.name === lineMeasure
+                    )
+                  : measures.filter((m) => m.isSelected)
+                ).map((measure, index) => {
+                  const defaultMarkerSymbols = [
+                    "circle",
+                    "square",
+                    "diamond",
+                    "triangle",
+                    "triangle-down",
+                  ];
+                  const defaultIcon =
+                    defaultMarkerSymbols[index % defaultMarkerSymbols.length];
+                  return (
+                    <div
+                      key={measure.name}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <select
+                        value={
+                          seriesIcons[measure.name] === undefined
+                            ? defaultIcon
+                            : seriesIcons[measure.name]
+                        }
+                        onChange={(e) =>
+                          setSeriesIcons((prev: Record<string, string>) => ({
+                            ...prev,
+                            [measure.name]: e.target.value,
+                          }))
+                        }
+                        className="border rounded px-2 py-1"
+                      >
+                        <option value="circle">● Cirkel</option>
+                        <option value="square">■ Fyrkant</option>
+                        <option value="diamond">◆ Diamant</option>
+                        <option value="triangle">▲ Triangel</option>
+                        <option value="triangle-down">▼ Triangel Ner</option>
+                        <option value="">Ingen ikon</option>
+                      </select>
+                      <span className="text-sm">{measure.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

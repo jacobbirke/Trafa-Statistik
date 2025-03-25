@@ -29,6 +29,7 @@ interface EmbeddedChartProps {
     yAxisSecondaryMin?: number;
     yAxisSecondaryMax?: number;
     yAxisSecondaryTick?: number;
+    seriesIcons: Record<string, string>;
   };
 }
 
@@ -71,6 +72,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           yAxisSecondaryMin: config.yAxisSecondaryMin,
           yAxisSecondaryMax: config.yAxisSecondaryMax,
           yAxisSecondaryTick: config.yAxisSecondaryTick,
+          seriesIcons: config.seriesIcons,
         },
         containerRef.current!
       );

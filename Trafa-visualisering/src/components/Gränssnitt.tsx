@@ -28,6 +28,7 @@ const StatistikGränssnitt: React.FC = () => {
   const [is3D, setIs3D] = useState<boolean>(false);
   const [chart, setChart] = useState<any>(null);
   const [seriesColors, setSeriesColors] = useState<Record<string, string>>({});
+  const [seriesIcons, setSeriesIcons] = useState<Record<string, string>>({});
   const [measureColors, setMeasureColors] = useState<Record<string, string>>(
     {}
   );
@@ -99,6 +100,7 @@ const StatistikGränssnitt: React.FC = () => {
         yAxisSecondaryMin,
         yAxisSecondaryMax,
         yAxisSecondaryTick,
+        seriesIcons,
       },
       containerRef.current
     );
@@ -257,6 +259,8 @@ const StatistikGränssnitt: React.FC = () => {
         setYAxisSecondaryMax={setYAxisSecondaryMax}
         yAxisSecondaryTick={yAxisSecondaryTick}
         setYAxisSecondaryTick={setYAxisSecondaryTick}
+        seriesIcons={seriesIcons}
+        setSeriesIcons={setSeriesIcons}
       />
     </div>
   );
