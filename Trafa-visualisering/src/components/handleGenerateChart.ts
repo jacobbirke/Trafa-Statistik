@@ -798,6 +798,9 @@ export const handleGenerateChart = (
               : {
                   enabled: true,
                   symbol: chosenIcon,
+                  radius: 6,
+                  lineWidth: 1,
+                  lineColor: "#ffffff",
                 };
         }
         generalSeriesData.push(seriesData);
@@ -838,6 +841,9 @@ export const handleGenerateChart = (
             : {
                 enabled: true,
                 symbol: chosenIcon,
+                radius: 6,
+                lineWidth: 1,
+                lineColor: "#ffffff",
               };
       }
       generalSeriesData.push(seriesData);
@@ -884,6 +890,8 @@ export const handleGenerateChart = (
         marker: {
           enabled: true,
           radius: 6,
+          lineWidth: 1,
+          lineColor: "#ffffff",
         },
       },
     },

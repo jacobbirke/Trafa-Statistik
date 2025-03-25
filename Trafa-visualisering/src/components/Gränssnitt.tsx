@@ -100,7 +100,7 @@ const StatistikGränssnitt: React.FC = () => {
         yAxisSecondaryMin,
         yAxisSecondaryMax,
         yAxisSecondaryTick,
-        seriesIcons: {},
+        seriesIcons: seriesIcons
       },
       containerRef.current
     );
