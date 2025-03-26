@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "../../UI/Button";
 import {
   ChartType,
@@ -51,6 +51,12 @@ export const ChartConfigurationStep: React.FC<Props> = ({
     chartType === "stackedArea"
       ? 1
       : 2;
+
+  useEffect(() => {
+    if (xAxisDimensions.length > maxXAxisAllowed) {
+      setXAxisDimensions([]);
+    }
+  }, [chartType, xAxisDimensions.length, maxXAxisAllowed, setXAxisDimensions]);
 
   const handleXAxisChange = (dimName: string) => {
     if (xAxisDimensions.includes(dimName)) {
