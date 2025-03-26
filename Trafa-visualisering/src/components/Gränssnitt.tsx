@@ -100,7 +100,7 @@ const StatistikGränssnitt: React.FC = () => {
         yAxisSecondaryMin,
         yAxisSecondaryMax,
         yAxisSecondaryTick,
-        seriesIcons: seriesIcons
+        seriesIcons: seriesIcons,
       },
       containerRef.current
     );
@@ -142,6 +142,38 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [seriesDimension, dimensions, setSeriesColors]);
 
+  const handleChartTypeChange: React.Dispatch<
+    React.SetStateAction<ChartType>
+  > = (newChartType) => {
+    if (typeof newChartType === "function") {
+      setChartType(newChartType);
+    } else {
+      setChartType(newChartType);
+      setXAxisDimensions([]);
+      setSeriesDimension(null);
+      setBarMeasure(null);
+      setLineMeasure(null);
+      setVariwideWidthMeasure(null);
+      setVariwideHeightMeasure(null);
+    }
+  };
+
+  const handleSetStep: React.Dispatch<React.SetStateAction<WizardStep>> = (
+    value
+  ) => {
+    const newStep = typeof value === "function" ? value(step) : value;
+
+    if (newStep === "select-diagram-type") {
+      setXAxisDimensions([]);
+      setSeriesDimension(null);
+      setBarMeasure(null);
+      setLineMeasure(null);
+      setVariwideWidthMeasure(null);
+      setVariwideHeightMeasure(null);
+    }
+    setStep(newStep);
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -154,13 +186,13 @@ const StatistikGränssnitt: React.FC = () => {
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const parsedData = XLSX.utils.sheet_to_json<any[]>(sheet, {
           header: 1,
-          raw: false, 
+          raw: false,
         });
 
-        const processedData = parsedData.map(row => 
-          row.map(cell => {
-            if (typeof cell === 'string' && cell.includes(',')) {
-              return parseFloat(cell.replace(',', '.')) || cell;
+        const processedData = parsedData.map((row) =>
+          row.map((cell) => {
+            if (typeof cell === "string" && cell.includes(",")) {
+              return parseFloat(cell.replace(",", ".")) || cell;
             }
             return cell;
           })
@@ -231,10 +263,8 @@ const StatistikGränssnitt: React.FC = () => {
         is3D={is3D}
         containerRef={containerRef}
         handleFileUpload={handleFileUpload}
-        setStep={setStep}
         setDimensions={setDimensions}
         setMeasures={setMeasures}
-        setChartType={setChartType}
         setXAxisDimensions={setXAxisDimensions}
         setSeriesDimension={setSeriesDimension}
         setBarMeasure={setBarMeasure}
@@ -273,6 +303,8 @@ const StatistikGränssnitt: React.FC = () => {
         setYAxisSecondaryTick={setYAxisSecondaryTick}
         seriesIcons={seriesIcons}
         setSeriesIcons={setSeriesIcons}
+        setChartType={handleChartTypeChange}
+        setStep={handleSetStep}
       />
     </div>
   );
