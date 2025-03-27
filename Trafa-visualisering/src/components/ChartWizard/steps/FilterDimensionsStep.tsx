@@ -30,7 +30,7 @@ export const FilterDimensionsStep: React.FC<Props> = ({
 
   return (
     <Card>
-      <h3 className="text-2xl font-bold mb-4">Filtrera Dimensioner</h3>
+      <h3 className="text-2xl font-bold mb-4">Filtrera dimensioner</h3>
       {dimensions.map((dim) => (
         <div key={dim.name} className="border p-4 mb-4 rounded-lg">
           <h4 className="text-xl font-semibold mb-2">{dim.name}</h4>
@@ -50,13 +50,13 @@ export const FilterDimensionsStep: React.FC<Props> = ({
               Ta bort alla
             </Button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
             {dim.allValues.map((value) => (
               <label
                 key={value}
                 className={`flex items-center p-2 rounded-md border ${
                   dim.selectedValues.includes(value)
-                    ? "border-blue-500 bg-blue-50"
+                    ? "border-blue-500 bg-blue-100"
                     : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
                 }`}
               >

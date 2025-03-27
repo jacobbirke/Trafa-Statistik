@@ -90,7 +90,7 @@ export const ChartConfigurationStep: React.FC<Props> = ({
                   key={dim.name}
                   className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                     xAxisDimensions.includes(dim.name)
-                      ? "border-blue-500 bg-blue-50"
+                      ? "border-blue-500 bg-blue-100"
                       : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
                   }`}
                 >
@@ -109,7 +109,7 @@ export const ChartConfigurationStep: React.FC<Props> = ({
           </div>
           <div className="mb-2 p-1">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
+              <div className="flex-1 ">
                 <h4 className="text-xl font-semibold mb-2">
                   Välj mått för bredd
                 </h4>
@@ -117,7 +117,7 @@ export const ChartConfigurationStep: React.FC<Props> = ({
                   .filter((m) => m.isSelected)
                   .map((measure) => (
                     <div key={measure.name} className="flex items-center mb-2">
-                      <label className="flex items-center space-x-2">
+                      <label className="flex items-center space-x-2 pl-2">
                         <input
                           type="radio"
                           name="variwideWidthMeasure"
@@ -140,7 +140,7 @@ export const ChartConfigurationStep: React.FC<Props> = ({
                   .filter((m) => m.isSelected)
                   .map((measure) => (
                     <div key={measure.name} className="flex items-center mb-2">
-                      <label className="flex items-center space-x-2">
+                      <label className="flex items-center space-x-2 pl-2">
                         <input
                           type="radio"
                           name="variwideHeightMeasure"
@@ -192,7 +192,7 @@ export const ChartConfigurationStep: React.FC<Props> = ({
                   key={dim.name}
                   className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                     xAxisDimensions.includes(dim.name)
-                      ? "border-blue-500 bg-blue-50"
+                      ? "border-blue-500 bg-blue-100"
                       : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
                   }`}
                 >
@@ -248,13 +248,13 @@ export const ChartConfigurationStep: React.FC<Props> = ({
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <h4 className="text-xl font-semibold mb-2">
-                Välj Mått för Stapel
+                Välj mått för stapel
               </h4>
               {measures
                 .filter((m) => m.isSelected)
                 .map((measure) => (
                   <div key={measure.name} className="flex items-center mb-2">
-                    <label className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-2 pl-2">
                       <input
                         type="radio"
                         name="barMeasure"
@@ -271,13 +271,13 @@ export const ChartConfigurationStep: React.FC<Props> = ({
 
             <div className="flex-1">
               <h4 className="text-xl font-semibold mb-2">
-                Välj Mått för Linje
+                Välj mått för linje
               </h4>
               {measures
                 .filter((m) => m.isSelected)
                 .map((measure) => (
                   <div key={measure.name} className="flex items-center mb-2">
-                    <label className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-2 pl-2">
                       <input
                         type="radio"
                         name="lineMeasure"

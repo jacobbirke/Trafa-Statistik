@@ -578,7 +578,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
         {(chartType === "line" || chartType === "combo") && (
           <div className="mb-2 p-1">
-            <h4 className="text-xl font-semibold mb-2">Marker Icon Options</h4>
+            <h4 className="text-xl font-semibold mb-2">Linje ikoner</h4>
             {tempSeriesDimension ? (
               (() => {
                 const seriesValues =
@@ -687,77 +687,80 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </div>
         )}
 
-        {chartType !== "variwide" && (
-          <div className="mb-2 p-1">
-            <h4 className="text-xl font-semibold mb-2">Legend Position</h4>
-            <div className="grid grid-cols-5 gap-4 pl-2">
-              <button
-                className={`py-2 px-4 rounded-lg text-base ${
-                  legendPosition === "top"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black hover:bg-blue-100"
-                }`}
-                onClick={() => setLegendPosition("top")}
-              >
-                Uppe
-              </button>
-              <button
-                className={`py-2 px-4 rounded-lg text-base ${
-                  legendPosition === "right"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black hover:bg-blue-100"
-                }`}
-                onClick={() => setLegendPosition("right")}
-              >
-                Höger
-              </button>
-              <button
-                className={`py-2 px-4 rounded-lg text-base ${
-                  legendPosition === "bottom"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black hover:bg-blue-100"
-                }`}
-                onClick={() => setLegendPosition("bottom")}
-              >
-                Nere
-              </button>
-              <button
-                className={`py-2 px-4 rounded-lg text-base ${
-                  legendPosition === "left"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black hover:bg-blue-100"
-                }`}
-                onClick={() => setLegendPosition("left")}
-              >
-                Vänster
-              </button>
-              <button
-                className={`py-2 px-4 rounded-lg text-base ${
-                  legendPosition === "inside"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black hover:bg-blue-100"
-                }`}
-                onClick={() => setLegendPosition("inside")}
-              >
-                Inuti
-              </button>
-            </div>
+        <div className="mb-2 p-1">
+          <h4 className="text-xl font-semibold mb-2">Legend position</h4>
+          <div className="flex flex-row space-x-4">
+            <label className="mb-1 pl-2">
+              <input
+                type="radio"
+                name="legendPosition"
+                value="top"
+                checked={legendPosition === "top"}
+                onChange={(e) => setLegendPosition(e.target.value)}
+                className="mr-2"
+              />
+              Uppe
+            </label>
+            <label className="mb-1">
+              <input
+                type="radio"
+                name="legendPosition"
+                value="right"
+                checked={legendPosition === "right"}
+                onChange={(e) => setLegendPosition(e.target.value)}
+                className="mr-2"
+              />
+              Höger
+            </label>
+            <label className="mb-1">
+              <input
+                type="radio"
+                name="legendPosition"
+                value="bottom"
+                checked={legendPosition === "bottom"}
+                onChange={(e) => setLegendPosition(e.target.value)}
+                className="mr-2"
+              />
+              Nere
+            </label>
+            <label className="mb-1">
+              <input
+                type="radio"
+                name="legendPosition"
+                value="left"
+                checked={legendPosition === "left"}
+                onChange={(e) => setLegendPosition(e.target.value)}
+                className="mr-2"
+              />
+              Vänster
+            </label>
+            <label className="mb-1">
+              <input
+                type="radio"
+                name="legendPosition"
+                value="inside"
+                checked={legendPosition === "inside"}
+                onChange={(e) => setLegendPosition(e.target.value)}
+                className="mr-2"
+              />
+              Inuti diagrammet
+            </label>
           </div>
-        )}
+        </div>
 
         <div className="mb-2 p-1">
-          <h4 className="text-xl font-semibold mb-4">Dimensioner & Roller</h4>
+          <h4 className="text-xl font-semibold mb-2">Dimensioner & roller</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {tempDimensions.map((dim) => {
               const currentRole = getDimensionRole(dim.name);
               return (
                 <div
                   key={dim.name}
-                  className="p-4 border rounded-lg shadow-sm flex flex-col space-y-4"
+                  className="p-4 border rounded-lg shadow-sm flex flex-col space-y-3"
                 >
                   <div className="text-lg font-medium">{dim.name}</div>
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex justify-between items-center">
+                  <div className="flex flex-col space-y-2 space pl-">
+                    <label className="flex items-center text-gray-900">
                       <input
                         type="radio"
                         name={`role-${dim.name}`}
@@ -765,21 +768,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         onChange={() =>
                           handleTempDimensionRoleChange(dim.name, "main")
                         }
-                        className="hidden"
-                        id={`main-${dim.name}`}
+                        className="mr-1"
                       />
-                      <label
-                        htmlFor={`main-${dim.name}`}
-                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
-                          currentRole === "main"
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-black hover:bg-blue-100"
-                        }`}
-                      >
-                        Huvudkategori
-                      </label>
-                    </div>
-                    <div className="flex justify-between items-center">
+                      Huvudkategori
+                    </label>
+                    <label className="flex items-center space-x-2">
                       <input
                         type="radio"
                         name={`role-${dim.name}`}
@@ -787,21 +780,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         onChange={() =>
                           handleTempDimensionRoleChange(dim.name, "sub")
                         }
-                        className="hidden"
-                        id={`sub-${dim.name}`}
+                        className="mr-1"
                       />
-                      <label
-                        htmlFor={`sub-${dim.name}`}
-                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
-                          currentRole === "sub"
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-black hover:bg-blue-100"
-                        }`}
-                      >
-                        Underkategori
-                      </label>
-                    </div>
-                    <div className="flex justify-between items-center">
+                      Underkategori
+                    </label>
+                    <label className="flex items-center space-x-2">
                       <input
                         type="radio"
                         name={`role-${dim.name}`}
@@ -809,21 +792,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         onChange={() =>
                           handleTempDimensionRoleChange(dim.name, "series")
                         }
-                        className="hidden"
-                        id={`series-${dim.name}`}
+                        className="mr-1"
                       />
-                      <label
-                        htmlFor={`series-${dim.name}`}
-                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
-                          currentRole === "series"
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-black hover:bg-blue-100"
-                        }`}
-                      >
-                        Serie
-                      </label>
-                    </div>
-                    <div className="flex justify-between items-center">
+                      Serie
+                    </label>
+                    <label className="flex items-center space-x-2">
                       <input
                         type="radio"
                         name={`role-${dim.name}`}
@@ -831,31 +804,21 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         onChange={() =>
                           handleTempDimensionRoleChange(dim.name, "filter")
                         }
-                        className="hidden"
-                        id={`filter-${dim.name}`}
+                        className="mr-1"
                       />
-                      <label
-                        htmlFor={`filter-${dim.name}`}
-                        className={`flex-1 py-3 px-5 rounded-lg text-center cursor-pointer text-base ${
-                          currentRole === "filter"
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-black hover:bg-blue-100"
-                        }`}
-                      >
-                        Filter
-                      </label>
-                    </div>
+                      Filter
+                    </label>
                   </div>
                 </div>
               );
-            })}
+            })}{" "}
           </div>
         </div>
 
         <div className="p-1">
-          <h4 className="text-xl font-semibold mb-2">Filtrera Värden</h4>
+          <h4 className="text-xl font-semibold mb-2">Filtrera värden</h4>
           {tempDimensions.map((dim) => (
-            <div key={dim.name} className="p-2 mb-4 border rounded shadow-sm">
+            <div key={dim.name} className="p-2 mb-2 border rounded shadow-sm">
               <div className="flex gap-2 mb-3 pt-1">
                 {" "}
                 <h4 className="text-lg font-semibold mr-4 p-1">{dim.name}</h4>
@@ -880,7 +843,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     key={value}
                     className={`flex items-center p-2 rounded-md border ${
                       dim.selectedValues.includes(value)
-                        ? "border-blue-500 bg-blue-50"
+                        ? "border-blue-500 bg-blue-100"
                         : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
                     }`}
                   >
@@ -924,7 +887,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   key={measure.name}
                   className={`flex items-center p-2 rounded-md border ${
                     measure.isSelected
-                      ? "border-blue-500 bg-blue-50"
+                      ? "border-blue-500 bg-blue-100"
                       : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
                   }`}
                 >
@@ -956,7 +919,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <h4 className="text-lg font-semibold mb-2">
-                  Välj Mått för Stapel
+                  Välj mått för stapel
                 </h4>
                 {tempMeasures
                   .filter((m) => m.isSelected)
@@ -979,7 +942,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
               <div className="flex-1">
                 <h4 className="text-lg font-semibold mb-2">
-                  Välj Mått för Linje
+                  Välj mått för linje
                 </h4>
                 {tempMeasures
                   .filter((m) => m.isSelected)
@@ -1002,7 +965,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             </div>
           </div>
         )}
-        
+
         {chartType === "variwide" && (
           <>
             <div className="mb-2 p-1">
@@ -1018,7 +981,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         key={measure.name}
                         className="flex items-center mb-2"
                       >
-                        <label className="flex items-center space-x-2">
+                        <label className="flex items-center space-x-2 pl-2">
                           <input
                             type="radio"
                             name="variwideWidthMeasure"
@@ -1045,7 +1008,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         key={measure.name}
                         className="flex items-center mb-2"
                       >
-                        <label className="flex items-center space-x-2">
+                        <label className="flex items-center space-x-2 pl-2">
                           <input
                             type="radio"
                             name="variwideHeightMeasure"
@@ -1067,7 +1030,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         <div className="mb-4 p-1 ">
-          <h5 className="text-xl font-semibold mb-2">Y-axel Inställningar</h5>
+          <h5 className="text-xl font-semibold mb-2">Y-axel inställningar</h5>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
             <div>
               <label className="block mb-1 font-medium">Y-axel titel</label>
@@ -1099,7 +1062,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium">Y-axel Värde Max</label>
+              <label className="block mb-1 font-medium">Y-axel värde max</label>
               <input
                 type="number"
                 value={yAxisPrimaryMax}
@@ -1113,7 +1076,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium">Y-axel Intervall</label>
+              <label className="block mb-1 font-medium">Y-axel intervall</label>
               <input
                 type="number"
                 value={yAxisPrimaryTick}
@@ -1275,11 +1238,11 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
         <div className="mt-4">
           <Button onClick={generateEmbedCode} variant="success">
-            Generera inbädnningskod
+            Generera inbäddningskod
           </Button>
           {embedCode && (
             <div className="mt-4">
-              <h3 className="text-xl font-bold mb-2">Inäddningskod</h3>
+              <h3 className="text-xl font-bold mb-2">Inbäddningskod</h3>
               <textarea
                 value={embedCode}
                 readOnly

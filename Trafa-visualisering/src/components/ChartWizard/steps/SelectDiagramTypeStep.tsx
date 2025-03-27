@@ -12,10 +12,10 @@ type Props = {
 const chartOptions = [
   { value: "column", label: "Stapeldiagram", icon: "📊" },
   { value: "line", label: "Linjediagram", icon: "📈" },
-  { value: "combo", label: "Kombinerat (Stapel & Linje)", icon: "🔀" },
+  { value: "combo", label: "Kombinerat (stapel & linje)", icon: "🔀" },
   { value: "stacked", label: "Staplad kolumn", icon: "🟰" },
   { value: "pie", label: "Pajdiagram", icon: "🥧" },
-  { value: "variwide", label: "Variwide Diagram", icon: "📏" },
+  { value: "variwide", label: "Variwide diagram", icon: "📏" },
   { value: "stackedArea", label: "Staplad yta", icon: "📊" },
 ];
 
@@ -25,14 +25,14 @@ export const SelectDiagramTypeStep: React.FC<Props> = ({
   setStep,
 }) => (
   <Card>
-    <h3 className="text-2xl font-bold mb-4">Välj Diagramtyp</h3>
+    <h3 className="text-2xl font-bold mb-4">Välj diagramtyp</h3>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {chartOptions.map((option) => (
         <label
           key={option.value}
           className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
             chartType === option.value
-              ? "border-blue-500 bg-blue-50"
+              ? "border-blue-500 bg-blue-100"
               : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
           }`}
         >

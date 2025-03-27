@@ -96,6 +96,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
 
   return (
     <div className="p-4">
+      <div className="flex justify-center items-center gap-4 flex-wrap mt-10">
       {localDimensions
         .filter(
           (dim) =>
@@ -121,6 +122,8 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
             </select>
           </div>
         ))}
+      </div>
+
 
       <div
         ref={containerRef}
