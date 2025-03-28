@@ -133,6 +133,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   const [tempLineMeasure, setTempLineMeasure] = useState(lineMeasure);
   const [embedCode, setEmbedCode] = useState<string>("");
   const [isYAxisTitleEdited, setIsYAxisTitleEdited] = useState(false);
+  const [isYAxisSecondaryTitleEdited, setIsYAxisSecondaryTitleEdited] =
+    useState(false);
   const customDefaultColors = [
     "#4C5CC5",
     "#52AF32",
@@ -211,10 +213,16 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   }, [barMeasure, lineMeasure, variwideHeightMeasure]);
 
   useEffect(() => {
-    if (chartType === "combo" && !yAxisSecondaryTitle && lineMeasure) {
+    if (chartType === "combo" && !isYAxisSecondaryTitleEdited && lineMeasure) {
       setYAxisSecondaryTitle(lineMeasure);
     }
-  }, [chartType, lineMeasure, yAxisSecondaryTitle, setYAxisSecondaryTitle]);
+  }, [
+    chartType,
+    lineMeasure,
+    yAxisSecondaryTitle,
+    setYAxisSecondaryTitle,
+    isYAxisSecondaryTitleEdited,
+  ]);
 
   useEffect(() => {
     if (tempSeriesDimension) {
@@ -687,67 +695,69 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="mb-2 p-1">
-          <h4 className="text-xl font-semibold mb-2">Legend position</h4>
-          <div className="flex flex-row space-x-4">
-            <label className="mb-1 pl-2">
-              <input
-                type="radio"
-                name="legendPosition"
-                value="top"
-                checked={legendPosition === "top"}
-                onChange={(e) => setLegendPosition(e.target.value)}
-                className="mr-2"
-              />
-              Uppe
-            </label>
-            <label className="mb-1">
-              <input
-                type="radio"
-                name="legendPosition"
-                value="right"
-                checked={legendPosition === "right"}
-                onChange={(e) => setLegendPosition(e.target.value)}
-                className="mr-2"
-              />
-              Höger
-            </label>
-            <label className="mb-1">
-              <input
-                type="radio"
-                name="legendPosition"
-                value="bottom"
-                checked={legendPosition === "bottom"}
-                onChange={(e) => setLegendPosition(e.target.value)}
-                className="mr-2"
-              />
-              Nere
-            </label>
-            <label className="mb-1">
-              <input
-                type="radio"
-                name="legendPosition"
-                value="left"
-                checked={legendPosition === "left"}
-                onChange={(e) => setLegendPosition(e.target.value)}
-                className="mr-2"
-              />
-              Vänster
-            </label>
-            <label className="mb-1">
-              <input
-                type="radio"
-                name="legendPosition"
-                value="inside"
-                checked={legendPosition === "inside"}
-                onChange={(e) => setLegendPosition(e.target.value)}
-                className="mr-2"
-              />
-              Inuti diagrammet
-            </label>
+        {chartType !== "variwide" && (
+          <div className="mb-2 p-1">
+            <h4 className="text-xl font-semibold mb-2">Legend position</h4>
+            <div className="flex flex-row space-x-4">
+              <label className="mb-1 pl-2">
+                <input
+                  type="radio"
+                  name="legendPosition"
+                  value="top"
+                  checked={legendPosition === "top"}
+                  onChange={(e) => setLegendPosition(e.target.value)}
+                  className="mr-2"
+                />
+                Uppe
+              </label>
+              <label className="mb-1">
+                <input
+                  type="radio"
+                  name="legendPosition"
+                  value="right"
+                  checked={legendPosition === "right"}
+                  onChange={(e) => setLegendPosition(e.target.value)}
+                  className="mr-2"
+                />
+                Höger
+              </label>
+              <label className="mb-1">
+                <input
+                  type="radio"
+                  name="legendPosition"
+                  value="bottom"
+                  checked={legendPosition === "bottom"}
+                  onChange={(e) => setLegendPosition(e.target.value)}
+                  className="mr-2"
+                />
+                Nere
+              </label>
+              <label className="mb-1">
+                <input
+                  type="radio"
+                  name="legendPosition"
+                  value="left"
+                  checked={legendPosition === "left"}
+                  onChange={(e) => setLegendPosition(e.target.value)}
+                  className="mr-2"
+                />
+                Vänster
+              </label>
+              <label className="mb-1">
+                <input
+                  type="radio"
+                  name="legendPosition"
+                  value="inside"
+                  checked={legendPosition === "inside"}
+                  onChange={(e) => setLegendPosition(e.target.value)}
+                  className="mr-2"
+                />
+                Inuti diagrammet
+              </label>
+            </div>
           </div>
-        </div>
-
+        )}
+        
         <div className="mb-2 p-1">
           <h4 className="text-xl font-semibold mb-2">Dimensioner & roller</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -1104,7 +1114,10 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   <input
                     type="text"
                     value={yAxisSecondaryTitle}
-                    onChange={(e) => setYAxisSecondaryTitle(e.target.value)}
+                    onChange={(e) => {
+                      setYAxisSecondaryTitle(e.target.value);
+                      setIsYAxisSecondaryTitleEdited(true);
+                    }}
                     className="border rounded px-2 py-1 w-full"
                     placeholder="Titel för sekundär Y-Axis"
                   />
