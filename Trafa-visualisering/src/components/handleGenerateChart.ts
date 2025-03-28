@@ -35,13 +35,13 @@ export const handleGenerateChart = (
 ) => {
   Highcharts.setOptions({
     lang: {
-      decimalPoint: ',',
-      thousandsSep: ' '
+      decimalPoint: ",",
+      thousandsSep: " ",
     },
     tooltip: {
-      valuePrefix: '',
-      valueSuffix: ''
-    }
+      valuePrefix: "",
+      valueSuffix: "",
+    },
   });
   const {
     dimensions,
@@ -695,17 +695,17 @@ export const handleGenerateChart = (
   } else {
     currentChart.yAxis[0].update({
       title: {
-        text: config.yAxisPrimaryTitle || (barMeasure ? barMeasure : ""),
+        text: config.yAxisPrimaryTitle || "",
         style: { color: "" },
       },
       min: config.yAxisPrimaryMin,
       max: config.yAxisPrimaryMax,
       tickInterval: config.yAxisPrimaryTick,
     });
-    if (config.chartType === "combo" && currentChart.yAxis[1]) {
+    if (config.chartType === "combo") {
       currentChart.yAxis[1].update({
         title: {
-          text: config.yAxisSecondaryTitle || (lineMeasure ? lineMeasure : ""),
+          text: config.yAxisSecondaryTitle || "",
           style: { color: "" },
         },
         min: config.yAxisSecondaryMin,
