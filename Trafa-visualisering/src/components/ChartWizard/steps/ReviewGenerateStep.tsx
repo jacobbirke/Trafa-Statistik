@@ -370,6 +370,19 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       seriesIcons: seriesIcons,
     };
 
+    if (chartType === "combo" && (!tempBarMeasure || !tempLineMeasure)) {
+      alert("Vänligen välj både stapel- och linjemått");
+      return;
+    }
+
+    if (
+      chartType === "variwide" &&
+      (!variwideWidthMeasure || !variwideHeightMeasure)
+    ) {
+      alert("Vänligen välj både bredd- och höjdmått");
+      return;
+    }
+
     handleGenerateChart(updatedConfig);
   };
 
@@ -646,9 +659,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 pl-2">
                 {(chartType === "combo"
-                  ? measures.filter(
-                      (m) => m.isSelected && m.name === lineMeasure
-                    )
+                  ? measures.filter((m) => m.name === lineMeasure)
                   : measures.filter((m) => m.isSelected)
                 ).map((measure, index) => {
                   const defaultMarkerSymbols = [
@@ -752,12 +763,12 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   onChange={(e) => setLegendPosition(e.target.value)}
                   className="mr-2"
                 />
-                Inuti diagrammet
+                Inuti
               </label>
             </div>
           </div>
         )}
-        
+
         <div className="mb-2 p-1">
           <h4 className="text-xl font-semibold mb-2">Dimensioner & roller</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -888,41 +899,45 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           ))}
         </div>
 
-        <div className="p-1 mb-2">
-          <h4 className="text-xl font-semibold mb-2 ">Mått</h4>
-          <div className="space-y-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-2">
-              {tempMeasures.map((measure) => (
-                <label
-                  key={measure.name}
-                  className={`flex items-center p-2 rounded-md border ${
-                    measure.isSelected
-                      ? "border-blue-500 bg-blue-100"
-                      : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={measure.isSelected}
-                    onChange={(e) => {
-                      setTempMeasures((prev) =>
-                        prev.map((m) =>
-                          m.name === measure.name
-                            ? { ...m, isSelected: e.target.checked }
-                            : m
-                        )
-                      );
-                    }}
-                    className="mr-3 h-4 w-4 text-blue-600"
-                  />
-                  <span className="text-base">
-                    {measure.name} {measure.unit && `(${measure.unit})`}
-                  </span>
-                </label>
-              ))}
+        {!["combo", "variwide"].includes(chartType) && (
+          <>
+            <div className="p-1 mb-2">
+              <h4 className="text-xl font-semibold mb-2 ">Mått</h4>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-2">
+                  {tempMeasures.map((measure) => (
+                    <label
+                      key={measure.name}
+                      className={`flex items-center p-2 rounded-md border ${
+                        measure.isSelected
+                          ? "border-blue-500 bg-blue-100"
+                          : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={measure.isSelected}
+                        onChange={(e) => {
+                          setTempMeasures((prev) =>
+                            prev.map((m) =>
+                              m.name === measure.name
+                                ? { ...m, isSelected: e.target.checked }
+                                : m
+                            )
+                          );
+                        }}
+                        className="mr-3 h-4 w-4 text-blue-600"
+                      />
+                      <span className="text-base">
+                        {measure.name} {measure.unit && `(${measure.unit})`}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
 
         {chartType === "combo" && (
           <div className="mb-2 p-1">
@@ -931,46 +946,42 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 <h4 className="text-lg font-semibold mb-2">
                   Välj mått för stapel
                 </h4>
-                {tempMeasures
-                  .filter((m) => m.isSelected)
-                  .map((measure) => (
-                    <div key={measure.name} className="flex items-center mb-2">
-                      <label className="flex items-center space-x-2 pl-2">
-                        <input
-                          type="radio"
-                          name="barMeasure"
-                          value={measure.name}
-                          checked={tempBarMeasure === measure.name}
-                          onChange={() => setTempBarMeasure(measure.name)}
-                          className="mr-2 h-4 w-4 text-blue-600"
-                        />
-                        {measure.name}
-                      </label>
-                    </div>
-                  ))}
+                {tempMeasures.map((measure) => (
+                  <div key={measure.name} className="flex items-center mb-2">
+                    <label className="flex items-center space-x-2 pl-2">
+                      <input
+                        type="radio"
+                        name="barMeasure"
+                        value={measure.name}
+                        checked={tempBarMeasure === measure.name}
+                        onChange={() => setTempBarMeasure(measure.name)}
+                        className="mr-2 h-4 w-4 text-blue-600"
+                      />
+                      {measure.name}
+                    </label>
+                  </div>
+                ))}
               </div>
 
               <div className="flex-1">
                 <h4 className="text-lg font-semibold mb-2">
                   Välj mått för linje
                 </h4>
-                {tempMeasures
-                  .filter((m) => m.isSelected)
-                  .map((measure) => (
-                    <div key={measure.name} className="flex items-center mb-2">
-                      <label className="flex items-center space-x-2 pl-2">
-                        <input
-                          type="radio"
-                          name="lineMeasure"
-                          value={measure.name}
-                          checked={tempLineMeasure === measure.name}
-                          onChange={() => setTempLineMeasure(measure.name)}
-                          className="mr-2 h-4 w-4 text-blue-600"
-                        />
-                        {measure.name}
-                      </label>
-                    </div>
-                  ))}
+                {tempMeasures.map((measure) => (
+                  <div key={measure.name} className="flex items-center mb-2">
+                    <label className="flex items-center space-x-2 pl-2">
+                      <input
+                        type="radio"
+                        name="lineMeasure"
+                        value={measure.name}
+                        checked={tempLineMeasure === measure.name}
+                        onChange={() => setTempLineMeasure(measure.name)}
+                        className="mr-2 h-4 w-4 text-blue-600"
+                      />
+                      {measure.name}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -984,55 +995,43 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   <h4 className="text-xl font-semibold mb-2">
                     Välj mått för bredd
                   </h4>
-                  {measures
-                    .filter((m) => m.isSelected)
-                    .map((measure) => (
-                      <div
-                        key={measure.name}
-                        className="flex items-center mb-2"
-                      >
-                        <label className="flex items-center space-x-2 pl-2">
-                          <input
-                            type="radio"
-                            name="variwideWidthMeasure"
-                            value={measure.name}
-                            checked={variwideWidthMeasure === measure.name}
-                            onChange={() =>
-                              setVariwideWidthMeasure(measure.name)
-                            }
-                            className="mr-2"
-                          />
-                          {measure.name}
-                        </label>
-                      </div>
-                    ))}
+                  {measures.map((measure) => (
+                    <div key={measure.name} className="flex items-center mb-2">
+                      <label className="flex items-center space-x-2 pl-2">
+                        <input
+                          type="radio"
+                          name="variwideWidthMeasure"
+                          value={measure.name}
+                          checked={variwideWidthMeasure === measure.name}
+                          onChange={() => setVariwideWidthMeasure(measure.name)}
+                          className="mr-2"
+                        />
+                        {measure.name}
+                      </label>
+                    </div>
+                  ))}
                 </div>
                 <div className="flex-1">
                   <h4 className="text-xl font-semibold mb-2">
                     Välj mått för höjd
                   </h4>
-                  {measures
-                    .filter((m) => m.isSelected)
-                    .map((measure) => (
-                      <div
-                        key={measure.name}
-                        className="flex items-center mb-2"
-                      >
-                        <label className="flex items-center space-x-2 pl-2">
-                          <input
-                            type="radio"
-                            name="variwideHeightMeasure"
-                            value={measure.name}
-                            checked={variwideHeightMeasure === measure.name}
-                            onChange={() =>
-                              setVariwideHeightMeasure(measure.name)
-                            }
-                            className="mr-2"
-                          />
-                          {measure.name}
-                        </label>
-                      </div>
-                    ))}
+                  {measures.map((measure) => (
+                    <div key={measure.name} className="flex items-center mb-2">
+                      <label className="flex items-center space-x-2 pl-2">
+                        <input
+                          type="radio"
+                          name="variwideHeightMeasure"
+                          value={measure.name}
+                          checked={variwideHeightMeasure === measure.name}
+                          onChange={() =>
+                            setVariwideHeightMeasure(measure.name)
+                          }
+                          className="mr-2"
+                        />
+                        {measure.name}
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1052,7 +1051,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                   setIsYAxisTitleEdited(true);
                 }}
                 className="border rounded px-2 py-1 w-full"
-                placeholder="Titel för primär Y-Axis"
+                placeholder="Titel för y-axel"
               />
             </div>
             <div>
@@ -1119,7 +1118,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                       setIsYAxisSecondaryTitleEdited(true);
                     }}
                     className="border rounded px-2 py-1 w-full"
-                    placeholder="Titel för sekundär Y-Axis"
+                    placeholder="Titel för sekundär y-axel"
                   />
                 </div>
                 <div>

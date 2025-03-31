@@ -14,36 +14,19 @@ type Props = {
   measures: Measure[];
   xAxisDimensions: string[];
   seriesDimension: string | null;
-  barMeasure: string | null;
-  lineMeasure: string | null;
   setXAxisDimensions: React.Dispatch<React.SetStateAction<string[]>>;
   setSeriesDimension: React.Dispatch<React.SetStateAction<string | null>>;
-  setBarMeasure: React.Dispatch<React.SetStateAction<string | null>>;
-  setLineMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   setStep: (step: WizardStep) => void;
-  variwideWidthMeasure: string | null;
-  setVariwideWidthMeasure: React.Dispatch<React.SetStateAction<string | null>>;
-  variwideHeightMeasure: string | null;
-  setVariwideHeightMeasure: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 export const ChartConfigurationStep: React.FC<Props> = ({
   chartType,
   dimensions,
-  measures,
   xAxisDimensions,
   seriesDimension,
-  barMeasure,
-  lineMeasure,
   setXAxisDimensions,
   setSeriesDimension,
-  setBarMeasure,
-  setLineMeasure,
   setStep,
-  variwideWidthMeasure,
-  setVariwideWidthMeasure,
-  variwideHeightMeasure,
-  setVariwideHeightMeasure,
 }) => {
   const maxXAxisAllowed =
     chartType === "variwide" ||
@@ -105,58 +88,6 @@ export const ChartConfigurationStep: React.FC<Props> = ({
                   </div>
                 </label>
               ))}
-            </div>
-          </div>
-          <div className="mb-2 p-1">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 ">
-                <h4 className="text-xl font-semibold mb-2">
-                  Välj mått för bredd
-                </h4>
-                {measures
-                  .filter((m) => m.isSelected)
-                  .map((measure) => (
-                    <div key={measure.name} className="flex items-center mb-2">
-                      <label className="flex items-center space-x-2 pl-2">
-                        <input
-                          type="radio"
-                          name="variwideWidthMeasure"
-                          value={measure.name}
-                          checked={variwideWidthMeasure === measure.name}
-                          onChange={() => setVariwideWidthMeasure(measure.name)}
-                          disabled={variwideHeightMeasure === measure.name}
-                          className="mr-2"
-                        />
-                        {measure.name}
-                      </label>
-                    </div>
-                  ))}
-              </div>
-              <div className="flex-1">
-                <h4 className="text-xl font-semibold mb-2">
-                  Välj mått för höjd
-                </h4>
-                {measures
-                  .filter((m) => m.isSelected)
-                  .map((measure) => (
-                    <div key={measure.name} className="flex items-center mb-2">
-                      <label className="flex items-center space-x-2 pl-2">
-                        <input
-                          type="radio"
-                          name="variwideHeightMeasure"
-                          value={measure.name}
-                          checked={variwideHeightMeasure === measure.name}
-                          onChange={() =>
-                            setVariwideHeightMeasure(measure.name)
-                          }
-                          disabled={variwideWidthMeasure === measure.name}
-                          className="mr-2"
-                        />
-                        {measure.name}
-                      </label>
-                    </div>
-                  ))}
-              </div>
             </div>
           </div>
         </>
@@ -243,57 +174,6 @@ export const ChartConfigurationStep: React.FC<Props> = ({
         </>
       ) : null}
 
-      {chartType === "combo" && (
-        <div className="mb-4 p-1">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <h4 className="text-xl font-semibold mb-2">
-                Välj mått för stapel
-              </h4>
-              {measures
-                .filter((m) => m.isSelected)
-                .map((measure) => (
-                  <div key={measure.name} className="flex items-center mb-2">
-                    <label className="flex items-center space-x-2 pl-2">
-                      <input
-                        type="radio"
-                        name="barMeasure"
-                        value={measure.name}
-                        checked={barMeasure === measure.name}
-                        onChange={() => setBarMeasure(measure.name)}
-                        className="mr-2"
-                      />
-                      {measure.name}
-                    </label>
-                  </div>
-                ))}
-            </div>
-
-            <div className="flex-1">
-              <h4 className="text-xl font-semibold mb-2">
-                Välj mått för linje
-              </h4>
-              {measures
-                .filter((m) => m.isSelected)
-                .map((measure) => (
-                  <div key={measure.name} className="flex items-center mb-2">
-                    <label className="flex items-center space-x-2 pl-2">
-                      <input
-                        type="radio"
-                        name="lineMeasure"
-                        value={measure.name}
-                        checked={lineMeasure === measure.name}
-                        onChange={() => setLineMeasure(measure.name)}
-                        className="mr-2"
-                      />
-                      {measure.name}
-                    </label>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="flex justify-between mt-6">
         <Button onClick={() => setStep("select-measures")} variant="secondary">
