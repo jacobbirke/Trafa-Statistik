@@ -60,8 +60,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   yAxisSecondaryTick,
   setYAxisSecondaryTick,
   seriesIcons,
-  setSeriesIcons
-
+  setSeriesIcons,
 }) => {
   return (
     <div className="max-w-7xl mx-auto p-3 space-y-8">
@@ -91,6 +90,14 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           measures={measures}
           setMeasures={setMeasures}
           setStep={setStep}
+          variwideWidthMeasure={variwideWidthMeasure}
+          setVariwideWidthMeasure={setVariwideWidthMeasure}
+          variwideHeightMeasure={variwideHeightMeasure}
+          setVariwideHeightMeasure={setVariwideHeightMeasure}
+          barMeasure={barMeasure}
+          lineMeasure={lineMeasure}
+          setBarMeasure={setBarMeasure}
+          setLineMeasure={setLineMeasure}
         />
       )}
 
@@ -101,17 +108,9 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           measures={measures}
           xAxisDimensions={xAxisDimensions}
           seriesDimension={seriesDimension}
-          barMeasure={barMeasure}
-          lineMeasure={lineMeasure}
           setXAxisDimensions={setXAxisDimensions}
           setSeriesDimension={setSeriesDimension}
-          setBarMeasure={setBarMeasure}
-          setLineMeasure={setLineMeasure}
           setStep={setStep}
-          variwideWidthMeasure={variwideWidthMeasure}
-          setVariwideWidthMeasure={setVariwideWidthMeasure}
-          variwideHeightMeasure={variwideHeightMeasure}
-          setVariwideHeightMeasure={setVariwideHeightMeasure}
         />
       )}
 

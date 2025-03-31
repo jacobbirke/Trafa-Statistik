@@ -258,21 +258,6 @@ export const handleGenerateChart = (
       return;
     }
 
-    const selectedMeasures = config.measures.filter((m) => m.isSelected);
-    if (selectedMeasures.length !== 2) {
-      alert("Välj exakt två mått: ett för höjd och ett för bredd.");
-      return;
-    }
-
-    if (!config.variwideWidthMeasure) {
-      alert("Välj vilket mått som ska användas för bredden.");
-      return;
-    }
-    if (!config.variwideHeightMeasure) {
-      alert("Välj vilket mått som ska användas för höjden.");
-      return;
-    }
-
     const widthMeasureIndex =
       config.measures.findIndex((m) => m.name === config.variwideWidthMeasure) +
       config.dimensions.length;
@@ -760,13 +745,23 @@ export const handleGenerateChart = (
   };
 
   const generalSeriesData: any[] = [];
-  const selectedMeasuresForOther = measures.filter(
-    (measure) => measure.isSelected
-  );
+  let selectedMeasuresForOther: Measure[] = [];
+  if (chartType === "combo") {
+    if (config.barMeasure) {
+      const bar = measures.find((m) => m.name === config.barMeasure);
+      if (bar) selectedMeasuresForOther.push(bar);
+    }
+    if (config.lineMeasure) {
+      const line = measures.find((m) => m.name === config.lineMeasure);
+      if (line) selectedMeasuresForOther.push(line);
+    }
+  } else {
+    selectedMeasuresForOther = measures.filter((measure) => measure.isSelected);
+  }
 
   const getSeriesType = (measure: Measure) => {
     if (chartType === "combo") {
-      return measure.name === lineMeasure ? "spline" : "column";
+      return measure.name === config.lineMeasure ? "spline" : "column";
     }
     return chartType === "line" ? "spline" : "column";
   };

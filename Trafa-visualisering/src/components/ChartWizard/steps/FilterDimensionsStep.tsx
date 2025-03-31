@@ -33,8 +33,8 @@ export const FilterDimensionsStep: React.FC<Props> = ({
       <h3 className="text-2xl font-bold mb-4">Filtrera dimensioner</h3>
       {dimensions.map((dim) => (
         <div key={dim.name} className="border p-4 mb-4 rounded-lg">
-          <h4 className="text-xl font-semibold mb-2">{dim.name}</h4>
-          <div className="flex gap-2 mb-2">
+          <div className="flex gap-2 mb-2">          
+            <h4 className="text-xl font-semibold mr-4 p-1">{dim.name}</h4>
             <Button
               onClick={() => handleSelectAll(dim.name)}
               variant="success"
