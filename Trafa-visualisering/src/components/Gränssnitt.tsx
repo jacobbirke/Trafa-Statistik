@@ -250,7 +250,7 @@ const StatistikGränssnitt: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-trafaPrimary">
+    <div className="min-h-screen bg-trafaPrimary pt-6">
       <ChartWizard
         step={step}
         chartType={chartType}

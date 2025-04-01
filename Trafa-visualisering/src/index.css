@@ -5,7 +5,7 @@
 
 @layer base {
   body {
-    @apply bg-trafaPrimary text-black font-sans mt-5;
+    @apply text-black font-sans;
   }
 }
 

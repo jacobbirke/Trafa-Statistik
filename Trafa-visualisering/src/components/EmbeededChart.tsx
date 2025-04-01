@@ -95,7 +95,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
   };
 
   return (
-    <div className="p-4">
+    <div className="">
       <div className="flex justify-center items-center gap-4 flex-wrap mt-10">
       {localDimensions
         .filter(
@@ -127,7 +127,7 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
 
       <div
         ref={containerRef}
-        className="w-full h-[600px] bg-gray-100 rounded"
+        className="w-full h-full"
       />
 
       {config.chartType !== "variwide" &&
