@@ -52,6 +52,17 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
   }, []);
 
   useEffect(() => {
+    const handleResize = () => {
+      if (chartInstance) {
+        chartInstance.reflow();
+      }
+    };
+  
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [chartInstance]);
+
+  useEffect(() => {
     if (chartInstance) {
       handleGenerateChart(
         chartInstance,
@@ -125,10 +136,10 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
       </div>
 
 
-      <div
-        ref={containerRef}
-        className="w-full h-full"
-      />
+      <div 
+  ref={containerRef}
+  className="w-full h-[90vh] min-h-[400px]"
+/>
 
       {config.chartType !== "variwide" &&
         config.chartType !== "stackedArea" &&

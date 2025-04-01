@@ -39,7 +39,7 @@ const EmbedPage: React.FC = () => {
   if (!config) return <div className="p-4">Laddar...</div>;
 
   return (
-    <div className="bg-white p-1">
+    <div className="bg-white p-1 w-full h-screen">
       <EmbeddedChart config={config} />
     </div>
   );

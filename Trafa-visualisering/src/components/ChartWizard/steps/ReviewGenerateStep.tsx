@@ -425,12 +425,12 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       const embedUrl = `${window.location.origin}/embed?configId=${id}`;
 
       setEmbedCode(
-        `<iframe 
-          src="${embedUrl}"
-          width="100%" 
-          height="700" 
-          style="border:1px solid #ddd;border-radius:8px"
-        ></iframe>`
+        `<div style="width: 100%; height: 600px; overflow: hidden;">
+          <iframe 
+            src="${embedUrl}"
+            style="width: 100%; height: 100%; border: none;"
+          ></iframe>
+        </div>`
       );
     } catch (error) {
       console.error("Embed generation failed:", error);
