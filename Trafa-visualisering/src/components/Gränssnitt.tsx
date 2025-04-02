@@ -23,7 +23,7 @@ const StatistikGränssnitt: React.FC = () => {
   const [seriesDimension, setSeriesDimension] = useState<string | null>(null);
   const [barMeasure, setBarMeasure] = useState<string | null>(null);
   const [lineMeasure, setLineMeasure] = useState<string | null>(null);
-  const [title, setTitle] = useState<string>("Diagram utan titel");
+  const [title, setTitle] = useState<string>("Diagram");
   const [jsonData, setJsonData] = useState<any[]>([]);
   const [is3D, setIs3D] = useState<boolean>(false);
   const [chart, setChart] = useState<any>(null);
@@ -198,9 +198,7 @@ const StatistikGränssnitt: React.FC = () => {
           })
         );
 
-        const title = parsedData[0][0];
-        const headers = parsedData[1];
-        const units = parsedData[2];
+        const headers = parsedData[0];
         const dimensionHeaders: string[] = [];
         const measureHeaders: string[] = [];
         headers.forEach((header) => {
@@ -210,30 +208,33 @@ const StatistikGränssnitt: React.FC = () => {
             dimensionHeaders.push(header);
           }
         });
-        const dimensionsData: Dimension[] = dimensionHeaders.map(
-          (header, index) => {
-            const uniqueValues = new Set<string>();
-            parsedData.forEach((row, rowIndex) => {
-              if (rowIndex > 2) uniqueValues.add(row[index]?.toString() || "");
-            });
-            return {
-              name: header,
-              allValues: Array.from(uniqueValues),
-              selectedValues: [],
-              unit: units[index] || "",
-            };
-          }
-        );
-        const measuresData: Measure[] = measureHeaders.map((header, index) => ({
+        const dimensionsData: Dimension[] = dimensionHeaders.map((header) => {
+          const headerIndex = headers.indexOf(header);
+          const uniqueValues = new Set<string>();
+
+          processedData.slice(1).forEach((row) => {
+            const value = row[headerIndex]?.toString() || "";
+            uniqueValues.add(value);
+          });
+
+          return {
+            name: header,
+            allValues: Array.from(uniqueValues),
+            selectedValues: [],
+            unit: "",
+          };
+        });
+
+        const measuresData: Measure[] = measureHeaders.map((header) => ({
           name: header.replace("_M", ""),
-          unit: units[index] || "",
+          unit: "",
           isSelected: false,
         }));
         setTitle(title);
         setDimensions(dimensionsData);
         setMeasures(measuresData);
-        setJsonData(parsedData.slice(3));
-        setJsonData(processedData.slice(3));
+        setJsonData(parsedData.slice(0));
+        setJsonData(processedData.slice(0));
       } catch (error) {
         console.error("Error", error);
       }
