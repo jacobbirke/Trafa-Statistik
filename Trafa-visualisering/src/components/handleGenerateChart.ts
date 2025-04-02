@@ -37,10 +37,36 @@ export const handleGenerateChart = (
     lang: {
       decimalPoint: ",",
       thousandsSep: " ",
+      numericSymbols: [],
     },
     tooltip: {
       valuePrefix: "",
       valueSuffix: "",
+      formatter: function () {
+        if (!this.points) {
+          const point = this.point || this;
+          const value = point.y ?? 0;
+          const formattedValue =
+            value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          const color = point.color || this.series.color;
+          return `<span style="color:${color}">●</span> ${this.series.name}: <b>${formattedValue}</b>`;
+        }
+        return this.points.reduce((s, point) => {
+          const value = point.y ?? 0;
+          const formattedValue =
+            value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          return (
+            s +
+            `<br/><span style="color:${
+              point.color || point.series.color
+            }">●</span> ${point.series.name}: <b>${formattedValue}</b>`
+          );
+        }, `<span style="font-size: 10px">${this.x}</span>`);
+      },
     },
   });
   const {
@@ -223,10 +249,30 @@ export const handleGenerateChart = (
           cursor: "pointer",
           dataLabels: {
             enabled: true,
-            format: "{point.name}",
+            formatter: function (this: Highcharts.PointLabelObject) {
+              const value = this.y ?? 0;
+              const formattedValue =
+                value % 1 === 0
+                  ? Highcharts.numberFormat(value, 0, ",", " ")
+                  : Highcharts.numberFormat(value, 2, ",", " ");
+              return `${this.point.name}: ${formattedValue}`;
+            },
           },
         },
       },
+      series: [
+        {
+          type: "pie",
+          name: measure.name,
+          data: pieSeriesData.map((point, index) => ({
+            name: point.name,
+            y: point.y,
+            color:
+              config.seriesColors[point.name] ||
+              customDefaultColors[index % customDefaultColors.length],
+          })),
+        },
+      ],
     });
     currentChart.xAxis[0].update({ visible: false });
     currentChart.yAxis[0].update({ visible: false });
@@ -351,9 +397,18 @@ export const handleGenerateChart = (
         plotOptions: {
           variwide: {
             tooltip: {
-              pointFormat:
-                `Höjd: <b><u>{point.y}</u></b>  (${config.variwideHeightMeasure})<br>` +
-                `Bredd: <b><u>{point.z}</u></b>  (${config.variwideWidthMeasure})`,
+              pointFormatter: function (this: any) {
+                const yVal = (this.y ?? 0) % 1 === 0
+                  ? Highcharts.numberFormat(this.y ?? 0, 0, ",", " ")
+                  : Highcharts.numberFormat(this.y ?? 0, 2, ",", " ");
+                const zVal = (this.z ?? 0) % 1 === 0
+                  ? Highcharts.numberFormat(this.z ?? 0, 0, ",", " ")
+                  : Highcharts.numberFormat(this.z ?? 0, 2, ",", " ");
+                return (
+                  `Höjd: <b><u>${yVal}</u></b> (${config.variwideHeightMeasure})<br>` +
+                  `Bredd: <b><u>${zVal}</u></b> (${config.variwideWidthMeasure})`
+                );
+              },
             },
           },
         },
@@ -392,16 +447,16 @@ export const handleGenerateChart = (
   // Stacked Area
   if (chartType === "stackedArea") {
     if (xAxisDimensions.length !== 1) {
-      alert("För staplat områdesdiagram, välj exakt en dimension för x-axeln.");
+      alert("För staplad yta, välj exakt en dimension för x-axeln.");
       return;
     }
     if (!seriesDimension) {
-      alert("För staplat områdesdiagram, välj en dimension för serier.");
+      alert("För staplad yta, välj en dimension för serier.");
       return;
     }
     const selectedMeasuresForStacked = measures.filter((m) => m.isSelected);
     if (selectedMeasuresForStacked.length !== 1) {
-      alert("För staplat områdesdiagram, välj exakt ett mått.");
+      alert("För staplad yta, välj exakt ett mått.");
       return;
     }
     const measure = selectedMeasuresForStacked[0];
@@ -506,16 +561,16 @@ export const handleGenerateChart = (
   // Staplad kolumn
   if (chartType === "stacked") {
     if (xAxisDimensions.length !== 1) {
-      alert("För staplat diagram, välj exakt en dimension för x-axeln.");
+      alert("För staplad kolumn, välj exakt en dimension för x-axeln.");
       return;
     }
     if (!seriesDimension) {
-      alert("För staplat diagram, välj exakt en dimension för serier.");
+      alert("För staplad kolumn, välj exakt en dimension för serier.");
       return;
     }
     const selectedMeasuresForStacked = measures.filter((m) => m.isSelected);
     if (selectedMeasuresForStacked.length !== 1) {
-      alert("För staplat diagram, välj exakt ett mått.");
+      alert("För staplad kolumn, välj exakt ett mått.");
       return;
     }
     const measure = selectedMeasuresForStacked[0];
@@ -887,6 +942,14 @@ export const handleGenerateChart = (
         grouping: true,
         pointPadding: 0.2,
         borderWidth: 0,
+        dataLabels: {
+          formatter: function (this: Highcharts.PointLabelObject) {
+            const value = this.y ?? 0;
+            return value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          },
+        },
       },
       pie: {
         depth: is3D ? 45 : undefined,
@@ -897,6 +960,16 @@ export const handleGenerateChart = (
           radius: 6,
           lineWidth: 1,
           lineColor: "#ffffff",
+        },
+      },
+      spline: {
+        dataLabels: {
+          formatter: function (this: Highcharts.PointLabelObject) {
+            const value = this.y ?? 0;
+            return value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          },
         },
       },
     },
