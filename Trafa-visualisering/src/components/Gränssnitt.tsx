@@ -23,7 +23,7 @@ const StatistikGränssnitt: React.FC = () => {
   const [seriesDimension, setSeriesDimension] = useState<string | null>(null);
   const [barMeasure, setBarMeasure] = useState<string | null>(null);
   const [lineMeasure, setLineMeasure] = useState<string | null>(null);
-  const [title, setTitle] = useState<string>("Diagram");
+  const [title, setTitle] = useState<string>("");
   const [jsonData, setJsonData] = useState<any[]>([]);
   const [is3D, setIs3D] = useState<boolean>(false);
   const [chart, setChart] = useState<any>(null);
@@ -180,41 +180,45 @@ const StatistikGränssnitt: React.FC = () => {
     const reader = new FileReader();
     reader.onload = function (event) {
       const data = event.target?.result;
-      if (!(data instanceof ArrayBuffer)) return;
+      if (!data) return;
+
       try {
         const workbook = XLSX.read(data, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const parsedData = XLSX.utils.sheet_to_json<any[]>(sheet, {
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
           header: 1,
           raw: false,
         });
 
-        const processedData = parsedData.map((row) =>
-          row.map((cell) => {
-            if (typeof cell === "string" && cell.includes(",")) {
-              return parseFloat(cell.replace(",", ".")) || cell;
-            }
-            return cell;
-          })
-        );
+        if (jsonData.length < 2) {
+          alert("Filen innehåller inte tillräckligt med data");
+          return;
+        }
 
-        const headers = parsedData[0];
+        const headers = jsonData[0] as string[];
+        const rows = jsonData.slice(1) as any[][];
         const dimensionHeaders: string[] = [];
         const measureHeaders: string[] = [];
+
         headers.forEach((header) => {
-          if (header.endsWith("_M")) {
-            measureHeaders.push(header);
-          } else {
-            dimensionHeaders.push(header);
+          if (typeof header === "string") {
+            if (header.endsWith("_M")) {
+              measureHeaders.push(header);
+            } else {
+              dimensionHeaders.push(header);
+            }
           }
         });
+
         const dimensionsData: Dimension[] = dimensionHeaders.map((header) => {
           const headerIndex = headers.indexOf(header);
           const uniqueValues = new Set<string>();
 
-          processedData.slice(1).forEach((row) => {
-            const value = row[headerIndex]?.toString() || "";
-            uniqueValues.add(value);
+          rows.forEach((row) => {
+            if (row[headerIndex] !== undefined) {
+              uniqueValues.add(String(row[headerIndex]));
+            }
           });
 
           return {
@@ -230,13 +234,22 @@ const StatistikGränssnitt: React.FC = () => {
           unit: "",
           isSelected: false,
         }));
-        setTitle(title);
+        const processedData = rows.map((row) =>
+          row.map((cell) => {
+            if (typeof cell === "string" && cell.includes(",")) {
+              return parseFloat(cell.replace(",", ".")) || cell;
+            }
+            return cell;
+          })
+        );
+
+        setTitle("");
         setDimensions(dimensionsData);
         setMeasures(measuresData);
-        setJsonData(parsedData.slice(0));
-        setJsonData(processedData.slice(0));
+        setJsonData(processedData);
       } catch (error) {
-        console.error("Error", error);
+        console.error("Error processing file:", error);
+        alert("Det uppstod ett fel vid bearbetning av filen");
       }
     };
     reader.readAsArrayBuffer(file);

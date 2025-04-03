@@ -35,16 +35,17 @@ export const SelectMeasuresStep: React.FC<Props> = ({
 }) => {
   return (
     <Card>
-    <div>
-      {chartType === "variwide" ? (
-        <h3 className="text-2xl font-bold mb-4">Mått för variwde diagram</h3>
-      ) : chartType === "combo" ? (
-        <h3 className="text-2xl font-bold mb-4">Mått för kombinerat diagram</h3>
-      ) : (
-        <h3 className="text-2xl font-bold mb-4">Välj mått</h3> 
-      )}
-    </div>
-
+      <div>
+        {chartType === "variwide" ? (
+          <h3 className="text-2xl font-bold mb-4">Mått för variwde diagram</h3>
+        ) : chartType === "combo" ? (
+          <h3 className="text-2xl font-bold mb-4">
+            Mått för kombinerat diagram
+          </h3>
+        ) : (
+          <h3 className="text-2xl font-bold mb-4">Välj mått</h3>
+        )}
+      </div>
 
       {!["combo", "variwide"].includes(chartType) && (
         <>
@@ -189,12 +190,16 @@ export const SelectMeasuresStep: React.FC<Props> = ({
           onClick={() => {
             if (chartType === "variwide") {
               if (!variwideWidthMeasure || !variwideHeightMeasure) {
-                alert("För variwide diagram, välj ett mått för bredd och ett mått för höjd.");
+                alert(
+                  "För variwide diagram, välj ett mått för bredd och ett mått för höjd."
+                );
                 return;
               }
             } else if (chartType === "combo") {
               if (!barMeasure || !lineMeasure) {
-                alert("För kombinerat diagram, välj ett mått för stapel och ett mått för linje.");
+                alert(
+                  "För kombinerat diagram, välj ett mått för stapel och ett mått för linje."
+                );
                 return;
               }
             } else {
