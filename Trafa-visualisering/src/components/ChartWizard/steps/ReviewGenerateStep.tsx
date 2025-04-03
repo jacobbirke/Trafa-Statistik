@@ -1040,8 +1040,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
         <div className="mb-4 p-1 ">
           <h5 className="text-xl font-semibold mb-2">Y-axel inställningar</h5>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
-            <div>
+            <div className="pl-1">
               <label className="block mb-1 font-medium">Y-axel titel</label>
               <input
                 type="text"
@@ -1054,6 +1053,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 placeholder="Titel för y-axel"
               />
             </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-1">
             <div>
               <label className="block mb-1 font-medium">
                 Y-axel värde minimum
@@ -1105,8 +1105,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               <h5 className="text-lg font-semibold mb-2">
                 Sekundär y-axel inställningar
               </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
-                <div>
+                <div className="pl-1">
                   <label className="block mb-1 font-medium">
                     Sekundär y-axel titel
                   </label>
@@ -1121,6 +1120,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     placeholder="Titel för sekundär y-axel"
                   />
                 </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 space-x-4 p-1">
                 <div>
                   <label className="block mb-1 font-medium">
                     Sekundär y-axel minimum
