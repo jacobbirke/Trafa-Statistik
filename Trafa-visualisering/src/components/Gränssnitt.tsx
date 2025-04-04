@@ -23,7 +23,7 @@ const StatistikGränssnitt: React.FC = () => {
   const [seriesDimension, setSeriesDimension] = useState<string | null>(null);
   const [barMeasure, setBarMeasure] = useState<string | null>(null);
   const [lineMeasure, setLineMeasure] = useState<string | null>(null);
-  const [title, setTitle] = useState<string>("Diagram");
+  const [title, setTitle] = useState<string>("");
   const [jsonData, setJsonData] = useState<any[]>([]);
   const [is3D, setIs3D] = useState<boolean>(false);
   const [chart, setChart] = useState<any>(null);
@@ -60,6 +60,8 @@ const StatistikGränssnitt: React.FC = () => {
   const [yAxisSecondaryTick, setYAxisSecondaryTick] = useState<
     number | undefined
   >(undefined);
+  const [yAxisTitlePosition, setYAxisTitlePosition] = useState<string>("side");
+  const [yAxisSecondaryTitlePosition, setYAxisSecondaryTitlePosition] = useState<string>("side");
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -101,6 +103,8 @@ const StatistikGränssnitt: React.FC = () => {
         yAxisSecondaryMax,
         yAxisSecondaryTick,
         seriesIcons: seriesIcons,
+        yAxisTitlePosition,
+        yAxisSecondaryTitlePosition,
       },
       containerRef.current
     );
@@ -306,6 +310,10 @@ const StatistikGränssnitt: React.FC = () => {
         setSeriesIcons={setSeriesIcons}
         setChartType={handleChartTypeChange}
         setStep={handleSetStep}
+        yAxisTitlePosition={yAxisTitlePosition}
+        setYAxisTitlePosition={setYAxisTitlePosition}
+        yAxisSecondaryTitlePosition={yAxisSecondaryTitlePosition}
+        setYAxisSecondaryTitlePosition={setYAxisSecondaryTitlePosition}
       />
     </div>
   );

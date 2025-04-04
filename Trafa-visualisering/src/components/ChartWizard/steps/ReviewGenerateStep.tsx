@@ -67,6 +67,10 @@ interface Props {
   >;
   seriesIcons: Record<string, string>;
   setSeriesIcons: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  yAxisTitlePosition: string;
+  setYAxisTitlePosition: React.Dispatch<React.SetStateAction<string>>;
+  yAxisSecondaryTitlePosition: string;
+  setYAxisSecondaryTitlePosition: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -120,6 +124,10 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setYAxisSecondaryTick,
   seriesIcons,
   setSeriesIcons,
+  yAxisTitlePosition,
+  setYAxisTitlePosition,
+  yAxisSecondaryTitlePosition,
+  setYAxisSecondaryTitlePosition,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -368,6 +376,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       yAxisSecondaryMax,
       yAxisSecondaryTick,
       seriesIcons: seriesIcons,
+      yAxisTitlePosition,
+      yAxisSecondaryTitlePosition,
     };
 
     if (chartType === "combo" && (!tempBarMeasure || !tempLineMeasure)) {
@@ -406,6 +416,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       yAxisPrimaryTitle,
       yAxisSecondaryTitle,
       seriesIcons,
+      yAxisTitlePosition,
+      yAxisSecondaryTitlePosition,
     };
 
     try {
@@ -1040,7 +1052,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
         <div className="mb-4 p-1 ">
           <h5 className="text-xl font-semibold mb-2">Y-axel inställningar</h5>
-            <div className="pl-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-1">
+            <div>
               <label className="block mb-1 font-medium">Y-axel titel</label>
               <input
                 type="text"
@@ -1052,7 +1065,22 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 className="border rounded px-2 py-1 w-full"
                 placeholder="Titel för y-axel"
               />
+            </div>{" "}
+            <div>
+              <label className="block mb-1 font-medium">
+                Y-axel titel placering
+              </label>
+              <select
+                value={yAxisTitlePosition}
+                onChange={(e) => setYAxisTitlePosition(e.target.value)}
+                className="border rounded px-2 py-1 w-full"
+              >
+                <option value="side">Sida (nedifrån upp)</option>
+                <option value="rotated">Sida (uppifrån ned)</option>
+                <option value="top">Ovanför axeln</option>
+              </select>
             </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-1">
             <div>
               <label className="block mb-1 font-medium">
@@ -1105,7 +1133,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               <h5 className="text-lg font-semibold mb-2">
                 Sekundär y-axel inställningar
               </h5>
-                <div className="pl-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-1">
+                <div>
                   <label className="block mb-1 font-medium">
                     Sekundär y-axel titel
                   </label>
@@ -1120,6 +1149,23 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     placeholder="Titel för sekundär y-axel"
                   />
                 </div>
+                <div>
+                  <label className="block mb-1 font-medium">
+                    Sekundär y-axel placering
+                  </label>
+                  <select
+                    value={yAxisSecondaryTitlePosition}
+                    onChange={(e) =>
+                      setYAxisSecondaryTitlePosition(e.target.value)
+                    }
+                    className="border rounded px-2 py-1 w-full"
+                  >
+                    <option value="side">Sida (vertikal)</option>
+                    <option value="rotated">Sida (nedifrån upp)</option>
+                    <option value="top">Ovanför axeln</option>
+                  </select>
+                </div>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 space-x-4 p-1">
                 <div>
                   <label className="block mb-1 font-medium">

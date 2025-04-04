@@ -30,6 +30,8 @@ interface EmbeddedChartProps {
     yAxisSecondaryMax?: number;
     yAxisSecondaryTick?: number;
     seriesIcons: Record<string, string>;
+    yAxisTitlePosition: string;
+    yAxisSecondaryTitlePosition: string;
   };
 }
 
@@ -84,6 +86,8 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           yAxisSecondaryMax: config.yAxisSecondaryMax,
           yAxisSecondaryTick: config.yAxisSecondaryTick,
           seriesIcons: config.seriesIcons || {},
+          yAxisTitlePosition: config.yAxisTitlePosition,
+          yAxisSecondaryTitlePosition: config.yAxisSecondaryTitlePosition
         },
         containerRef.current!
       );

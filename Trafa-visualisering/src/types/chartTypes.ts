@@ -83,4 +83,8 @@ export interface ChartWizardProps {
   setYAxisSecondaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
   seriesIcons: Record<string, string>;
   setSeriesIcons: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  yAxisTitlePosition: string;
+  setYAxisTitlePosition: React.Dispatch<React.SetStateAction<string>>;
+  yAxisSecondaryTitlePosition: string;
+  setYAxisSecondaryTitlePosition: React.Dispatch<React.SetStateAction<string>>;
 }
