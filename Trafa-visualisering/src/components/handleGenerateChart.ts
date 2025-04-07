@@ -1,7 +1,7 @@
 import Highcharts from "highcharts";
 import { Dimension, Measure, ChartType } from "../types/chartTypes";
 
-type Config = {
+export type Config = {
   dimensions: Dimension[];
   measures: Measure[];
   xAxisDimensions: string[];
@@ -39,35 +39,6 @@ export const handleGenerateChart = (
       decimalPoint: ",",
       thousandsSep: " ",
       numericSymbols: [],
-    },
-    tooltip: {
-      valuePrefix: "",
-      valueSuffix: "",
-      formatter: function () {
-        if (!this.points) {
-          const point = this.point || this;
-          const value = point.y ?? 0;
-          const formattedValue =
-            value % 1 === 0
-              ? Highcharts.numberFormat(value, 0, ",", " ")
-              : Highcharts.numberFormat(value, 2, ",", " ");
-          const color = point.color || this.series.color;
-          return `<span style="color:${color}">●</span> ${this.series.name}: <b>${formattedValue}</b>`;
-        }
-        return this.points.reduce((s, point) => {
-          const value = point.y ?? 0;
-          const formattedValue =
-            value % 1 === 0
-              ? Highcharts.numberFormat(value, 0, ",", " ")
-              : Highcharts.numberFormat(value, 2, ",", " ");
-          return (
-            s +
-            `<br/><span style="color:${
-              point.color || point.series.color
-            }">●</span> ${point.series.name}: <b>${formattedValue}</b>`
-          );
-        }, `<span style="font-size: 10px">${this.x}</span>`);
-      },
     },
   });
   const {
@@ -247,6 +218,7 @@ export const handleGenerateChart = (
               config.seriesColors[point.name] ||
               customDefaultColors[index % customDefaultColors.length],
           })),
+          unit: measure.unit,
         },
       ],
     });
@@ -255,6 +227,7 @@ export const handleGenerateChart = (
     if (currentChart.yAxis[1]) {
       currentChart.yAxis[1].update({ visible: false });
     }
+    currentChart.redraw();
     while (currentChart.series.length > 0) {
       currentChart.series[0].remove(false);
     }
@@ -268,6 +241,7 @@ export const handleGenerateChart = (
           config.seriesColors[point.name] ||
           customDefaultColors[index % customDefaultColors.length],
       })),
+      unit: measure.unit, 
     });
     currentChart.redraw();
     return;
@@ -376,6 +350,13 @@ export const handleGenerateChart = (
           variwide: {
             tooltip: {
               pointFormatter: function (this: any) {
+                const heightMeasure = config.measures.find(
+                  (m) => m.name === config.variwideHeightMeasure
+                );
+                const widthMeasure = config.measures.find(
+                  (m) => m.name === config.variwideWidthMeasure
+                );
+
                 const yVal =
                   (this.y ?? 0) % 1 === 0
                     ? Highcharts.numberFormat(this.y ?? 0, 0, ",", " ")
@@ -384,9 +365,14 @@ export const handleGenerateChart = (
                   (this.z ?? 0) % 1 === 0
                     ? Highcharts.numberFormat(this.z ?? 0, 0, ",", " ")
                     : Highcharts.numberFormat(this.z ?? 0, 2, ",", " ");
+
                 return (
-                  `Höjd: <b><u>${yVal}</u></b> (${config.variwideHeightMeasure})<br>` +
-                  `Bredd: <b><u>${zVal}</u></b> (${config.variwideWidthMeasure})`
+                  `Höjd: <b><u>${yVal}${
+                    heightMeasure?.unit ? " " + heightMeasure.unit : ""
+                  }</u></b> (${config.variwideHeightMeasure})<br>` +
+                  `Bredd: <b><u>${zVal}${
+                    widthMeasure?.unit ? " " + widthMeasure.unit : ""
+                  }</u></b> (${config.variwideWidthMeasure})`
                 );
               },
             },
@@ -518,6 +504,7 @@ export const handleGenerateChart = (
         color:
           config.seriesColors[seriesValue] ||
           customDefaultColors[index % customDefaultColors.length],
+        unit: measure.unit,
       });
     });
 
@@ -654,6 +641,7 @@ export const handleGenerateChart = (
         color:
           config.seriesColors[seriesValue] ||
           customDefaultColors[index % customDefaultColors.length],
+        unit: measure.unit,
       });
     });
 
@@ -959,6 +947,7 @@ export const handleGenerateChart = (
             customDefaultColors[seriesIndex % customDefaultColors.length],
           yAxis:
             chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
+          unit: measure.unit,
         };
         if (applyMarker) {
           seriesData.marker =
@@ -1002,6 +991,7 @@ export const handleGenerateChart = (
           customDefaultColors[index % customDefaultColors.length],
         yAxis:
           chartType === "combo" ? (measure.name === lineMeasure ? 1 : 0) : 0,
+        unit: measure.unit,
       };
       if (includeMarker) {
         seriesData.marker =
@@ -1047,6 +1037,54 @@ export const handleGenerateChart = (
           : chartType === "line"
           ? "spline"
           : "column",
+    },
+
+    tooltip: {
+      valuePrefix: "",
+      valueSuffix: "",
+      formatter: function (this: Highcharts.TooltipFormatterContextObject) {
+        const getUnit = (series: Highcharts.Series) => {
+          return (
+            (series.userOptions as any)?.unit ||
+            (series.options as any)?.unit ||
+            ""
+          );
+        };
+
+        if (!this.points) {
+          const point = this.point || this;
+          const value = point.y ?? 0;
+          const formattedValue =
+            value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          const color = point.color || this.series.color;
+          const unit = getUnit(this.series);
+
+          return `<span style="color:${color}">●</span> ${
+            this.series.name
+          }: <b>${formattedValue}${unit ? " " + unit : ""}</b>`;
+        }
+
+        return (this.points || []).reduce((s, point) => {
+          const value = point.y ?? 0;
+          const formattedValue =
+            value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          const unit = getUnit(point.series);
+
+          return (
+            s +
+            `<br/><span style="color:${
+              point.color || point.series.color
+            }">●</span> ` +
+            `${point.series.name}: <b>${formattedValue}${
+              unit ? " " + unit : ""
+            }</b>`
+          );
+        }, `<span style="font-size: 10px">${this.x}</span>`);
+      },
     },
 
     plotOptions: {
