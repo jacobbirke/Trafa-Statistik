@@ -16,7 +16,6 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   seriesDimension,
   barMeasure,
   lineMeasure,
-  is3D,
   jsonData,
   title,
   setTitle,
@@ -36,7 +35,6 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   measureColors,
   handleGenerateChart,
   handleGoBack,
-  setIs3D,
   legendPosition,
   setLegendPosition,
   variwideWidthMeasure,
@@ -61,6 +59,10 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setYAxisSecondaryTick,
   seriesIcons,
   setSeriesIcons,
+  yAxisTitlePosition,
+  setYAxisTitlePosition,
+  yAxisSecondaryTitlePosition,
+  setYAxisSecondaryTitlePosition,
 }) => {
   return (
     <div className="max-w-7xl mx-auto p-3 space-y-8">
@@ -129,8 +131,6 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setBarMeasure={setBarMeasure}
           lineMeasure={lineMeasure}
           setLineMeasure={setLineMeasure}
-          is3D={is3D}
-          setIs3D={setIs3D}
           containerRef={containerRef}
           handleGenerateChart={handleGenerateChart}
           handleGoBack={handleGoBack}
@@ -166,6 +166,10 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setYAxisSecondaryTick={setYAxisSecondaryTick}
           seriesIcons={seriesIcons}
           setSeriesIcons={setSeriesIcons}
+          yAxisTitlePosition={yAxisTitlePosition}
+          setYAxisTitlePosition={setYAxisTitlePosition}
+          yAxisSecondaryTitlePosition={yAxisSecondaryTitlePosition}
+          setYAxisSecondaryTitlePosition={setYAxisSecondaryTitlePosition}
         />
       )}
     </div>

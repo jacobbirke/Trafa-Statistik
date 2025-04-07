@@ -9,7 +9,6 @@ export type Config = {
   chartType: ChartType;
   barMeasure: string | null;
   lineMeasure: string | null;
-  is3D: boolean;
   title: string;
   jsonData: any[];
   seriesColors: Record<string, string>;
@@ -26,6 +25,8 @@ export type Config = {
   yAxisSecondaryMax?: number;
   yAxisSecondaryTick?: number;
   seriesIcons: Record<string, string>;
+  yAxisTitlePosition: string;
+  yAxisSecondaryTitlePosition: string;
 };
 
 export const handleGenerateChart = (
@@ -93,7 +94,6 @@ export const handleGenerateChart = (
     xAxisDimensions,
     jsonData,
     seriesDimension,
-    is3D,
     barMeasure,
     lineMeasure,
     chartType,
@@ -181,17 +181,6 @@ export const handleGenerateChart = (
     "#C1E2B5",
   ];
 
-  const threeDOptions = is3D
-    ? {
-        options3d: {
-          enabled: true,
-          alpha: 15,
-          beta: 15,
-          depth: 50,
-          viewDistance: 25,
-        },
-      }
-    : { options3d: { enabled: false } };
 
   // Paj
   if (chartType === "pie") {
@@ -242,27 +231,14 @@ export const handleGenerateChart = (
       y: categorySums[category] || 0,
     }));
 
-    const pieThreeDOptions = is3D
-      ? {
-          options3d: {
-            enabled: true,
-            alpha: 40,
-            beta: 0,
-            depth: 50,
-            viewDistance: 25,
-          },
-        }
-      : { options3d: { enabled: false } };
 
     currentChart.update({
       chart: {
         type: "pie",
-        ...pieThreeDOptions,
       },
       title: { text: title || "" },
       plotOptions: {
         pie: {
-          depth: is3D ? 45 : 0,
           allowPointSelect: true,
           cursor: "pointer",
           dataLabels: {
@@ -402,7 +378,9 @@ export const handleGenerateChart = (
       {
         chart: {
           type: "variwide",
-          options3d: { enabled: false },
+          marginLeft: 80,
+          marginRight: 80, 
+          marginTop: title ? 80 : 50,  
         },
         title: { text: title || "" },
         xAxis: {
@@ -455,6 +433,26 @@ export const handleGenerateChart = (
       title: {
         text: config.yAxisPrimaryTitle || "",
         style: { color: "" },
+        rotation:
+          config.yAxisTitlePosition === "rotated"
+            ? 90
+            : config.yAxisTitlePosition === "top"
+            ? 0
+            : 270,
+        align: config.yAxisTitlePosition === "top" ? "high" : "middle",
+        x:
+          config.yAxisTitlePosition === "rotated"
+            ? -10
+            : config.yAxisTitlePosition === "top"
+            ? 0
+            : -5, 
+        y:
+          config.yAxisTitlePosition === "top"
+            ? title
+              ? -20
+              : -10 
+            : 0,
+        margin: config.yAxisTitlePosition === "top" ? -50 : 5,
       },
       min: config.yAxisPrimaryMin,
       max: config.yAxisPrimaryMax,
@@ -559,8 +557,10 @@ export const handleGenerateChart = (
 
     currentChart.update({
       chart: {
+        marginLeft: 90,
+        marginRight: 80,
+        marginTop: title ? 80 : 50,
         type: "area",
-        ...threeDOptions,
       },
       title: { text: title || "" },
       yAxis: {
@@ -576,7 +576,28 @@ export const handleGenerateChart = (
     currentChart.yAxis[0].update({
       title: {
         text: config.yAxisPrimaryTitle || "",
-        style: { color: "" },
+        style: {
+          color: "",
+          whiteSpace: "nowrap",
+        },
+        rotation:
+          config.yAxisTitlePosition === "rotated"
+            ? 90
+            : config.yAxisTitlePosition === "top"
+            ? 0
+            : 270,
+        align: config.yAxisTitlePosition === "top" ? "high" : "middle",
+        textAlign: "center",
+        x:
+          config.yAxisTitlePosition === "rotated"
+            ? -17
+            : config.yAxisTitlePosition === "top"
+            ? 40
+            : -5,
+        y: config.yAxisTitlePosition === "top" ? (title ? -20 : -10) : 0,
+        reserveSpace: false,
+        margin: config.yAxisTitlePosition === "top" ? 10 : 5,
+        offset: 0,
       },
       min: config.yAxisPrimaryMin,
       max: config.yAxisPrimaryMax,
@@ -673,14 +694,15 @@ export const handleGenerateChart = (
 
     currentChart.update({
       chart: {
+        marginLeft: 90,
+        marginRight: 80,
+        marginTop: title ? 80 : 50,
         type: "column",
-        ...threeDOptions,
       },
       title: { text: title || "" },
       plotOptions: {
         column: {
           stacking: "normal",
-          depth: is3D ? 25 : 0,
           grouping: true,
           pointPadding: 0.2,
           borderWidth: 0,
@@ -691,7 +713,28 @@ export const handleGenerateChart = (
     currentChart.yAxis[0].update({
       title: {
         text: config.yAxisPrimaryTitle || "",
-        style: { color: "" },
+        style: {
+          color: "",
+          whiteSpace: "nowrap",
+        },
+        rotation:
+          config.yAxisTitlePosition === "rotated"
+            ? 90
+            : config.yAxisTitlePosition === "top"
+            ? 0
+            : 270,
+        align: config.yAxisTitlePosition === "top" ? "high" : "middle",
+        textAlign: "center",
+        x:
+          config.yAxisTitlePosition === "rotated"
+            ? -17
+            : config.yAxisTitlePosition === "top"
+            ? 40
+            : -5,
+        y: config.yAxisTitlePosition === "top" ? (title ? -20 : -10) : 0,
+        reserveSpace: false,
+        margin: config.yAxisTitlePosition === "top" ? 10 : 5,
+        offset: 0,
       },
       min: config.yAxisPrimaryMin,
       max: config.yAxisPrimaryMax,
@@ -763,7 +806,28 @@ export const handleGenerateChart = (
     currentChart.yAxis[0].update({
       title: {
         text: config.yAxisPrimaryTitle || "",
-        style: { color: "" },
+        style: {
+          color: "",
+          whiteSpace: "nowrap",
+        },
+        rotation:
+          config.yAxisTitlePosition === "rotated"
+            ? 90
+            : config.yAxisTitlePosition === "top"
+            ? 0
+            : 270,
+        align: config.yAxisTitlePosition === "top" ? "high" : "middle",
+        textAlign: "center",
+        x:
+          config.yAxisTitlePosition === "rotated"
+            ? -17
+            : config.yAxisTitlePosition === "top"
+            ? 40
+            : -5,
+        y: config.yAxisTitlePosition === "top" ? (title ? -20 : -10) : 0,
+        reserveSpace: false,
+        margin: config.yAxisTitlePosition === "top" ? 10 : 5,
+        offset: 0,
       },
       min: config.yAxisPrimaryMin,
       max: config.yAxisPrimaryMax,
@@ -773,8 +837,30 @@ export const handleGenerateChart = (
     currentChart.yAxis[0].update({
       title: {
         text: config.yAxisPrimaryTitle || "",
-        style: { color: "" },
+        style: {
+          color: "",
+          whiteSpace: "nowrap", 
+        },
+        rotation:
+          config.yAxisTitlePosition === "rotated"
+            ? 90
+            : config.yAxisTitlePosition === "top"
+            ? 0
+            : 270,
+        align: config.yAxisTitlePosition === "top" ? "high" : "middle",
+        textAlign: "center", 
+        x:
+          config.yAxisTitlePosition === "rotated"
+            ? -17
+            : config.yAxisTitlePosition === "top"
+            ? 40
+            : -5,
+        y: config.yAxisTitlePosition === "top" ? (title ? -20 : -10) : 0,
+        reserveSpace: false, 
+        margin: config.yAxisTitlePosition === "top" ? 10 : 5,
+        offset: 0, 
       },
+
       min: config.yAxisPrimaryMin,
       max: config.yAxisPrimaryMax,
       tickInterval: config.yAxisPrimaryTick,
@@ -784,6 +870,27 @@ export const handleGenerateChart = (
         title: {
           text: config.yAxisSecondaryTitle || "",
           style: { color: "" },
+          rotation:
+            config.yAxisSecondaryTitlePosition === "rotated"
+              ? 90
+              : config.yAxisSecondaryTitlePosition === "top"
+              ? 0
+              : 270,
+          align:
+            config.yAxisSecondaryTitlePosition === "top" ? "high" : "middle",
+          x:
+            config.yAxisSecondaryTitlePosition === "rotated"
+              ? 10 
+              : config.yAxisSecondaryTitlePosition === "top"
+              ? -80 
+              : 20,
+          y:
+            config.yAxisSecondaryTitlePosition === "top"
+              ? title
+                ? -25
+                : -10
+              : 0,
+          margin: config.yAxisSecondaryTitlePosition === "top" ? 20 : 0,
         },
         min: config.yAxisSecondaryMin,
         max: config.yAxisSecondaryMax,
@@ -964,20 +1071,23 @@ export const handleGenerateChart = (
   generalSeriesData.forEach((series) => currentChart.addSeries(series, false));
   currentChart.redraw();
   currentChart.setTitle({ text: title || "" });
+
   currentChart.update({
     chart: {
+      marginLeft: 80,
+      marginRight: 80,
+      marginTop: title ? 80 : 50,
+
       type:
         xAxisDimensions.length === 2
           ? "column"
           : chartType === "line"
           ? "spline"
           : "column",
-      ...threeDOptions,
     },
 
     plotOptions: {
       column: {
-        depth: is3D ? 45 : undefined,
         grouping: true,
         pointPadding: 0.2,
         borderWidth: 0,
@@ -991,7 +1101,6 @@ export const handleGenerateChart = (
         },
       },
       pie: {
-        depth: is3D ? 45 : undefined,
       },
       series: {
         marker: {

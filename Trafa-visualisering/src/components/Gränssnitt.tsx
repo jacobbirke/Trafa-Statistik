@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import * as XLSX from "xlsx";
 import HighchartsGroupedCategories from "highcharts-grouped-categories";
-import Highcharts3D from "highcharts/highcharts-3d";
 import Variwide from "highcharts/modules/variwide";
 import { createChart } from "../utils/chartUtils";
 
@@ -11,7 +10,6 @@ import { ChartType, Dimension, Measure, WizardStep } from "../types/chartTypes";
 import { handleGenerateChart } from "./handleGenerateChart";
 
 HighchartsGroupedCategories(Highcharts);
-Highcharts3D(Highcharts);
 Variwide(Highcharts);
 
 const StatistikGränssnitt: React.FC = () => {
@@ -25,7 +23,6 @@ const StatistikGränssnitt: React.FC = () => {
   const [lineMeasure, setLineMeasure] = useState<string | null>(null);
   const [title, setTitle] = useState<string>("");
   const [jsonData, setJsonData] = useState<any[]>([]);
-  const [is3D, setIs3D] = useState<boolean>(false);
   const [chart, setChart] = useState<any>(null);
   const [seriesColors, setSeriesColors] = useState<Record<string, string>>({});
   const [seriesIcons, setSeriesIcons] = useState<Record<string, string>>({});
@@ -60,6 +57,8 @@ const StatistikGränssnitt: React.FC = () => {
   const [yAxisSecondaryTick, setYAxisSecondaryTick] = useState<
     number | undefined
   >(undefined);
+  const [yAxisTitlePosition, setYAxisTitlePosition] = useState<string>("side");
+  const [yAxisSecondaryTitlePosition, setYAxisSecondaryTitlePosition] = useState<string>("side");
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -80,7 +79,6 @@ const StatistikGränssnitt: React.FC = () => {
         barMeasure,
         chartType,
         dimensions,
-        is3D,
         jsonData,
         lineMeasure,
         measures,
@@ -101,6 +99,8 @@ const StatistikGränssnitt: React.FC = () => {
         yAxisSecondaryMax,
         yAxisSecondaryTick,
         seriesIcons: seriesIcons,
+        yAxisTitlePosition,
+        yAxisSecondaryTitlePosition,
       },
       containerRef.current
     );
@@ -119,11 +119,6 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [step]);
 
-  useEffect(() => {
-    if (step === "review-generate" && chart) {
-      localHandleGenerateChart();
-    }
-  }, [is3D]);
 
   useEffect(() => {
     if (seriesDimension) {
@@ -274,7 +269,6 @@ const StatistikGränssnitt: React.FC = () => {
         seriesDimension={seriesDimension}
         barMeasure={barMeasure}
         lineMeasure={lineMeasure}
-        is3D={is3D}
         containerRef={containerRef}
         handleFileUpload={handleFileUpload}
         setDimensions={setDimensions}
@@ -285,7 +279,6 @@ const StatistikGränssnitt: React.FC = () => {
         setLineMeasure={setLineMeasure}
         handleGenerateChart={localHandleGenerateChart}
         handleGoBack={handleGoBack}
-        setIs3D={setIs3D}
         jsonData={jsonData}
         title={title}
         setTitle={setTitle}
@@ -319,6 +312,10 @@ const StatistikGränssnitt: React.FC = () => {
         setSeriesIcons={setSeriesIcons}
         setChartType={handleChartTypeChange}
         setStep={handleSetStep}
+        yAxisTitlePosition={yAxisTitlePosition}
+        setYAxisTitlePosition={setYAxisTitlePosition}
+        yAxisSecondaryTitlePosition={yAxisSecondaryTitlePosition}
+        setYAxisSecondaryTitlePosition={setYAxisSecondaryTitlePosition}
       />
     </div>
   );

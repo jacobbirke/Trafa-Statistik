@@ -36,7 +36,6 @@ export interface ChartWizardProps {
   seriesDimension: string | null;
   barMeasure: string | null;
   lineMeasure: string | null;
-  is3D: boolean;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setStep: React.Dispatch<React.SetStateAction<WizardStep>>;
@@ -49,7 +48,6 @@ export interface ChartWizardProps {
   setLineMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   handleGenerateChart: () => void;
   handleGoBack: () => void;
-  setIs3D: React.Dispatch<React.SetStateAction<boolean>>;
   jsonData: any[];
   title: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
@@ -83,4 +81,8 @@ export interface ChartWizardProps {
   setYAxisSecondaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
   seriesIcons: Record<string, string>;
   setSeriesIcons: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  yAxisTitlePosition: string;
+  setYAxisTitlePosition: React.Dispatch<React.SetStateAction<string>>;
+  yAxisSecondaryTitlePosition: string;
+  setYAxisSecondaryTitlePosition: React.Dispatch<React.SetStateAction<string>>;
 }

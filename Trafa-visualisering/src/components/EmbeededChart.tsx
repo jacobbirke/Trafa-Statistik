@@ -13,7 +13,6 @@ interface EmbeddedChartProps {
     chartType: ChartType;
     barMeasure: string | null;
     lineMeasure: string | null;
-    is3D: boolean;
     title: string;
     jsonData: any[];
     seriesColors?: Record<string, string>;
@@ -30,12 +29,13 @@ interface EmbeddedChartProps {
     yAxisSecondaryMax?: number;
     yAxisSecondaryTick?: number;
     seriesIcons: Record<string, string>;
+    yAxisTitlePosition: string;
+    yAxisSecondaryTitlePosition: string;
   };
 }
 
 const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
   const [localDimensions, setLocalDimensions] = useState(config.dimensions);
-  const [localIs3D, setLocalIs3D] = useState(config.is3D);
   const seriesColors = config.seriesColors || {};
   const measureColors = config.measureColors || {};
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -57,9 +57,9 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
         chartInstance.reflow();
       }
     };
-  
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [chartInstance]);
 
   useEffect(() => {
@@ -69,7 +69,6 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
         {
           ...config,
           dimensions: localDimensions,
-          is3D: localIs3D,
           seriesColors,
           measureColors,
           legendPosition: config.legendPosition || "bottom",
@@ -84,13 +83,14 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           yAxisSecondaryMax: config.yAxisSecondaryMax,
           yAxisSecondaryTick: config.yAxisSecondaryTick,
           seriesIcons: config.seriesIcons || {},
+          yAxisTitlePosition: config.yAxisTitlePosition,
+          yAxisSecondaryTitlePosition: config.yAxisSecondaryTitlePosition,
         },
         containerRef.current!
       );
     }
   }, [
     localDimensions,
-    localIs3D,
     chartInstance,
     config,
     seriesColors,
@@ -108,52 +108,34 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
   return (
     <div className="">
       <div className="flex justify-center items-center gap-4 flex-wrap mt-10">
-      {localDimensions
-        .filter(
-          (dim) =>
-            !config.xAxisDimensions.includes(dim.name) &&
-            dim.name !== config.seriesDimension
-        )
-        .map((dim) => (
-          <div
-            key={dim.name}
-            className="mb-5 flex justify-center items-center gap-4 flex-wrap"
-          >
-            <label className="block font-semibold mb-1">{dim.name}</label>
-            <select
-              value={dim.selectedValues[0] || ""}
-              onChange={(e) => handleFilterChange(dim.name, e.target.value)}
-              className="border rounded px-2 py-1"
+        {localDimensions
+          .filter(
+            (dim) =>
+              !config.xAxisDimensions.includes(dim.name) &&
+              dim.name !== config.seriesDimension
+          )
+          .map((dim) => (
+            <div
+              key={dim.name}
+              className="mb-5 flex justify-center items-center gap-4 flex-wrap"
             >
-              {dim.allValues.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+              <label className="block font-semibold mb-1">{dim.name}</label>
+              <select
+                value={dim.selectedValues[0] || ""}
+                onChange={(e) => handleFilterChange(dim.name, e.target.value)}
+                className="border rounded px-2 py-1"
+              >
+                {dim.allValues.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
       </div>
 
-
-      <div 
-  ref={containerRef}
-  className="w-full h-[90vh] min-h-[400px]"
-/>
-
-      {config.chartType !== "variwide" &&
-        config.chartType !== "stackedArea" &&
-        config.chartType !== "line" && (
-          <label className="flex items-center space-x-2 mb-4">
-            <input
-              type="checkbox"
-              checked={localIs3D}
-              onChange={(e) => setLocalIs3D(e.target.checked)}
-              className="mr-2"
-            />
-            Visa i 3D
-          </label>
-        )}
+      <div ref={containerRef} className="w-full h-[90vh] min-h-[400px]" />
     </div>
   );
 };
