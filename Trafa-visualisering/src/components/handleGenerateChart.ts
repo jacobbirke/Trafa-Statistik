@@ -40,53 +40,6 @@ export const handleGenerateChart = (
       thousandsSep: " ",
       numericSymbols: [],
     },
-    tooltip: {
-      valuePrefix: "",
-      valueSuffix: "",
-      formatter: function (this: Highcharts.TooltipFormatterContextObject) {
-        const getUnit = (series: Highcharts.Series) => {
-          return (
-            (series.userOptions as any)?.unit ||
-            (series.options as any)?.unit ||
-            ""
-          );
-        };
-
-        if (!this.points) {
-          const point = this.point || this;
-          const value = point.y ?? 0;
-          const formattedValue =
-            value % 1 === 0
-              ? Highcharts.numberFormat(value, 0, ",", " ")
-              : Highcharts.numberFormat(value, 2, ",", " ");
-          const color = point.color || this.series.color;
-          const unit = getUnit(this.series);
-
-          return `<span style="color:${color}">●</span> ${
-            this.series.name
-          }: <b>${formattedValue}${unit ? " " + unit : ""}</b>`;
-        }
-
-        return (this.points || []).reduce((s, point) => {
-          const value = point.y ?? 0;
-          const formattedValue =
-            value % 1 === 0
-              ? Highcharts.numberFormat(value, 0, ",", " ")
-              : Highcharts.numberFormat(value, 2, ",", " ");
-          const unit = getUnit(point.series);
-
-          return (
-            s +
-            `<br/><span style="color:${
-              point.color || point.series.color
-            }">●</span> ` +
-            `${point.series.name}: <b>${formattedValue}${
-              unit ? " " + unit : ""
-            }</b>`
-          );
-        }, `<span style="font-size: 10px">${this.x}</span>`);
-      },
-    },
   });
   const {
     dimensions,
@@ -1084,6 +1037,54 @@ export const handleGenerateChart = (
           : chartType === "line"
           ? "spline"
           : "column",
+    },
+
+    tooltip: {
+      valuePrefix: "",
+      valueSuffix: "",
+      formatter: function (this: Highcharts.TooltipFormatterContextObject) {
+        const getUnit = (series: Highcharts.Series) => {
+          return (
+            (series.userOptions as any)?.unit ||
+            (series.options as any)?.unit ||
+            ""
+          );
+        };
+
+        if (!this.points) {
+          const point = this.point || this;
+          const value = point.y ?? 0;
+          const formattedValue =
+            value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          const color = point.color || this.series.color;
+          const unit = getUnit(this.series);
+
+          return `<span style="color:${color}">●</span> ${
+            this.series.name
+          }: <b>${formattedValue}${unit ? " " + unit : ""}</b>`;
+        }
+
+        return (this.points || []).reduce((s, point) => {
+          const value = point.y ?? 0;
+          const formattedValue =
+            value % 1 === 0
+              ? Highcharts.numberFormat(value, 0, ",", " ")
+              : Highcharts.numberFormat(value, 2, ",", " ");
+          const unit = getUnit(point.series);
+
+          return (
+            s +
+            `<br/><span style="color:${
+              point.color || point.series.color
+            }">●</span> ` +
+            `${point.series.name}: <b>${formattedValue}${
+              unit ? " " + unit : ""
+            }</b>`
+          );
+        }, `<span style="font-size: 10px">${this.x}</span>`);
+      },
     },
 
     plotOptions: {
