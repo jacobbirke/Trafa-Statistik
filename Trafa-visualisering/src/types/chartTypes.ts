@@ -36,7 +36,6 @@ export interface ChartWizardProps {
   seriesDimension: string | null;
   barMeasure: string | null;
   lineMeasure: string | null;
-  is3D: boolean;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setStep: React.Dispatch<React.SetStateAction<WizardStep>>;
@@ -49,7 +48,6 @@ export interface ChartWizardProps {
   setLineMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   handleGenerateChart: () => void;
   handleGoBack: () => void;
-  setIs3D: React.Dispatch<React.SetStateAction<boolean>>;
   jsonData: any[];
   title: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
