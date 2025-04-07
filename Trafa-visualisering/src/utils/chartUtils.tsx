@@ -13,13 +13,6 @@ export function createChart(element: HTMLDivElement) {
   return Highcharts.chart(element, {
     chart: {
       type: "column",
-      options3d: {
-        enabled: false,
-        alpha: 15,
-        beta: 15,
-        depth: 50,
-        viewDistance: 25,
-      },
       zooming: {
         type: "xy",
       },

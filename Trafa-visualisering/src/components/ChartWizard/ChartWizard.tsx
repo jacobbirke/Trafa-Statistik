@@ -16,7 +16,6 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   seriesDimension,
   barMeasure,
   lineMeasure,
-  is3D,
   jsonData,
   title,
   setTitle,
@@ -36,7 +35,6 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   measureColors,
   handleGenerateChart,
   handleGoBack,
-  setIs3D,
   legendPosition,
   setLegendPosition,
   variwideWidthMeasure,
@@ -133,8 +131,6 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setBarMeasure={setBarMeasure}
           lineMeasure={lineMeasure}
           setLineMeasure={setLineMeasure}
-          is3D={is3D}
-          setIs3D={setIs3D}
           containerRef={containerRef}
           handleGenerateChart={handleGenerateChart}
           handleGoBack={handleGoBack}

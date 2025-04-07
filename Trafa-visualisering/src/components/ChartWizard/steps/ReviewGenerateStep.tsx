@@ -22,8 +22,6 @@ interface Props {
   setBarMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   lineMeasure: string | null;
   setLineMeasure: React.Dispatch<React.SetStateAction<string | null>>;
-  is3D: boolean;
-  setIs3D: React.Dispatch<React.SetStateAction<boolean>>;
   containerRef: React.RefObject<HTMLDivElement>;
   handleGenerateChart: (config: any) => void;
   handleGoBack: () => void;
@@ -87,8 +85,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setBarMeasure,
   lineMeasure,
   setLineMeasure,
-  is3D,
-  setIs3D,
   containerRef,
   handleGenerateChart,
   handleGoBack,
@@ -360,7 +356,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       chartType,
       barMeasure: tempBarMeasure,
       lineMeasure: tempLineMeasure,
-      is3D,
       title,
       jsonData,
       seriesColors,
@@ -405,7 +400,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       chartType,
       barMeasure,
       lineMeasure,
-      is3D,
       title,
       jsonData,
       seriesColors,
@@ -1280,20 +1274,6 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           ref={containerRef}
           className="w-full h-[600px] bg-red rounded"
         />
-        {chartType !== "variwide" &&
-          chartType !== "stackedArea" &&
-          chartType !== "line" && (
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={is3D}
-                onChange={(e) => setIs3D(e.target.checked)}
-                className="mr-2"
-              />
-              Visa i 3D
-            </label>
-          )}
-
         <div className="mt-4">
           <Button onClick={generateEmbedCode} variant="success">
             Generera inbäddningskod

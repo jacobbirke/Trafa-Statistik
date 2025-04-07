@@ -9,7 +9,6 @@ type Config = {
   chartType: ChartType;
   barMeasure: string | null;
   lineMeasure: string | null;
-  is3D: boolean;
   title: string;
   jsonData: any[];
   seriesColors: Record<string, string>;
@@ -77,7 +76,6 @@ export const handleGenerateChart = (
     xAxisDimensions,
     jsonData,
     seriesDimension,
-    is3D,
     barMeasure,
     lineMeasure,
     chartType,
@@ -165,17 +163,6 @@ export const handleGenerateChart = (
     "#C1E2B5",
   ];
 
-  const threeDOptions = is3D
-    ? {
-        options3d: {
-          enabled: true,
-          alpha: 15,
-          beta: 15,
-          depth: 50,
-          viewDistance: 25,
-        },
-      }
-    : { options3d: { enabled: false } };
 
   // Paj
   if (chartType === "pie") {
@@ -226,27 +213,14 @@ export const handleGenerateChart = (
       y: categorySums[category] || 0,
     }));
 
-    const pieThreeDOptions = is3D
-      ? {
-          options3d: {
-            enabled: true,
-            alpha: 40,
-            beta: 0,
-            depth: 50,
-            viewDistance: 25,
-          },
-        }
-      : { options3d: { enabled: false } };
 
     currentChart.update({
       chart: {
         type: "pie",
-        ...pieThreeDOptions,
       },
       title: { text: title || "" },
       plotOptions: {
         pie: {
-          depth: is3D ? 45 : 0,
           allowPointSelect: true,
           cursor: "pointer",
           dataLabels: {
@@ -383,7 +357,6 @@ export const handleGenerateChart = (
       {
         chart: {
           type: "variwide",
-          options3d: { enabled: false },
           marginLeft: 80,
           marginRight: 80, 
           marginTop: title ? 80 : 50,  
@@ -554,7 +527,6 @@ export const handleGenerateChart = (
         marginRight: 80,
         marginTop: title ? 80 : 50,
         type: "area",
-        ...threeDOptions,
       },
       title: { text: title || "" },
       yAxis: {
@@ -691,13 +663,11 @@ export const handleGenerateChart = (
         marginRight: 80,
         marginTop: title ? 80 : 50,
         type: "column",
-        ...threeDOptions,
       },
       title: { text: title || "" },
       plotOptions: {
         column: {
           stacking: "normal",
-          depth: is3D ? 25 : 0,
           grouping: true,
           pointPadding: 0.2,
           borderWidth: 0,
@@ -1077,12 +1047,10 @@ export const handleGenerateChart = (
           : chartType === "line"
           ? "spline"
           : "column",
-      ...threeDOptions,
     },
 
     plotOptions: {
       column: {
-        depth: is3D ? 45 : undefined,
         grouping: true,
         pointPadding: 0.2,
         borderWidth: 0,
@@ -1096,7 +1064,6 @@ export const handleGenerateChart = (
         },
       },
       pie: {
-        depth: is3D ? 45 : undefined,
       },
       series: {
         marker: {
