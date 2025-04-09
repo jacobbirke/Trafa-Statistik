@@ -63,6 +63,9 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setYAxisTitlePosition,
   yAxisSecondaryTitlePosition,
   setYAxisSecondaryTitlePosition,
+  confidenceMeasures,
+  confidenceMeasure,
+  setConfidenceMeasure,
 }) => {
   return (
     <div className="max-w-7xl mx-auto p-3 space-y-8">
@@ -100,6 +103,9 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           lineMeasure={lineMeasure}
           setBarMeasure={setBarMeasure}
           setLineMeasure={setLineMeasure}
+          confidenceMeasures={confidenceMeasures}
+          confidenceMeasure={confidenceMeasure}
+          setConfidenceMeasure={setConfidenceMeasure}
         />
       )}
 
@@ -170,6 +176,8 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setYAxisTitlePosition={setYAxisTitlePosition}
           yAxisSecondaryTitlePosition={yAxisSecondaryTitlePosition}
           setYAxisSecondaryTitlePosition={setYAxisSecondaryTitlePosition}
+          confidenceMeasure={confidenceMeasure}
+
         />
       )}
     </div>
