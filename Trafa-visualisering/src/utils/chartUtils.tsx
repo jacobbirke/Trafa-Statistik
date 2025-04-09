@@ -3,7 +3,9 @@ import Exporting from "highcharts/modules/exporting";
 import ExportData from "highcharts/modules/export-data";
 import OfflineExporting from "highcharts/modules/offline-exporting";
 import Accessibility from "highcharts/modules/accessibility";
+import HighchartsMore from "highcharts/highcharts-more";
 
+HighchartsMore(Highcharts);
 Exporting(Highcharts);
 ExportData(Highcharts);
 OfflineExporting(Highcharts);

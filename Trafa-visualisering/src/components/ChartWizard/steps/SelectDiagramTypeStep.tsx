@@ -11,6 +11,7 @@ type Props = {
 
 const chartOptions = [
   { value: "column", label: "Stapeldiagram", icon: "📊" },
+  { value: "errorbar-column", label: "Stapeldiagram med felmarginal", icon: "📊" },
   { value: "line", label: "Linjediagram", icon: "📈" },
   { value: "combo", label: "Kombinerat (stapel & linje)", icon: "🔀" },
   { value: "stacked", label: "Staplad kolumn", icon: "🟰" },

@@ -69,6 +69,7 @@ interface Props {
   setYAxisTitlePosition: React.Dispatch<React.SetStateAction<string>>;
   yAxisSecondaryTitlePosition: string;
   setYAxisSecondaryTitlePosition: React.Dispatch<React.SetStateAction<string>>;
+  confidenceMeasure: string | null;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -124,6 +125,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   setYAxisTitlePosition,
   yAxisSecondaryTitlePosition,
   setYAxisSecondaryTitlePosition,
+  confidenceMeasure,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -364,6 +366,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       seriesIcons: seriesIcons,
       yAxisTitlePosition,
       yAxisSecondaryTitlePosition,
+      confidenceMeasure,
     };
 
     setDimensions(tempDimensions);
@@ -412,6 +415,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       seriesIcons,
       yAxisTitlePosition,
       yAxisSecondaryTitlePosition,
+      confidenceMeasure,
     };
 
     try {
@@ -492,35 +496,36 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </div>
         )}
 
-        {!tempSeriesDimension && ["column", "line"].includes(chartType) && (
-          <div className="mb-2 p-1">
-            <h4 className="text-xl font-semibold mb-2">Färgval för mått</h4>
-            <div className="flex gap-4 pl-2">
-              {measures
-                .filter((m) => m.isSelected)
-                .map((measure, idx) => (
-                  <div key={measure.name} className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={
-                        measureColors[measure.name] ||
-                        customDefaultColors[idx % customDefaultColors.length]
-                      }
-                      onChange={(e) =>
-                        setMeasureColors((prev: Record<string, string>) => ({
-                          ...prev,
-                          [measure.name]: e.target.value,
-                        }))
-                      }
-                      className="cursor-pointer"
-                      title={`Klicka för att välja färg för ${measure.name}`}
-                    />
-                    <label className="p-1">{measure.name}</label>
-                  </div>
-                ))}
+        {!tempSeriesDimension &&
+          ["column", "line", "errorbar-column"].includes(chartType) && (
+            <div className="mb-2 p-1">
+              <h4 className="text-xl font-semibold mb-2">Färgval för mått</h4>
+              <div className="flex gap-4 pl-2">
+                {measures
+                  .filter((m) => m.isSelected)
+                  .map((measure, idx) => (
+                    <div key={measure.name} className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={
+                          measureColors[measure.name] ||
+                          customDefaultColors[idx % customDefaultColors.length]
+                        }
+                        onChange={(e) =>
+                          setMeasureColors((prev: Record<string, string>) => ({
+                            ...prev,
+                            [measure.name]: e.target.value,
+                          }))
+                        }
+                        className="cursor-pointer"
+                        title={`Klicka för att välja färg för ${measure.name}`}
+                      />
+                      <label className="p-1">{measure.name}</label>
+                    </div>
+                  ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {chartType === "combo" && !tempSeriesDimension && (
           <div className="mb-2 p-1">
@@ -599,6 +604,31 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                     );
                   })
                 )}
+            </div>
+          </div>
+        )}
+
+        {chartType === "errorbar-column" && (
+          <div className="mb-2 p-1">
+            <h4 className="text-xl font-semibold mb-2">
+              Färgval för felmarginal
+            </h4>
+            <div className="flex gap-4 pl-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={measureColors[confidenceMeasure as string] || "#00000"}
+                  onChange={(e) =>
+                    setMeasureColors((prev) => ({
+                      ...prev,
+                      [confidenceMeasure as string]: e.target.value,
+                    }))
+                  }
+                  className="cursor-pointer"
+                  title={`Klicka för att välja färg för ${confidenceMeasure}`}
+                />
+                <label className="p-1">{confidenceMeasure}</label>
+              </div>
             </div>
           </div>
         )}

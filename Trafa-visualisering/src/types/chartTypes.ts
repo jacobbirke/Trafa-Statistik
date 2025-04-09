@@ -5,14 +5,15 @@ export type ChartType =
   | "pie"
   | "stacked"
   | "stackedArea"
-  | "variwide";
+  | "variwide"
+  | "errorbar-column"
 export type WizardStep =
   | "input-file"
   | "select-diagram-type"
   | "filter-dimensions"
   | "select-measures"
   | "chart-configuration"
-  | "review-generate";
+  | "review-generate"
 
 export interface Dimension {
   name: string;
@@ -25,6 +26,7 @@ export interface Measure {
   name: string;
   unit?: string;
   isSelected: boolean;
+  isConfidence?: boolean;
 }
 
 export interface ChartWizardProps {
@@ -85,4 +87,7 @@ export interface ChartWizardProps {
   setYAxisTitlePosition: React.Dispatch<React.SetStateAction<string>>;
   yAxisSecondaryTitlePosition: string;
   setYAxisSecondaryTitlePosition: React.Dispatch<React.SetStateAction<string>>;
+  confidenceMeasures: Measure[];
+  confidenceMeasure: string | null;
+  setConfidenceMeasure: React.Dispatch<React.SetStateAction<string | null>>;
 }

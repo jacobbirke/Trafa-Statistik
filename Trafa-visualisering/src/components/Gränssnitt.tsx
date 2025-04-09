@@ -59,6 +59,9 @@ const StatistikGränssnitt: React.FC = () => {
   >(undefined);
   const [yAxisTitlePosition, setYAxisTitlePosition] = useState<string>("side");
   const [yAxisSecondaryTitlePosition, setYAxisSecondaryTitlePosition] = useState<string>("side");
+  const [confidenceMeasure, setConfidenceMeasure] = useState<string | null>("");
+
+
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -101,6 +104,7 @@ const StatistikGränssnitt: React.FC = () => {
         seriesIcons: seriesIcons,
         yAxisTitlePosition,
         yAxisSecondaryTitlePosition,
+        confidenceMeasure,
       },
       containerRef.current
     );
@@ -176,7 +180,7 @@ const StatistikGränssnitt: React.FC = () => {
     reader.onload = function (event) {
       const data = event.target?.result;
       if (!data) return;
-
+  
       try {
         const workbook = XLSX.read(data, { type: "array" });
         const firstSheetName = workbook.SheetNames[0];
@@ -185,37 +189,39 @@ const StatistikGränssnitt: React.FC = () => {
           header: 1,
           raw: false,
         });
-
+  
         if (jsonData.length < 2) {
           alert("Filen innehåller inte tillräckligt med data");
           return;
         }
-
-        const headers = jsonData[0] as string[];
-        const rows = jsonData.slice(1) as any[][];
-        const dimensionHeaders: string[] = [];
+  
+        const rawHeaders = jsonData[0] as string[];
+        const headers = rawHeaders.map((header) => header.trim());        
+        console.log("Parsed headers:", headers);
+        const rows = jsonData.slice(1) as any[];
+  
         const measureHeaders: string[] = [];
-
+        const confidenceHeaders: string[] = [];
+        const dimensionHeaders: string[] = [];
+        
         headers.forEach((header) => {
-          if (typeof header === "string") {
-            if (header.endsWith("_M")) {
-              measureHeaders.push(header);
-            } else {
-              dimensionHeaders.push(header);
-            }
+          if (header.endsWith("_M")) {
+            measureHeaders.push(header);
+          } else if (header.endsWith("_KI")) {
+            confidenceHeaders.push(header);
+          } else {
+            dimensionHeaders.push(header);
           }
         });
-
+  
         const dimensionsData: Dimension[] = dimensionHeaders.map((header) => {
           const headerIndex = headers.indexOf(header);
           const uniqueValues = new Set<string>();
-
           rows.forEach((row) => {
             if (row[headerIndex] !== undefined) {
               uniqueValues.add(String(row[headerIndex]));
             }
           });
-
           return {
             name: header,
             allValues: Array.from(uniqueValues),
@@ -223,25 +229,36 @@ const StatistikGränssnitt: React.FC = () => {
             unit: "",
           };
         });
+  
+        const measuresData: Measure[] = [
+          ...measureHeaders.map((header) => ({
+            name: header.replace("_M", ""),
+            unit: "",
+            isSelected: false,
+            isConfidence: false, 
+          })),
+          ...confidenceHeaders.map((header) => ({
+            name: header.replace("_KI", ""),
+            unit: "",
+            isSelected: false,
+            isConfidence: true,  
+          }))
+        ];
+        console.log("All Measures:", measuresData);
 
-        const measuresData: Measure[] = measureHeaders.map((header) => ({
-          name: header.replace("_M", ""),
-          unit: "",
-          isSelected: false,
-        }));
         const processedData = rows.map((row) =>
-          row.map((cell) => {
+          row.map((cell: string) => {
             if (typeof cell === "string" && cell.includes(",")) {
               return parseFloat(cell.replace(",", ".")) || cell;
             }
             return cell;
           })
         );
-
+        
         setTitle("");
         setDimensions(dimensionsData);
         setMeasures(measuresData);
-        setJsonData(processedData);
+        setJsonData([headers, ...processedData]);
       } catch (error) {
         console.error("Error processing file:", error);
         alert("Det uppstod ett fel vid bearbetning av filen");
@@ -249,6 +266,8 @@ const StatistikGränssnitt: React.FC = () => {
     };
     reader.readAsArrayBuffer(file);
   };
+  
+  const confidenceMeasures = measures.filter((m) => m.isConfidence);
 
   const handleGoBack = () => {
     if (chart) {
@@ -316,6 +335,9 @@ const StatistikGränssnitt: React.FC = () => {
         setYAxisTitlePosition={setYAxisTitlePosition}
         yAxisSecondaryTitlePosition={yAxisSecondaryTitlePosition}
         setYAxisSecondaryTitlePosition={setYAxisSecondaryTitlePosition}
+        confidenceMeasure={confidenceMeasure}
+        confidenceMeasures={confidenceMeasures}
+        setConfidenceMeasure={setConfidenceMeasure}
       />
     </div>
   );

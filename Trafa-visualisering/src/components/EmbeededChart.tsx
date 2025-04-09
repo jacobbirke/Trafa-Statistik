@@ -31,6 +31,8 @@ interface EmbeddedChartProps {
     seriesIcons: Record<string, string>;
     yAxisTitlePosition: string;
     yAxisSecondaryTitlePosition: string;
+    confidenceMeasure: string | null;
+
   };
 }
 
@@ -85,6 +87,8 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           seriesIcons: config.seriesIcons || {},
           yAxisTitlePosition: config.yAxisTitlePosition,
           yAxisSecondaryTitlePosition: config.yAxisSecondaryTitlePosition,
+          confidenceMeasure: config.confidenceMeasure
+
         },
         containerRef.current!
       );
