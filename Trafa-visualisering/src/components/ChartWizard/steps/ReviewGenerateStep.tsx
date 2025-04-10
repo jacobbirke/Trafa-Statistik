@@ -70,6 +70,8 @@ interface Props {
   yAxisSecondaryTitlePosition: string;
   setYAxisSecondaryTitlePosition: React.Dispatch<React.SetStateAction<string>>;
   confidenceMeasure: string | null;
+  setConfidenceMeasure: (measure: string | null) => void;
+  confidenceMeasures: Measure[];
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -126,6 +128,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   yAxisSecondaryTitlePosition,
   setYAxisSecondaryTitlePosition,
   confidenceMeasure,
+  setConfidenceMeasure,
+  confidenceMeasures,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -935,7 +939,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           ))}
         </div>
 
-        {!["combo", "variwide"].includes(chartType) && (
+        {!["combo", "variwide", "errorbar-column"].includes(chartType) && (
           <>
             <div className="p-1 mb-2">
               <h4 className="text-xl font-semibold mb-2 ">Mått</h4>
@@ -988,6 +992,63 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               </div>
             </div>
           </>
+        )}
+
+        {chartType === "errorbar-column" && (
+          <div className="p-1 mb-2">
+            <h4 className="text-xl font-semibold mb-2 ">Mått</h4>
+            <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tempMeasures
+                  .filter((measure) => !measure.isConfidence)
+                  .map((measure) => (
+                    <label
+                      key={measure.name}
+                      className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                        measure.isSelected
+                          ? "border-blue-500 bg-blue-100"
+                          : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={measure.isSelected}
+                        onChange={(e) => {
+                          setTempMeasures((prev) =>
+                            prev.map((m) =>
+                              m.name === measure.name
+                                ? { ...m, isSelected: e.target.checked }
+                                : m
+                            )
+                          );
+                        }}
+                        className="mr-3 h-5 w-5 text-blue-600"
+                      />
+                      <span className="text-style">
+                        {measure.name} {measure.unit && `(${measure.unit})`}
+                      </span>
+                    </label>
+                  ))}
+              </div>
+              <div className="mt-6">
+                <h4 className="text-xl font-semibold mb-2">
+                  Välj konfidensintervall för valt mått
+                </h4>
+                <select
+                  value={confidenceMeasure || ""}
+                  onChange={(e) => setConfidenceMeasure(e.target.value || null)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  <option value="">Ingen</option>
+                  {confidenceMeasures.map((cm) => (
+                    <option key={cm.name} value={cm.name}>
+                      {cm.name} {cm.unit && `(${cm.unit})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
         )}
 
         {chartType === "combo" && (

@@ -103,7 +103,6 @@ export const SelectMeasuresStep: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Combo chart: bar & line selection */}
       {chartType === "combo" && (
         <div className="mb-4 p-3">
           <div className="flex flex-col md:flex-row gap-4">
@@ -154,7 +153,6 @@ export const SelectMeasuresStep: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Variwide: width & height measures */}
       {chartType === "variwide" && (
         <div className="mb-4 p-3">
           <div className="flex flex-col md:flex-row gap-4">
@@ -224,7 +222,6 @@ export const SelectMeasuresStep: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Footer navigation */}
       <div className="flex justify-between mt-6">
         <Button
           onClick={() => setStep("filter-dimensions")}

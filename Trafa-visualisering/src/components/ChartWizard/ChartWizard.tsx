@@ -177,6 +177,9 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           yAxisSecondaryTitlePosition={yAxisSecondaryTitlePosition}
           setYAxisSecondaryTitlePosition={setYAxisSecondaryTitlePosition}
           confidenceMeasure={confidenceMeasure}
+          setConfidenceMeasure={setConfidenceMeasure}
+          confidenceMeasures={confidenceMeasures}
+
 
         />
       )}
