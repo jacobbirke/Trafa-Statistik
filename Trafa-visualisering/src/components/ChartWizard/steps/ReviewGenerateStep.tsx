@@ -468,7 +468,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   return (
     <Card>
       <div className="border-2 border-gray-300 p-4 rounded mb-5">
-        <h3 className="text-2xl font-bold mb-4">Snabbkonfiguration</h3>
+        <h3 className="text-2xl font-bold mb-1">Snabbkonfiguration</h3>
         <div className="mb-1 p-1">
           <label className="block text-xl font-semibold mb-2">
             Diagramtitel
@@ -489,7 +489,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
               {tempDimensions
                 .find((d) => d.name === tempSeriesDimension)
                 ?.selectedValues.map((value, idx) => (
-                  <div key={value} className="flex items-center gap-2">
+                  <div key={value} className="flex items-center gap-">
                     <input
                       type="color"
                       value={
@@ -503,7 +503,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                           [value]: e.target.value,
                         }))
                       }
-                      className="cursor-pointer"
+                      className="cursor-pointer "
                       title={`Klicka för att välja färg för ${value}`}
                     />{" "}
                     <label className="p-1">{value}</label>
