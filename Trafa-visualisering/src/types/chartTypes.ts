@@ -7,13 +7,14 @@ export type ChartType =
   | "stackedArea"
   | "variwide"
   | "errorbar-column"
+  | "errorbar-line";
 export type WizardStep =
   | "input-file"
   | "select-diagram-type"
   | "filter-dimensions"
   | "select-measures"
   | "chart-configuration"
-  | "review-generate"
+  | "review-generate";
 
 export interface Dimension {
   name: string;
@@ -90,4 +91,6 @@ export interface ChartWizardProps {
   confidenceMeasures: Measure[];
   confidenceMeasure: string | null;
   setConfidenceMeasure: React.Dispatch<React.SetStateAction<string | null>>;
+  errorDisplayType: "errorbar" | "dashed";
+  setErrorDisplayType: (type: "errorbar" | "dashed") => void;
 }

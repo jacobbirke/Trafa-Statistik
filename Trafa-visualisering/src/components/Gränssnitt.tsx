@@ -60,6 +60,8 @@ const StatistikGränssnitt: React.FC = () => {
   const [yAxisTitlePosition, setYAxisTitlePosition] = useState<string>("side");
   const [yAxisSecondaryTitlePosition, setYAxisSecondaryTitlePosition] = useState<string>("side");
   const [confidenceMeasure, setConfidenceMeasure] = useState<string | null>("");
+  const [errorDisplayType, setErrorDisplayType] = useState<'errorbar' | 'dashed'>('errorbar');
+
 
 
 
@@ -105,6 +107,7 @@ const StatistikGränssnitt: React.FC = () => {
         yAxisTitlePosition,
         yAxisSecondaryTitlePosition,
         confidenceMeasure,
+        errorDisplayType,
       },
       containerRef.current
     );
@@ -197,7 +200,6 @@ const StatistikGränssnitt: React.FC = () => {
   
         const rawHeaders = jsonData[0] as string[];
         const headers = rawHeaders.map((header) => header.trim());        
-        console.log("Parsed headers:", headers);
         const rows = jsonData.slice(1) as any[];
   
         const measureHeaders: string[] = [];
@@ -244,7 +246,6 @@ const StatistikGränssnitt: React.FC = () => {
             isConfidence: true,  
           }))
         ];
-        console.log("All Measures:", measuresData);
 
         const processedData = rows.map((row) =>
           row.map((cell: string) => {
@@ -338,6 +339,8 @@ const StatistikGränssnitt: React.FC = () => {
         confidenceMeasure={confidenceMeasure}
         confidenceMeasures={confidenceMeasures}
         setConfidenceMeasure={setConfidenceMeasure}
+        errorDisplayType={errorDisplayType}
+        setErrorDisplayType={setErrorDisplayType}
       />
     </div>
   );

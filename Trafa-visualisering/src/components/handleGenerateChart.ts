@@ -28,6 +28,9 @@ export type Config = {
   yAxisTitlePosition: string;
   yAxisSecondaryTitlePosition: string;
   confidenceMeasure: string | null;
+  errorDisplayType: "errorbar" | "dashed";
+  dashedColor?: string;
+
 };
 
 export const handleGenerateChart = (
@@ -134,6 +137,270 @@ export const handleGenerateChart = (
     "#A3D2E1",
     "#C1E2B5",
   ];
+
+    //Linjediagram med felmarginal
+  if (config.chartType === "errorbar-line") {
+    if (config.xAxisDimensions.length === 0) {
+      alert("Välj minst en dimension för x-axeln.");
+      return;
+    }
+
+    const selectedMeasures = config.measures.filter((m) => m.isSelected);
+    if (selectedMeasures.length !== 1) {
+      alert("För ett linjediagram med felmarginal, välj exakt ett mått.");
+      return;
+    }
+
+    const measureName = selectedMeasures[0].name;
+    if (!config.confidenceMeasure) {
+      alert("Välj ett konfidensintervall för det valda måttet.");
+      return;
+    }
+
+    const baseHeader = measureName + "_M";
+    const errorHeader = config.confidenceMeasure + "_KI";
+    const headers = config.jsonData[0];
+    const baseIdx = headers.indexOf(baseHeader);
+    const errorIdx = headers.indexOf(errorHeader);
+
+    if (baseIdx === -1 || errorIdx === -1) {
+      alert("Hittade inte mått- eller felstapelkolumner för valt mått.");
+      return;
+    }
+
+    const filteredRows = config.jsonData.slice(1).filter((row) =>
+      dimensions.every((dimension) => {
+        const dimIndex = dimensions.findIndex((d) => d.name === dimension.name);
+        return dimension.selectedValues.includes(row[dimIndex]?.toString());
+      })
+    );
+
+    if (filteredRows.length === 0) {
+      alert("Ingen data matchar det valda filtret.");
+      return;
+    }
+
+    const selectedXAxisValues = config.xAxisDimensions.map((dimName) => {
+      const dim = dimensions.find((d) => d.name === dimName);
+      return dim ? dim.selectedValues : [];
+    });
+
+    const xAxisDimIndices = config.xAxisDimensions.map((dimName) =>
+      dimensions.findIndex((d) => d.name === dimName)
+    );
+    if (xAxisDimIndices.includes(-1)) {
+      alert("Ogiltiga x-axel dimensioner.");
+      return;
+    }
+
+    const xAxisCombinations: string[][] = [];
+    if (config.xAxisDimensions.length === 1) {
+      xAxisCombinations.push(...selectedXAxisValues[0].map((cat) => [cat]));
+    } else if (config.xAxisDimensions.length === 2) {
+      for (const mainCat of selectedXAxisValues[0]) {
+        for (const subCat of selectedXAxisValues[1]) {
+          xAxisCombinations.push([mainCat, subCat]);
+        }
+      }
+    }
+
+    const seriesDim = config.seriesDimension
+      ? dimensions.find((d) => d.name === config.seriesDimension)
+      : null;
+    const seriesValues = seriesDim ? seriesDim.selectedValues : [measureName];
+    const measureUnit = selectedMeasures[0].unit || "";
+
+    while (chart.series.length > 0) {
+      chart.series[0].remove(false);
+    }
+    chart.update(
+      {
+        chart: { type: "line", marginLeft: 95, marginTop: title ? 80 : 50 },
+        title: { text: config.title || "" },
+        xAxis:
+          config.xAxisDimensions.length === 2
+            ? {
+                type: "category",
+                categories: selectedXAxisValues[0],
+                labels: {
+                  formatter: function () {
+                    return this.value as string;
+                  },
+                },
+              }
+            : { categories: selectedXAxisValues[0] as string[] },
+      },
+      false
+    );
+
+    seriesValues.forEach((seriesValue, seriesIndex) => {
+      const seriesRows = seriesDim
+        ? filteredRows.filter((row) => {
+            const dimIndex = dimensions.findIndex(
+              (d) => d.name === seriesDim.name
+            );
+            return row[dimIndex]?.toString() === seriesValue;
+          })
+        : filteredRows;
+
+      const columnData: number[] = xAxisCombinations.map((combination) => {
+        const row = seriesRows.find((row) =>
+          xAxisDimIndices.every(
+            (dimIdx, i) => row[dimIdx]?.toString() === combination[i]
+          )
+        );
+        return row ? parseFloat(row[baseIdx]) || 0 : 0;
+      });
+
+      const errorData: [number, number][] = xAxisCombinations.map(
+        (combination) => {
+          const row = seriesRows.find((row) =>
+            xAxisDimIndices.every(
+              (dimIdx, i) => row[dimIdx]?.toString() === combination[i]
+            )
+          );
+          const baseVal = row ? parseFloat(row[baseIdx]) || 0 : 0;
+          const errorVal = row ? parseFloat(row[errorIdx]) || 0 : 0;
+          return [baseVal - errorVal, baseVal + errorVal] as [number, number];
+        }
+      );
+
+      const seriesName = seriesDim ? (seriesValue as string) : measureName;
+      const color = seriesDim
+        ? config.seriesColors[seriesValue as string] ||
+          customDefaultColors[seriesIndex % customDefaultColors.length]
+        : config.measureColors[measureName] || customDefaultColors[0];
+
+      chart.addSeries(
+        {
+          type: "line",
+          name: seriesName,
+          data: columnData,
+          color: color,
+          tooltip: {
+            pointFormatter: function (this: Highcharts.Point) {
+              const value = this.y ?? 0;
+              const formattedValue =
+                value % 1 === 0
+                  ? Highcharts.numberFormat(value, 0, ",", " ")
+                  : Highcharts.numberFormat(value, 2, ",", " ");
+              return `<span style="color:${this.color}">●</span> ${seriesName}:
+                <b>${formattedValue}${
+                measureUnit ? " " + measureUnit : ""
+              }</b><br>`;
+            },
+          },
+        },
+        false
+      );
+
+      if (config.errorDisplayType === "dashed") {
+        const dashedColor =
+        config.dashedColor ||
+        (config.confidenceMeasure && config.measureColors[config.confidenceMeasure]
+          ? config.measureColors[config.confidenceMeasure]
+          : "#000000");
+        const upperData = errorData.map(([,high]) => high);
+        const lowerData = errorData.map(([low]) => low);
+
+        chart.addSeries(
+          {
+            type: "line",
+            name: `${seriesName} (Övre gräns)`,
+            data: upperData,
+            color: dashedColor,
+            dashStyle: "Dash",
+            showInLegend: false,
+            marker: { enabled: false },
+            enableMouseTracking: false, 
+          },
+          false
+        );
+
+        chart.addSeries(
+          {
+            type: "line",
+            name: `${seriesName} (Undre gräns)`,
+            data: lowerData,
+            color: dashedColor,
+            dashStyle: "Dash",
+            showInLegend: false,
+            marker: { enabled: false },
+            enableMouseTracking: false, 
+          },
+          false
+        );
+      } else if (config.errorDisplayType === "errorbar") {
+        chart.addSeries(
+          {
+            type: "errorbar",
+            linkedTo: ":previous",
+            data: errorData,
+            color:
+              config.confidenceMeasure &&
+              config.measureColors[config.confidenceMeasure]
+                ? config.measureColors[config.confidenceMeasure]
+                : "#000000",
+            tooltip: {
+              pointFormatter: function () {
+                const low = this.low ?? 0;
+                const high = this.high ?? 0;
+                const formattedLow =
+                  low % 1 === 0
+                    ? Highcharts.numberFormat(low, 0, ",", " ")
+                    : Highcharts.numberFormat(low, 2, ",", " ");
+                const formattedHigh =
+                  high % 1 === 0
+                    ? Highcharts.numberFormat(high, 0, ",", " ")
+                    : Highcharts.numberFormat(high, 2, ",", " ");
+                return `Felmarginal: ${formattedLow} - ${formattedHigh}${
+                  measureUnit ? " " + measureUnit : ""
+                }<br>`;
+              },
+            },
+          },
+          false
+        );
+      }
+    });
+
+    currentChart.yAxis[0].update({
+      title: {
+        text: config.yAxisPrimaryTitle || "",
+        style: {
+          color: "",
+          whiteSpace: "nowrap",
+        },
+        rotation:
+          config.yAxisTitlePosition === "rotated"
+            ? 90
+            : config.yAxisTitlePosition === "top"
+            ? 0
+            : 270,
+        align: config.yAxisTitlePosition === "top" ? "high" : "middle",
+        textAlign: "center",
+        x:
+          config.yAxisTitlePosition === "rotated"
+            ? -17
+            : config.yAxisTitlePosition === "top"
+            ? 50
+            : -8,
+        y: config.yAxisTitlePosition === "top" ? (title ? -20 : -12) : 0,
+        reserveSpace: false,
+        margin: config.yAxisTitlePosition === "top" ? 10 : 5,
+        offset: 0,
+      },
+
+      min: config.yAxisPrimaryMin,
+      max: config.yAxisPrimaryMax,
+      tickInterval: config.yAxisPrimaryTick,
+    });
+
+    const legendOptions = getLegendOptions(config.legendPosition);
+    chart.update({ legend: legendOptions }, false, false);
+    chart.redraw();
+    return;
+  }
 
   //Stapeldiagram med felmarginal
   if (config.chartType === "errorbar-column") {
@@ -356,7 +623,6 @@ export const handleGenerateChart = (
       tickInterval: config.yAxisPrimaryTick,
     });
 
-    // Final chart updates
     const legendOptions = getLegendOptions(config.legendPosition);
     chart.update({ legend: legendOptions }, false, false);
     chart.redraw();
@@ -996,7 +1262,7 @@ export const handleGenerateChart = (
             : config.yAxisTitlePosition === "top"
             ? 40
             : -5,
-        y: config.yAxisTitlePosition === "top" ? (title ? -20 : -10) : 0,
+        y: config.yAxisTitlePosition === "top" ? (title ? -20 : -20) : 0,
         reserveSpace: false,
         margin: config.yAxisTitlePosition === "top" ? 10 : 5,
         offset: 0,
@@ -1134,7 +1400,7 @@ export const handleGenerateChart = (
     if (chartType === "combo") {
       return measure.name === config.lineMeasure ? "spline" : "column";
     }
-    return chartType === "line" ? "spline" : "column";
+    return chartType === "line" ? "line" : "column";
   };
 
   if (seriesDimension) {
@@ -1246,14 +1512,14 @@ export const handleGenerateChart = (
 
   currentChart.update({
     chart: {
-      marginLeft: 80,
+      marginTop: title ? 80 : 50,      marginLeft: 80,
       marginRight:
         config.chartType === "column" || config.chartType === "line" ? 0 : 80,
       type:
         xAxisDimensions.length === 2
           ? "column"
           : chartType === "line"
-          ? "spline"
+          ? "line"
           : "column",
     },
 
@@ -1328,7 +1594,7 @@ export const handleGenerateChart = (
           lineColor: "#ffffff",
         },
       },
-      spline: {
+      line: {
         dataLabels: {
           formatter: function (this: Highcharts.PointLabelObject) {
             const value = this.y ?? 0;
@@ -1343,5 +1609,6 @@ export const handleGenerateChart = (
   const legendOptions = getLegendOptions(config.legendPosition);
   currentChart.update({ legend: legendOptions }, false, false);
 
-  currentChart.redraw();
+  currentChart.redraw();console.log("Using errorDisplayType:", config.errorDisplayType);
+
 };

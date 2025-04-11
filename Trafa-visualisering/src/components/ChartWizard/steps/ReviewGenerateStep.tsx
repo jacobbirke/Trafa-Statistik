@@ -72,6 +72,8 @@ interface Props {
   confidenceMeasure: string | null;
   setConfidenceMeasure: (measure: string | null) => void;
   confidenceMeasures: Measure[];
+  errorDisplayType: "errorbar" | "dashed";
+  setErrorDisplayType: (type: "errorbar" | "dashed") => void;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
@@ -130,6 +132,8 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   confidenceMeasure,
   setConfidenceMeasure,
   confidenceMeasures,
+  errorDisplayType,
+  setErrorDisplayType,
 }) => {
   const [tempDimensions, setTempDimensions] = useState([...dimensions]);
   const [tempMeasures, setTempMeasures] = useState([...measures]);
@@ -143,6 +147,9 @@ export const ReviewGenerateStep: React.FC<Props> = ({
   const [tempLineMeasure, setTempLineMeasure] = useState(lineMeasure);
   const [embedCode, setEmbedCode] = useState<string>("");
   const [isYAxisTitleEdited, setIsYAxisTitleEdited] = useState(false);
+  const [tempErrorDisplayType, setTempErrorDisplayType] = useState<
+    "errorbar" | "dashed"
+  >(errorDisplayType);
   const [isYAxisSecondaryTitleEdited, setIsYAxisSecondaryTitleEdited] =
     useState(false);
   const customDefaultColors = [
@@ -276,6 +283,10 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     );
   }, []);
 
+  useEffect(() => {
+    setTempErrorDisplayType(errorDisplayType);
+  }, [errorDisplayType]);
+
   const handleSelectAll = (dimName: string) => {
     setTempDimensions((prev) =>
       prev.map((d) =>
@@ -371,6 +382,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       yAxisTitlePosition,
       yAxisSecondaryTitlePosition,
       confidenceMeasure,
+      errorDisplayType: tempErrorDisplayType,
     };
 
     setDimensions(tempDimensions);
@@ -381,6 +393,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
     setLineMeasure(tempLineMeasure);
     setVariwideHeightMeasure(variwideHeightMeasure);
     setVariwideWidthMeasure(variwideWidthMeasure);
+    setErrorDisplayType(tempErrorDisplayType);
 
     if (chartType === "combo" && (!tempBarMeasure || !tempLineMeasure)) {
       alert("Vänligen välj både stapel- och linjemått");
@@ -501,7 +514,9 @@ export const ReviewGenerateStep: React.FC<Props> = ({
         )}
 
         {!tempSeriesDimension &&
-          ["column", "line", "errorbar-column"].includes(chartType) && (
+          ["column", "line", "errorbar-column", "errorbar-line"].includes(
+            chartType
+          ) && (
             <div className="mb-2 p-1">
               <h4 className="text-xl font-semibold mb-2">Färgval för mått</h4>
               <div className="flex gap-4 pl-2">
@@ -612,7 +627,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </div>
         )}
 
-        {chartType === "errorbar-column" && (
+        {(chartType === "errorbar-column" || chartType === "errorbar-line") && (
           <div className="mb-2 p-1">
             <h4 className="text-xl font-semibold mb-2">
               Färgval för felmarginal
@@ -634,6 +649,23 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                 <label className="p-1">{confidenceMeasure}</label>
               </div>
             </div>
+          </div>
+          
+        )}
+
+        {(chartType === "errorbar-line") && (
+          <div className="mt-4">
+            <h4 className="text-xl font-semibold mb-2">Felvisningsstil</h4>
+            <select
+              value={tempErrorDisplayType}
+              onChange={(e) =>
+                setTempErrorDisplayType(e.target.value as "errorbar" | "dashed")
+              }
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="errorbar">Felstaplar</option>
+              <option value="dashed">Streckad linje</option>
+            </select>
           </div>
         )}
 
@@ -939,7 +971,9 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           ))}
         </div>
 
-        {!["combo", "variwide", "errorbar-column"].includes(chartType) && (
+        {!["combo", "variwide", "errorbar-column", "errorbar-line"].includes(
+          chartType
+        ) && (
           <>
             <div className="p-1 mb-2">
               <h4 className="text-xl font-semibold mb-2 ">Mått</h4>
@@ -994,7 +1028,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </>
         )}
 
-        {chartType === "errorbar-column" && (
+        {(chartType === "errorbar-column" || chartType === "errorbar-line") && (
           <div className="p-1 mb-2">
             <h4 className="text-xl font-semibold mb-2 ">Mått</h4>
             <div className="space-y-2">
@@ -1024,8 +1058,24 @@ export const ReviewGenerateStep: React.FC<Props> = ({
                         }}
                         className="mr-3 h-5 w-5 text-blue-600"
                       />
-                      <span className="text-style">
-                        {measure.name} {measure.unit && `(${measure.unit})`}
+                      <span className="text-base">
+                        {measure.name}
+                        <input
+                          type="text"
+                          value={measure.unit}
+                          onChange={(e) => {
+                            const newUnit = e.target.value;
+                            setTempMeasures((prev) =>
+                              prev.map((m) =>
+                                m.name === measure.name
+                                  ? { ...m, unit: newUnit }
+                                  : m
+                              )
+                            );
+                          }}
+                          placeholder="Enhet"
+                          className="ml-2 border rounded px-1 w-20 text-sm"
+                        />
                       </span>
                     </label>
                   ))}
