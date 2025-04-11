@@ -46,10 +46,23 @@ export const SelectMeasuresStep: React.FC<Props> = ({
           : {
               ...m,
               isSelected:
-                chartType === "errorbar-column" ||  chartType === "errorbar-line" ? false : m.isSelected,
+                chartType === "errorbar-column" || chartType === "errorbar-line"
+                  ? false
+                  : m.isSelected,
             }
       )
     );
+  };
+
+  const getInstruction = () => {
+    switch (chartType) {
+      case "errorbar-column":
+        return "Välj ett mått, samt tillhörande konfidensintervall.";
+      case "errorbar-line":
+        return "Välj ett mått, samt tillhörande konfidensintervall.";
+      default:
+        return "Välj ett mått för detta diagram.";
+    }
   };
 
   const renderTitle = () => {
@@ -59,23 +72,24 @@ export const SelectMeasuresStep: React.FC<Props> = ({
       case "combo":
         return "Mått för kombinerat diagram";
       case "errorbar-column":
-        return "Välj mått för kolumndiagram med felstaplar";
-        case "errorbar-line":
-          return "Välj mått för linjediagram med felmarginal";
+        return "Välj mått för kolumndiagram med felmarginal";
+      case "errorbar-line":
+        return "Välj mått för linjediagram med felmarginal";
       default:
         return "Välj mått";
     }
   };
 
   const filteredMeasures =
-    chartType === "errorbar-column" ||  chartType === "errorbar-line"
+    chartType === "errorbar-column" || chartType === "errorbar-line"
       ? measures.filter((measure) => !measure.isConfidence)
       : measures;
 
   return (
     <Card>
-      <div>
-        <h3 className="text-2xl font-bold mb-4">{renderTitle()}</h3>
+      <div className="mb-6">
+        <h3 className="text-2xl font-bold mb-2">{renderTitle()}</h3>
+        <p className="text-gray-600 ">{getInstruction()}</p>
       </div>
 
       {chartType !== "combo" && chartType !== "variwide" && (
@@ -204,7 +218,7 @@ export const SelectMeasuresStep: React.FC<Props> = ({
         </div>
       )}
 
-      {(chartType === "errorbar-column" ||  chartType === "errorbar-line") &&  (
+      {(chartType === "errorbar-column" || chartType === "errorbar-line") && (
         <div className="mt-6">
           <h4 className="text-xl font-semibold mb-2">
             Välj konfidensintervall för valt mått
@@ -223,7 +237,6 @@ export const SelectMeasuresStep: React.FC<Props> = ({
           </select>
         </div>
       )}
-
 
       <div className="flex justify-between mt-6">
         <Button

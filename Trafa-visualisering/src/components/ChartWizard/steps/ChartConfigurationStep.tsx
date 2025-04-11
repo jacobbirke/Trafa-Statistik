@@ -59,8 +59,8 @@ export const ChartConfigurationStep: React.FC<Props> = ({
 
   return (
     <Card>
-      <h3 className="text-2xl font-bold mb-4">Diagramkonfiguration</h3>
-
+      <h3 className="text-2xl font-bold mb-2">Diagramkonfiguration</h3>
+      <p className="text-gray-600 mb-4"> De dimensioner som inte får en roll blir per automatik filtervärde</p>
       {chartType === "variwide" && (
         <>
           <div className="mb-6">
