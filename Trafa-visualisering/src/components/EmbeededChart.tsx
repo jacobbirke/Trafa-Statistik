@@ -32,6 +32,7 @@ interface EmbeddedChartProps {
     yAxisTitlePosition: string;
     yAxisSecondaryTitlePosition: string;
     confidenceMeasure: string | null;
+    errorDisplayType: 'errorbar' | 'dashed';
 
   };
 }
@@ -87,11 +88,13 @@ const EmbeddedChart: React.FC<EmbeddedChartProps> = ({ config }) => {
           seriesIcons: config.seriesIcons || {},
           yAxisTitlePosition: config.yAxisTitlePosition,
           yAxisSecondaryTitlePosition: config.yAxisSecondaryTitlePosition,
-          confidenceMeasure: config.confidenceMeasure
-
+          confidenceMeasure: config.confidenceMeasure,
+          errorDisplayType: config.errorDisplayType
+          
         },
         containerRef.current!
-      );
+      );console.log("Error display type:", config.errorDisplayType);
+
     }
   }, [
     localDimensions,

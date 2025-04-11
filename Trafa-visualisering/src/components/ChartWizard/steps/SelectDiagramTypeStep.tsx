@@ -13,6 +13,7 @@ const chartOptions = [
   { value: "column", label: "Stapeldiagram", icon: "📊" },
   { value: "errorbar-column", label: "Stapeldiagram med felmarginal", icon: "📊" },
   { value: "line", label: "Linjediagram", icon: "📈" },
+  { value: "errorbar-line", label: "Linjediagram med felmarginal", icon: "📈" },
   { value: "combo", label: "Kombinerat (stapel & linje)", icon: "🔀" },
   { value: "stacked", label: "Staplad kolumn", icon: "🟰" },
   { value: "pie", label: "Pajdiagram", icon: "🥧" },

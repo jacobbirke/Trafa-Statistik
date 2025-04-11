@@ -46,7 +46,7 @@ export const SelectMeasuresStep: React.FC<Props> = ({
           : {
               ...m,
               isSelected:
-                chartType === "errorbar-column" ? false : m.isSelected,
+                chartType === "errorbar-column" ||  chartType === "errorbar-line" ? false : m.isSelected,
             }
       )
     );
@@ -60,13 +60,15 @@ export const SelectMeasuresStep: React.FC<Props> = ({
         return "Mått för kombinerat diagram";
       case "errorbar-column":
         return "Välj mått för kolumndiagram med felstaplar";
+        case "errorbar-line":
+          return "Välj mått för linjediagram med felmarginal";
       default:
         return "Välj mått";
     }
   };
 
   const filteredMeasures =
-    chartType === "errorbar-column"
+    chartType === "errorbar-column" ||  chartType === "errorbar-line"
       ? measures.filter((measure) => !measure.isConfidence)
       : measures;
 
@@ -202,7 +204,7 @@ export const SelectMeasuresStep: React.FC<Props> = ({
         </div>
       )}
 
-      {chartType === "errorbar-column" && (
+      {(chartType === "errorbar-column" ||  chartType === "errorbar-line") &&  (
         <div className="mt-6">
           <h4 className="text-xl font-semibold mb-2">
             Välj konfidensintervall för valt mått
@@ -221,6 +223,7 @@ export const SelectMeasuresStep: React.FC<Props> = ({
           </select>
         </div>
       )}
+
 
       <div className="flex justify-between mt-6">
         <Button
@@ -244,6 +247,13 @@ export const SelectMeasuresStep: React.FC<Props> = ({
               if (!barMeasure || !lineMeasure) {
                 alert(
                   "För kombinerat diagram, välj ett mått för stapel och ett mått för linje."
+                );
+                return;
+              }
+            } else if (chartType === "errorbar-line") {
+              if (selected.length !== 1) {
+                alert(
+                  "För ett linjediagram med felmarginal, välj exakt ett mått."
                 );
                 return;
               }

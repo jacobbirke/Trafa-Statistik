@@ -66,6 +66,8 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   confidenceMeasures,
   confidenceMeasure,
   setConfidenceMeasure,
+  errorDisplayType,
+setErrorDisplayType,
 }) => {
   return (
     <div className="max-w-7xl mx-auto p-3 space-y-8">
@@ -179,8 +181,8 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           confidenceMeasure={confidenceMeasure}
           setConfidenceMeasure={setConfidenceMeasure}
           confidenceMeasures={confidenceMeasures}
-
-
+          errorDisplayType={errorDisplayType}
+          setErrorDisplayType={setErrorDisplayType}
         />
       )}
     </div>
