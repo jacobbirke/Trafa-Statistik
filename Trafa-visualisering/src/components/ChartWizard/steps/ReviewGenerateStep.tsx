@@ -629,43 +629,53 @@ export const ReviewGenerateStep: React.FC<Props> = ({
 
         {(chartType === "errorbar-column" || chartType === "errorbar-line") && (
           <div className="mb-2 p-1">
-            <h4 className="text-xl font-semibold mb-2">
-              Färgval för felmarginal
-            </h4>
-            <div className="flex gap-4 pl-2">
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={measureColors[confidenceMeasure as string] || "#00000"}
-                  onChange={(e) =>
-                    setMeasureColors((prev) => ({
-                      ...prev,
-                      [confidenceMeasure as string]: e.target.value,
-                    }))
-                  }
-                  className="cursor-pointer"
-                  title={`Klicka för att välja färg för ${confidenceMeasure}`}
-                />
-                <label className="p-1">{confidenceMeasure}</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <h4 className="text-xl font-semibold mb-2">
+                  Färgval för felmarginal
+                </h4>
+                <div className="flex gap-4 pl-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={
+                        measureColors[confidenceMeasure as string] || "#00000"
+                      }
+                      onChange={(e) =>
+                        setMeasureColors((prev) => ({
+                          ...prev,
+                          [confidenceMeasure as string]: e.target.value,
+                        }))
+                      }
+                      className="cursor-pointer"
+                      title={`Klicka för att välja färg för ${confidenceMeasure}`}
+                    />
+                    <label className="p-1">{confidenceMeasure}</label>
+                  </div>
+                </div>
+              </div>
+              <div>
+                {chartType === "errorbar-line" && (
+                  <div className="mb-4">
+                    <h4 className="text-xl font-semibold mb-2">
+                      Felvisningsstil
+                    </h4>
+                    <select
+                      value={tempErrorDisplayType}
+                      onChange={(e) =>
+                        setTempErrorDisplayType(
+                          e.target.value as "errorbar" | "dashed"
+                        )
+                      }
+                      className="w-full p-2 border rounded-md"
+                    >
+                      <option value="errorbar">Felstaplar</option>
+                      <option value="dashed">Streckad linje</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-          
-        )}
-
-        {(chartType === "errorbar-line") && (
-          <div className="mt-4">
-            <h4 className="text-xl font-semibold mb-2">Felvisningsstil</h4>
-            <select
-              value={tempErrorDisplayType}
-              onChange={(e) =>
-                setTempErrorDisplayType(e.target.value as "errorbar" | "dashed")
-              }
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="errorbar">Felstaplar</option>
-              <option value="dashed">Streckad linje</option>
-            </select>
           </div>
         )}
 
