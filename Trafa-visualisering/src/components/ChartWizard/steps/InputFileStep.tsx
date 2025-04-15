@@ -131,8 +131,8 @@ const InfoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             visualisera data tydligare.
           </li>
           <li>
-            <strong>Enheter:</strong> Du kan mata in vad du vill ha för enhet
-            för ditt måttvärde.
+            <strong>Enheter:</strong> Bestäm vad du vill ha för enhet
+            till måttvärdet.
           </li>
           <li>
             <strong>Dimensioner och roller:</strong> Välj vilka dimensioner som

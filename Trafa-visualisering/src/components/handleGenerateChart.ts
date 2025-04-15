@@ -30,7 +30,6 @@ export type Config = {
   confidenceMeasure: string | null;
   errorDisplayType: "errorbar" | "dashed";
   dashedColor?: string;
-
 };
 
 export const handleGenerateChart = (
@@ -138,7 +137,7 @@ export const handleGenerateChart = (
     "#C1E2B5",
   ];
 
-    //Linjediagram med felmarginal
+  //Linjediagram med felmarginal
   if (config.chartType === "errorbar-line") {
     if (config.xAxisDimensions.length === 0) {
       alert("Välj minst en dimension för x-axeln.");
@@ -296,11 +295,12 @@ export const handleGenerateChart = (
 
       if (config.errorDisplayType === "dashed") {
         const dashedColor =
-        config.dashedColor ||
-        (config.confidenceMeasure && config.measureColors[config.confidenceMeasure]
-          ? config.measureColors[config.confidenceMeasure]
-          : "#000000");
-        const upperData = errorData.map(([,high]) => high);
+          config.dashedColor ||
+          (config.confidenceMeasure &&
+          config.measureColors[config.confidenceMeasure]
+            ? config.measureColors[config.confidenceMeasure]
+            : "#000000");
+        const upperData = errorData.map(([, high]) => high);
         const lowerData = errorData.map(([low]) => low);
 
         chart.addSeries(
@@ -312,7 +312,7 @@ export const handleGenerateChart = (
             dashStyle: "Dash",
             showInLegend: false,
             marker: { enabled: false },
-            enableMouseTracking: false, 
+            enableMouseTracking: false,
           },
           false
         );
@@ -326,7 +326,7 @@ export const handleGenerateChart = (
             dashStyle: "Dash",
             showInLegend: false,
             marker: { enabled: false },
-            enableMouseTracking: false, 
+            enableMouseTracking: false,
           },
           false
         );
@@ -695,7 +695,21 @@ export const handleGenerateChart = (
                 value % 1 === 0
                   ? Highcharts.numberFormat(value, 0, ",", " ")
                   : Highcharts.numberFormat(value, 2, ",", " ");
-              return `${this.point.name}: ${formattedValue}`;
+              const unit = (this.series.userOptions as any).unit || "";
+              return `${this.point.name}: ${formattedValue}${
+                unit ? " " + unit : ""
+              }`;
+            },
+          },
+          tooltip: {
+            pointFormatter: function (this: Highcharts.Point) { 
+              const value = this.y ?? 0;
+              const formattedValue =
+                value % 1 === 0
+                  ? Highcharts.numberFormat(value, 0, ",", " ")
+                  : Highcharts.numberFormat(value, 2, ",", " ");
+              const unit = (this.series.userOptions as any).unit || "";
+              return `<span style="color:${this.color}">●</span> ${this.name}: <b>${formattedValue}${unit ? " " + unit : ""}</b>`;
             },
           },
         },
@@ -711,10 +725,11 @@ export const handleGenerateChart = (
               config.seriesColors[point.name] ||
               customDefaultColors[index % customDefaultColors.length],
           })),
-          unit: measure.unit,
+          unit: measure.unit,  
         },
       ],
     });
+
     currentChart.xAxis[0].update({ visible: false });
     currentChart.yAxis[0].update({ visible: false });
     if (currentChart.yAxis[1]) {
@@ -1512,7 +1527,8 @@ export const handleGenerateChart = (
 
   currentChart.update({
     chart: {
-      marginTop: title ? 80 : 50,      marginLeft: 80,
+      marginTop: title ? 80 : 50,
+      marginLeft: 80,
       marginRight:
         config.chartType === "column" || config.chartType === "line" ? 0 : 80,
       type:
@@ -1609,6 +1625,6 @@ export const handleGenerateChart = (
   const legendOptions = getLegendOptions(config.legendPosition);
   currentChart.update({ legend: legendOptions }, false, false);
 
-  currentChart.redraw();console.log("Using errorDisplayType:", config.errorDisplayType);
-
+  currentChart.redraw();
+  console.log("Using errorDisplayType:", config.errorDisplayType);
 };
