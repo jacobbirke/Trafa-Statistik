@@ -1271,176 +1271,187 @@ export const ReviewGenerateStep: React.FC<Props> = ({
           </div>
         )}
 
-        <div className="mb-4 p-1 ">
-          <h5 className="text-xl font-semibold mb-2">Y-axel inställningar</h5>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-1">
-            <div>
-              <label className="block mb-1 font-medium">Y-axel titel</label>
-              <input
-                type="text"
-                value={yAxisPrimaryTitle}
-                onChange={(e) => {
-                  setYAxisPrimaryTitle(e.target.value);
-                  setIsYAxisTitleEdited(true);
-                }}
-                className="border rounded px-2 py-1 w-full"
-                placeholder="Titel för y-axel"
-              />
-            </div>{" "}
-            <div>
-              <label className="block mb-1 font-medium">
-                Y-axel titel placering
-              </label>
-              <select
-                value={yAxisTitlePosition}
-                onChange={(e) => setYAxisTitlePosition(e.target.value)}
-                className="border rounded px-2 py-1 w-full"
-              >
-                <option value="side">Sida (nedifrån upp)</option>
-                <option value="rotated">Sida (uppifrån ned)</option>
-                <option value="top">Ovanför axeln</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-1">
-            <div>
-              <label className="block mb-1 font-medium">
-                Y-axel värde minimum
-              </label>
-              <input
-                type="number"
-                value={yAxisPrimaryMin}
-                onChange={(e) =>
-                  setYAxisPrimaryMin(
-                    e.target.value ? parseFloat(e.target.value) : undefined
-                  )
-                }
-                className="border rounded px-2 py-1 w-full"
-                placeholder="Minvärde"
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">Y-axel värde max</label>
-              <input
-                type="number"
-                value={yAxisPrimaryMax}
-                onChange={(e) =>
-                  setYAxisPrimaryMax(
-                    e.target.value ? parseFloat(e.target.value) : undefined
-                  )
-                }
-                className="border rounded px-2 py-1 w-full"
-                placeholder="Maxvärde"
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium">Y-axel intervall</label>
-              <input
-                type="number"
-                value={yAxisPrimaryTick}
-                onChange={(e) =>
-                  setYAxisPrimaryTick(
-                    e.target.value ? parseFloat(e.target.value) : undefined
-                  )
-                }
-                className="border rounded px-2 py-1 w-full"
-                placeholder="Interval"
-              />
-            </div>
-          </div>
-
-          {chartType === "combo" && (
-            <div className="mt-4">
-              <h5 className="text-lg font-semibold mb-2">
-                Sekundär y-axel inställningar
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-1">
-                <div>
-                  <label className="block mb-1 font-medium">
-                    Sekundär y-axel titel
-                  </label>
-                  <input
-                    type="text"
-                    value={yAxisSecondaryTitle}
-                    onChange={(e) => {
-                      setYAxisSecondaryTitle(e.target.value);
-                      setIsYAxisSecondaryTitleEdited(true);
-                    }}
-                    className="border rounded px-2 py-1 w-full"
-                    placeholder="Titel för sekundär y-axel"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 font-medium">
-                    Sekundär y-axel placering
-                  </label>
-                  <select
-                    value={yAxisSecondaryTitlePosition}
-                    onChange={(e) =>
-                      setYAxisSecondaryTitlePosition(e.target.value)
-                    }
-                    className="border rounded px-2 py-1 w-full"
-                  >
-                    <option value="side">Sida (vertikal)</option>
-                    <option value="rotated">Sida (nedifrån upp)</option>
-                    <option value="top">Ovanför axeln</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 space-x-4 p-1">
-                <div>
-                  <label className="block mb-1 font-medium">
-                    Sekundär y-axel minimum
-                  </label>
-                  <input
-                    type="number"
-                    value={yAxisSecondaryMin}
-                    onChange={(e) =>
-                      setYAxisSecondaryMin(
-                        e.target.value ? parseFloat(e.target.value) : undefined
-                      )
-                    }
-                    className="border rounded px-2 py-1 w-full"
-                    placeholder="Minvärde"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 font-medium">
-                    Sekundär y-axel max
-                  </label>
-                  <input
-                    type="number"
-                    value={yAxisSecondaryMax}
-                    onChange={(e) =>
-                      setYAxisSecondaryMax(
-                        e.target.value ? parseFloat(e.target.value) : undefined
-                      )
-                    }
-                    className="border rounded px-2 py-1 w-full"
-                    placeholder="Maxvärde"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 font-medium">
-                    Sekundär y-axel intervall{" "}
-                  </label>
-                  <input
-                    type="number"
-                    value={yAxisSecondaryTick}
-                    onChange={(e) =>
-                      setYAxisSecondaryTick(
-                        e.target.value ? parseFloat(e.target.value) : undefined
-                      )
-                    }
-                    className="border rounded px-2 py-1 w-full"
-                    placeholder="Interval"
-                  />
-                </div>
+        {chartType !== "pie" && (
+          <div className="mb-4 p-1 ">
+            <h5 className="text-xl font-semibold mb-2">Y-axel inställningar</h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-1">
+              <div>
+                <label className="block mb-1 font-medium">Y-axel titel</label>
+                <input
+                  type="text"
+                  value={yAxisPrimaryTitle}
+                  onChange={(e) => {
+                    setYAxisPrimaryTitle(e.target.value);
+                    setIsYAxisTitleEdited(true);
+                  }}
+                  className="border rounded px-2 py-1 w-full"
+                  placeholder="Titel för y-axel"
+                />
+              </div>{" "}
+              <div>
+                <label className="block mb-1 font-medium">
+                  Y-axel titel placering
+                </label>
+                <select
+                  value={yAxisTitlePosition}
+                  onChange={(e) => setYAxisTitlePosition(e.target.value)}
+                  className="border rounded px-2 py-1 w-full"
+                >
+                  <option value="side">Sida (nedifrån upp)</option>
+                  <option value="rotated">Sida (uppifrån ned)</option>
+                  <option value="top">Ovanför axeln</option>
+                </select>
               </div>
             </div>
-          )}
-        </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-1">
+              <div>
+                <label className="block mb-1 font-medium">
+                  Y-axel värde minimum
+                </label>
+                <input
+                  type="number"
+                  value={yAxisPrimaryMin}
+                  onChange={(e) =>
+                    setYAxisPrimaryMin(
+                      e.target.value ? parseFloat(e.target.value) : undefined
+                    )
+                  }
+                  className="border rounded px-2 py-1 w-full"
+                  placeholder="Minvärde"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">
+                  Y-axel värde max
+                </label>
+                <input
+                  type="number"
+                  value={yAxisPrimaryMax}
+                  onChange={(e) =>
+                    setYAxisPrimaryMax(
+                      e.target.value ? parseFloat(e.target.value) : undefined
+                    )
+                  }
+                  className="border rounded px-2 py-1 w-full"
+                  placeholder="Maxvärde"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">
+                  Y-axel intervall
+                </label>
+                <input
+                  type="number"
+                  value={yAxisPrimaryTick}
+                  onChange={(e) =>
+                    setYAxisPrimaryTick(
+                      e.target.value ? parseFloat(e.target.value) : undefined
+                    )
+                  }
+                  className="border rounded px-2 py-1 w-full"
+                  placeholder="Interval"
+                />
+              </div>
+            </div>
 
+            {chartType === "combo" && (
+              <div className="mt-4">
+                <h5 className="text-lg font-semibold mb-2">
+                  Sekundär y-axel inställningar
+                </h5>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-1">
+                  <div>
+                    <label className="block mb-1 font-medium">
+                      Sekundär y-axel titel
+                    </label>
+                    <input
+                      type="text"
+                      value={yAxisSecondaryTitle}
+                      onChange={(e) => {
+                        setYAxisSecondaryTitle(e.target.value);
+                        setIsYAxisSecondaryTitleEdited(true);
+                      }}
+                      className="border rounded px-2 py-1 w-full"
+                      placeholder="Titel för sekundär y-axel"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium">
+                      Sekundär y-axel placering
+                    </label>
+                    <select
+                      value={yAxisSecondaryTitlePosition}
+                      onChange={(e) =>
+                        setYAxisSecondaryTitlePosition(e.target.value)
+                      }
+                      className="border rounded px-2 py-1 w-full"
+                    >
+                      <option value="side">Sida (vertikal)</option>
+                      <option value="rotated">Sida (nedifrån upp)</option>
+                      <option value="top">Ovanför axeln</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 space-x-4 p-1">
+                  <div>
+                    <label className="block mb-1 font-medium">
+                      Sekundär y-axel minimum
+                    </label>
+                    <input
+                      type="number"
+                      value={yAxisSecondaryMin}
+                      onChange={(e) =>
+                        setYAxisSecondaryMin(
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
+                        )
+                      }
+                      className="border rounded px-2 py-1 w-full"
+                      placeholder="Minvärde"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium">
+                      Sekundär y-axel max
+                    </label>
+                    <input
+                      type="number"
+                      value={yAxisSecondaryMax}
+                      onChange={(e) =>
+                        setYAxisSecondaryMax(
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
+                        )
+                      }
+                      className="border rounded px-2 py-1 w-full"
+                      placeholder="Maxvärde"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-medium">
+                      Sekundär y-axel intervall{" "}
+                    </label>
+                    <input
+                      type="number"
+                      value={yAxisSecondaryTick}
+                      onChange={(e) =>
+                        setYAxisSecondaryTick(
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
+                        )
+                      }
+                      className="border rounded px-2 py-1 w-full"
+                      placeholder="Interval"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex space-x-4 mt-4">
           <Button onClick={handleGoBack} variant="secondary">
             Tillbaka
