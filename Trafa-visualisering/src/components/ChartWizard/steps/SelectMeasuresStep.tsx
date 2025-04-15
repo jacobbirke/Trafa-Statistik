@@ -56,12 +56,16 @@ export const SelectMeasuresStep: React.FC<Props> = ({
 
   const getInstruction = () => {
     switch (chartType) {
+      case "combo":
+        return "Välj två mått";
+        case "variwide":
+          return "Välj två mått";
       case "errorbar-column":
         return "Välj ett mått, samt tillhörande konfidensintervall.";
       case "errorbar-line":
         return "Välj ett mått, samt tillhörande konfidensintervall.";
       default:
-        return "Välj ett mått för detta diagram.";
+        return "Välj ett mått för detta diagram";
     }
   };
 
@@ -120,7 +124,7 @@ export const SelectMeasuresStep: React.FC<Props> = ({
       )}
 
       {chartType === "combo" && (
-        <div className="mb-4 p-3">
+        <div className="mb-4 p-2">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <h4 className="text-xl font-semibold mb-2">
@@ -170,7 +174,7 @@ export const SelectMeasuresStep: React.FC<Props> = ({
       )}
 
       {chartType === "variwide" && (
-        <div className="mb-4 p-3">
+        <div className="mb-4 p-2">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <h4 className="text-xl font-semibold mb-2">
