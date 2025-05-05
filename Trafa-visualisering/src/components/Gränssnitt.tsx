@@ -58,12 +58,16 @@ const StatistikGränssnitt: React.FC = () => {
     number | undefined
   >(undefined);
   const [yAxisTitlePosition, setYAxisTitlePosition] = useState<string>("side");
-  const [yAxisSecondaryTitlePosition, setYAxisSecondaryTitlePosition] = useState<string>("side");
+  const [yAxisSecondaryTitlePosition, setYAxisSecondaryTitlePosition] =
+    useState<string>("side");
   const [confidenceMeasure, setConfidenceMeasure] = useState<string | null>("");
-  const [errorDisplayType, setErrorDisplayType] = useState<'errorbar' | 'dashed'>('errorbar');
-
-
-
+  const [errorDisplayType, setErrorDisplayType] = useState<
+    "errorbar" | "dashed"
+  >("errorbar");
+  const [dataSource, setDataSource] = useState<"file" | "api">("file");
+  const [apiQuery, setApiQuery] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (step === "review-generate" && chart) {
@@ -126,7 +130,6 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [step]);
 
-
   useEffect(() => {
     if (seriesDimension) {
       const seriesDim = dimensions.find((d) => d.name === seriesDimension);
@@ -144,6 +147,129 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [seriesDimension, dimensions, setSeriesColors]);
 
+  function xmlToJson(xmlString: string) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+  
+    // Remove the unused "obj" variable
+  
+    function traverse(node: any): any {
+      let result: any = {};
+      // Process attributes if any:
+      if (node.attributes && node.attributes.length > 0) {
+        result["@attributes"] = {};
+        for (let i = 0; i < node.attributes.length; i++) {
+          const attribute = node.attributes.item(i);
+          result["@attributes"][attribute.nodeName] = attribute.nodeValue;
+        }
+      }
+      // Process children:
+      if (node.childNodes && node.childNodes.length > 0) {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          const child = node.childNodes[i];
+          if (child.nodeType === 3) {
+            // text node
+            if (child.nodeValue.trim()) {
+              result = child.nodeValue.trim();
+            }
+          } else {
+            const childName = child.nodeName;
+            const childObj = traverse(child);
+            if (result[childName] === undefined) {
+              result[childName] = childObj;
+            } else {
+              // If there already exists a node then convert it to an array.
+              if (!Array.isArray(result[childName])) {
+                result[childName] = [result[childName]];
+              }
+              result[childName].push(childObj);
+            }
+          }
+        }
+      }
+      return result;
+    }
+  
+    return traverse(xmlDoc.documentElement);
+  }
+  
+  const fetchApiData = async (query?: string) => {
+    const effectiveQuery = query ?? apiQuery;
+    try {
+      const response = await fetch(
+        `https://api.trafa.se/api/data?query=${effectiveQuery}&lang=sv`
+      );
+      const text = await response.text();
+      const data = xmlToJson(text);
+  
+      // Bearbeta XML/JSON till applikationens format
+      const headerItems = data?.StatisticsData?.Header?.Column || [];
+      const headers = headerItems.map((col: any) => 
+        col.Type === "M" ? `${col.Name}_M` : col.Name
+      );
+  
+      const rows = data?.StatisticsData?.Rows?.Row?.map((row: any) =>
+        row.Cell?.map((cell: any) => {
+          const num = parseFloat(cell.Value?.replace(",", "."));
+          return isNaN(num) ? cell.Value : num;
+        })
+      ) || [];
+  
+      setJsonData([headers, ...rows]);
+      setError(null);
+    } catch (error) {
+      console.error("API fetch error:", error);
+      setError("Kunde inte hämta data från API");
+    }
+  };
+  
+
+// Update your useEffect for API queries
+useEffect(() => {
+  if (dataSource === "api" && apiQuery) {
+    fetchApiData(apiQuery);
+  }
+}, [apiQuery, dataSource]);
+  const processApiStructure = (data: any) => {
+    // Extract dimensions and measures from API structure
+    const dimensions = data.StatisticsData.Header.Column.filter(
+      (col: any) => col.Type === "D"
+    ).map((col: any) => ({
+      name: col.Value,
+      allValues: Array.from(
+        new Set(
+          data.StatisticsData.Rows.Row.map(
+            (row: any) =>
+              row.Cell.find((c: any) => c.Column === col.Name)?.Value
+          )
+        )
+      ),
+      selectedValues: [],
+      unit: "",
+    }));
+
+    const measures = data.StatisticsData.Header.Column.filter(
+      (col: any) => col.Type === "M"
+    ).map((col: any) => ({
+      name: col.Value + "_M", // Append _M to match existing format
+      unit: col.Unit || "",
+      isSelected: true,
+      isConfidence: false,
+    }));
+
+    setDimensions(dimensions);
+    setMeasures(measures);
+    processApiStructure(data);
+
+  };
+
+  // Update useEffect to handle API data
+  useEffect(() => {
+    if (step === "select-diagram-type" && dataSource === "api") {
+      fetchApiData();
+    }
+  }, [step, dataSource]);
+
   const handleChartTypeChange: React.Dispatch<
     React.SetStateAction<ChartType>
   > = (newChartType) => {
@@ -160,11 +286,23 @@ const StatistikGränssnitt: React.FC = () => {
     }
   };
 
+  const fetchApiStructure = async () => {
+    try {
+      const response = await fetch("https://api.trafa.se/api/structure");
+      const data = await response.json();
+    } catch (error) {
+      console.error("Error fetching API structure:", error);
+    }
+  };
+
   const handleSetStep: React.Dispatch<React.SetStateAction<WizardStep>> = (
     value
   ) => {
     const newStep = typeof value === "function" ? value(step) : value;
 
+    if (newStep === "select-api-product" && dataSource === "api") {
+      fetchApiStructure();
+    }
     if (newStep === "select-diagram-type") {
       setXAxisDimensions([]);
       setSeriesDimension(null);
@@ -183,7 +321,7 @@ const StatistikGränssnitt: React.FC = () => {
     reader.onload = function (event) {
       const data = event.target?.result;
       if (!data) return;
-  
+
       try {
         const workbook = XLSX.read(data, { type: "array" });
         const firstSheetName = workbook.SheetNames[0];
@@ -192,20 +330,20 @@ const StatistikGränssnitt: React.FC = () => {
           header: 1,
           raw: false,
         });
-  
+
         if (jsonData.length < 2) {
           alert("Filen innehåller inte tillräckligt med data");
           return;
         }
-  
+
         const rawHeaders = jsonData[0] as string[];
-        const headers = rawHeaders.map((header) => header.trim());        
+        const headers = rawHeaders.map((header) => header.trim());
         const rows = jsonData.slice(1) as any[];
-  
+
         const measureHeaders: string[] = [];
         const confidenceHeaders: string[] = [];
         const dimensionHeaders: string[] = [];
-        
+
         headers.forEach((header) => {
           if (header.endsWith("_M")) {
             measureHeaders.push(header);
@@ -215,7 +353,7 @@ const StatistikGränssnitt: React.FC = () => {
             dimensionHeaders.push(header);
           }
         });
-  
+
         const dimensionsData: Dimension[] = dimensionHeaders.map((header) => {
           const headerIndex = headers.indexOf(header);
           const uniqueValues = new Set<string>();
@@ -231,20 +369,20 @@ const StatistikGränssnitt: React.FC = () => {
             unit: "",
           };
         });
-  
+
         const measuresData: Measure[] = [
           ...measureHeaders.map((header) => ({
             name: header.replace("_M", ""),
             unit: "",
             isSelected: false,
-            isConfidence: false, 
+            isConfidence: false,
           })),
           ...confidenceHeaders.map((header) => ({
             name: header.replace("_KI", ""),
             unit: "",
             isSelected: false,
-            isConfidence: true,  
-          }))
+            isConfidence: true,
+          })),
         ];
 
         const processedData = rows.map((row) =>
@@ -255,7 +393,7 @@ const StatistikGränssnitt: React.FC = () => {
             return cell;
           })
         );
-        
+
         setTitle("");
         setDimensions(dimensionsData);
         setMeasures(measuresData);
@@ -267,7 +405,7 @@ const StatistikGränssnitt: React.FC = () => {
     };
     reader.readAsArrayBuffer(file);
   };
-  
+
   const confidenceMeasures = measures.filter((m) => m.isConfidence);
 
   const handleGoBack = () => {
@@ -280,6 +418,11 @@ const StatistikGränssnitt: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-trafaPrimary pt-6">
+          {error && (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <p>Error: {error}</p>
+      </div>
+    )}
       <ChartWizard
         step={step}
         chartType={chartType}
@@ -341,6 +484,13 @@ const StatistikGränssnitt: React.FC = () => {
         setConfidenceMeasure={setConfidenceMeasure}
         errorDisplayType={errorDisplayType}
         setErrorDisplayType={setErrorDisplayType}
+        setSelectedProduct={setSelectedProduct}
+        productId={selectedProduct}
+        setQuery={setApiQuery}
+        dataSource={dataSource}
+        setDataSource={setDataSource}
+        apiQuery={apiQuery}
+        setApiQuery={setApiQuery}
       />
     </div>
   );

@@ -6,6 +6,10 @@ import { SelectMeasuresStep } from "./steps/SelectMeasuresStep";
 import { ChartConfigurationStep } from "./steps/ChartConfigurationStep";
 import { ReviewGenerateStep } from "./steps/ReviewGenerateStep";
 import { ChartWizardProps } from "../../types/chartTypes";
+import { InputSourceStep } from "./steps/InputSourceStep";
+import { SelectApiProductStep } from "./steps/SelectApiProductStep";
+import { ConfigureApiQueryStep } from "./steps/ConfigureApiQueryStep";
+
 
 export const ChartWizard: React.FC<ChartWizardProps> = ({
   step,
@@ -68,11 +72,38 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setConfidenceMeasure,
   errorDisplayType,
   setErrorDisplayType,
+  selectedProduct,
+  setSelectedProduct,
+  productId,
+  setQuery,
+  dataSource,
+  setDataSource,
+  apiQuery,
+  setApiQuery,
 }) => {
   return (
     <div className="max-w-6xl mx-auto p-3 space-y-8">
+      {step === "input-source" && <InputSourceStep setStep={setStep} />}
+
       {step === "input-file" && (
         <InputFileStep handleFileUpload={handleFileUpload} setStep={setStep} />
+      )}
+
+      {step === "select-api-product" && (
+        <SelectApiProductStep
+          setSelectedProduct={setSelectedProduct}
+          setStep={setStep}
+        />
+      )}
+
+{step === "configure-api-query" && (
+        <ConfigureApiQueryStep
+          productId={selectedProduct || ""}
+          setQuery={setApiQuery}
+          setStep={setStep}
+          setDimensions={setDimensions}
+          setMeasures={setMeasures}
+        />
       )}
 
       {step === "select-diagram-type" && (

@@ -211,13 +211,22 @@ export const InputFileStep: React.FC<Props> = ({
         />
       </div>
 
+
       <Button
         onClick={() => setStep("select-diagram-type")}
         variant="primary"
         className="w-full max-w-md mx-auto mt-5"
       >
         Nästa
+      </Button>    <h3 className="text-2xl font-bold mt-10">Välj datakälla</h3>
+    <div className="flex gap-9 mt-5">
+      <Button onClick={() => setStep("input-file")} variant="primary">
+        Ladda upp fil
       </Button>
+      <Button onClick={() => setStep("select-api-product")} variant="primary">
+        Använd Trafikanalys API
+      </Button>
+      </div>
     </Card>
   );
 };

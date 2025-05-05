@@ -9,7 +9,10 @@ export type ChartType =
   | "errorbar-column"
   | "errorbar-line";
 export type WizardStep =
+  | "input-source" 
   | "input-file"
+  | "select-api-product"
+  | "configure-api-query"
   | "select-diagram-type"
   | "filter-dimensions"
   | "select-measures"
@@ -28,6 +31,31 @@ export interface Measure {
   unit?: string;
   isSelected: boolean;
   isConfidence?: boolean;
+}
+
+
+export interface ApiStructure {
+  dimensions: ApiDimension[];
+  measures: ApiMeasure[];
+}
+
+export interface ApiDimension {
+  name: string;
+  label: string;
+  values: string[];
+}
+
+export interface ApiMeasure {
+  name: string;
+  label: string;
+  unit: string;
+  isSelected: boolean;
+  isConfidence: boolean;
+}
+
+export interface QueryPart {
+  variable: string;
+  filters?: string[];
 }
 
 export interface ChartWizardProps {
@@ -77,11 +105,17 @@ export interface ChartWizardProps {
   yAxisPrimaryTick?: number;
   setYAxisPrimaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
   yAxisSecondaryMin?: number;
-  setYAxisSecondaryMin: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setYAxisSecondaryMin: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
   yAxisSecondaryMax?: number;
-  setYAxisSecondaryMax: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setYAxisSecondaryMax: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
   yAxisSecondaryTick?: number;
-  setYAxisSecondaryTick: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setYAxisSecondaryTick: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
   seriesIcons: Record<string, string>;
   setSeriesIcons: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   yAxisTitlePosition: string;
@@ -93,4 +127,12 @@ export interface ChartWizardProps {
   setConfidenceMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   errorDisplayType: "errorbar" | "dashed";
   setErrorDisplayType: (type: "errorbar" | "dashed") => void;
+  selectedProduct?: string;
+  setSelectedProduct: (product: string) => void;
+  apiQuery?: string;
+  setApiQuery: React.Dispatch<React.SetStateAction<string>>;
+  dataSource?: "file" | "api";
+  setDataSource?: (source: "file" | "api") => void;
+  productId?: string;
+  setQuery: (query: string) => void;
 }

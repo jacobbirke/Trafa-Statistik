@@ -33,7 +33,7 @@ interface ParsedData2 {
 
 // Function to fetch data for the first dataset
 export const fetchData1 = async (): Promise<{ parsedData: ParsedDataItem[]; years: string[] }> => {
-  try {
+  try { 
     const response = await fetch(`${API_BASE_URL}T04022%7Cgtrparb%7Cptrparb%7Car`);
     const data: Data1 = await response.json();
     
