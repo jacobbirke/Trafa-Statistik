@@ -13,7 +13,7 @@ HighchartsGroupedCategories(Highcharts);
 Variwide(Highcharts);
 
 const StatistikGränssnitt: React.FC = () => {
-  const [step, setStep] = useState<WizardStep>("input-file");
+  const [step, setStep] = useState<WizardStep>("input-source");
   const [chartType, setChartType] = useState<ChartType>("column");
   const [dimensions, setDimensions] = useState<Dimension[]>([]);
   const [measures, setMeasures] = useState<Measure[]>([]);
@@ -151,11 +151,9 @@ const StatistikGränssnitt: React.FC = () => {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlString, "text/xml");
   
-    // Remove the unused "obj" variable
   
     function traverse(node: any): any {
       let result: any = {};
-      // Process attributes if any:
       if (node.attributes && node.attributes.length > 0) {
         result["@attributes"] = {};
         for (let i = 0; i < node.attributes.length; i++) {
@@ -163,12 +161,10 @@ const StatistikGränssnitt: React.FC = () => {
           result["@attributes"][attribute.nodeName] = attribute.nodeValue;
         }
       }
-      // Process children:
       if (node.childNodes && node.childNodes.length > 0) {
         for (let i = 0; i < node.childNodes.length; i++) {
           const child = node.childNodes[i];
           if (child.nodeType === 3) {
-            // text node
             if (child.nodeValue.trim()) {
               result = child.nodeValue.trim();
             }
@@ -178,7 +174,6 @@ const StatistikGränssnitt: React.FC = () => {
             if (result[childName] === undefined) {
               result[childName] = childObj;
             } else {
-              // If there already exists a node then convert it to an array.
               if (!Array.isArray(result[childName])) {
                 result[childName] = [result[childName]];
               }
@@ -194,44 +189,41 @@ const StatistikGränssnitt: React.FC = () => {
   }
   
   const fetchApiData = async (query?: string) => {
-    const effectiveQuery = query ?? apiQuery;
     try {
       const response = await fetch(
-        `https://api.trafa.se/api/data?query=${effectiveQuery}&lang=sv`
+        `https://api.trafa.se/api/data?query=${query}&lang=sv`
       );
       const text = await response.text();
-      const data = xmlToJson(text);
+      const parsedData = xmlToJson(text);
   
-      // Bearbeta XML/JSON till applikationens format
-      const headerItems = data?.StatisticsData?.Header?.Column || [];
-      const headers = headerItems.map((col: any) => 
-        col.Type === "M" ? `${col.Name}_M` : col.Name
+      const columns = parsedData?.StatisticsData?.Header?.Column || [];
+      const headers = columns.map((col: any) => 
+        col.attributes?.Type === "M" 
+          ? `${col.Value?.value}_M` 
+          : col.Value?.value
       );
   
-      const rows = data?.StatisticsData?.Rows?.Row?.map((row: any) =>
-        row.Cell?.map((cell: any) => {
-          const num = parseFloat(cell.Value?.replace(",", "."));
-          return isNaN(num) ? cell.Value : num;
-        })
-      ) || [];
+      const rows = parsedData?.StatisticsData?.Rows?.Row?.map((row: any) => {
+        return row.Cell?.map((cell: any) => {
+          const numValue = parseFloat(cell.Value?.value?.replace(",", "."));
+          return isNaN(numValue) ? cell.Value?.value : numValue;
+        });
+      }) || [];
   
       setJsonData([headers, ...rows]);
-      setError(null);
     } catch (error) {
       console.error("API fetch error:", error);
-      setError("Kunde inte hämta data från API");
+      setError("Kunde inte hitta API data");
     }
   };
   
 
-// Update your useEffect for API queries
 useEffect(() => {
   if (dataSource === "api" && apiQuery) {
     fetchApiData(apiQuery);
   }
 }, [apiQuery, dataSource]);
   const processApiStructure = (data: any) => {
-    // Extract dimensions and measures from API structure
     const dimensions = data.StatisticsData.Header.Column.filter(
       (col: any) => col.Type === "D"
     ).map((col: any) => ({
@@ -251,7 +243,7 @@ useEffect(() => {
     const measures = data.StatisticsData.Header.Column.filter(
       (col: any) => col.Type === "M"
     ).map((col: any) => ({
-      name: col.Value + "_M", // Append _M to match existing format
+      name: col.Value + "_M",
       unit: col.Unit || "",
       isSelected: true,
       isConfidence: false,
@@ -263,7 +255,6 @@ useEffect(() => {
 
   };
 
-  // Update useEffect to handle API data
   useEffect(() => {
     if (step === "select-diagram-type" && dataSource === "api") {
       fetchApiData();
@@ -288,12 +279,12 @@ useEffect(() => {
 
   const fetchApiStructure = async () => {
     try {
-      const response = await fetch("https://api.trafa.se/api/structure");
-      const data = await response.json();
+      await fetch("https://api.trafa.se/api/structure?lang=sv");
     } catch (error) {
       console.error("Error fetching API structure:", error);
     }
   };
+  
 
   const handleSetStep: React.Dispatch<React.SetStateAction<WizardStep>> = (
     value

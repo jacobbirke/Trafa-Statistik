@@ -2,102 +2,79 @@ import React, { useEffect, useState } from "react";
 import { WizardStep } from "../../../types/chartTypes";
 import { Card } from "../../UI/Card";
 import { Button } from "../../UI/Button";
+import { xmlToJson } from "../../../utils/xmlUtils";
 
+interface Product { id: string; label: string; }
 
 export const SelectApiProductStep: React.FC<{
-    setStep: (step: WizardStep) => void;
-    setSelectedProduct: (product: string) => void;
-  }> = ({ setStep, setSelectedProduct }) => {
-    const [products, setProducts] = useState<Array<{ id: string; label: string }>>([]);
+  setStep: (step: WizardStep) => void;
+  setSelectedProduct: (product: string) => void;
+}> = ({ setStep, setSelectedProduct }) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState<string | null>(null);
   
-    useEffect(() => {
-      const fetchStructure = async () => {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const resp = await fetch("https://api.trafa.se/api/structure?lang=sv");
+        const text = await resp.text();
+
+        let items: any[] = [];
         try {
-          const response = await fetch("https://api.trafa.se/api/structure");
-          const text = await response.text();
-          const data = xmlToJson(text);
-          
-          const items = data?.StructureResponseWrapper?.StructureItems?.StructureItem || [];
-          const products = items
-            .filter((item: any) => item.Type === "P")
-            .map((item: any) => ({
-              id: item.Name,
-              label: item.Label,
-            }));
-          
-          setProducts(products);
-        } catch (error) {
-          console.error("Error fetching products:", error);
+          const json = JSON.parse(text);
+          items = json.StructureItems || [];
+        } catch {
+          const parsed = xmlToJson(text);
+          items = parsed?.StructureResponseWrapper?.StructureItems?.StructureItem || [];
         }
-      };
-    
-      fetchStructure();
-    }, []);
 
-  function xmlToJson(xmlString: string) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        const prods: Product[] = items
+          .filter((it) => it.Type === "P" || it['@attributes']?.Type === "P")
+          .map((it) => ({
+            id: it.Name || it['@attributes']?.Name,
+            label: it.Label || it['@attributes']?.Label?.Value || it.FullLabel || it['@attributes']?.Name,
+          }));
 
-    function traverse(node: any) {
-      let result: any = {};
-      if (node.attributes && node.attributes.length > 0) {
-        result["@attributes"] = {};
-        for (let i = 0; i < node.attributes.length; i++) {
-          const attribute = node.attributes.item(i);
-          result["@attributes"][attribute.nodeName] = attribute.nodeValue;
-        }
+        setProducts(prods);
+      } catch (e: any) {
+        console.error("Error fetching products:", e);
+        setError(e.message || "Kunde inte hämta produkter");
       }
-      if (node.childNodes && node.childNodes.length > 0) {
-        for (let i = 0; i < node.childNodes.length; i++) {
-          const child = node.childNodes[i];
-          if (child.nodeType === 3) {
-            if (child.nodeValue.trim()) {
-              result = child.nodeValue.trim();
-            }
-          } else {
-            const childName = child.nodeName;
-            const childObj = traverse(child);
-            if (result[childName] === undefined) {
-              result[childName] = childObj;
-            } else {
-              if (!Array.isArray(result[childName])) {
-                result[childName] = [result[childName]];
-              }
-              result[childName].push(childObj);
-            }
-          }
-        }
-      }
-      return result;
-    }
+    };
 
-    const json = traverse(xmlDoc.documentElement);
-    return json;
-  }
+    fetchProducts();
+  }, []);
 
   return (
     <Card>
       <h3 className="text-2xl font-bold mb-4">Välj statistikkälla</h3>
+      {error && <p className="text-red-500 mb-2">Fel: {error}</p>}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {products.map((product) => (
           <Button
             key={product.id}
+            variant="secondary"
             onClick={() => {
               setSelectedProduct(product.id);
               setStep("configure-api-query");
             }}
-            variant="secondary"
           >
             {product.label}
           </Button>
         ))}
       </div>
-      <Button onClick={() => setStep("input-source")} className="mt-4">
-        Tillbaka
-      </Button>
-      <Button onClick={() => setStep("configure-api-query")} className="mt-4">
-        Nästa
-      </Button>
+      <div className="mt-4 flex gap-4">
+        <Button onClick={() => setStep("input-source")} variant="secondary">
+          Tillbaka
+        </Button>
+        <Button
+          onClick={() => setStep("configure-api-query")}
+          variant="primary"
+          disabled={products.length === 0}
+        >
+          Nästa
+        </Button>
+      </div>
     </Card>
   );
 };

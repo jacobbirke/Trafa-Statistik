@@ -1,11 +1,13 @@
-// src/components/ChartWizard/steps/ConfigureApiQueryStep.tsx
-
 import React, { useEffect, useState } from "react";
 import { Button } from "../../UI/Button";
-import { QueryPart, WizardStep } from "../../../types/chartTypes";
 import { Card } from "../../UI/Card";
 import { xmlToJson } from "../../../utils/xmlUtils";
-import { ApiStructure, Dimension, Measure } from "../../../types/chartTypes";
+import {
+  QueryPart,
+  WizardStep,
+  Dimension,
+  Measure,
+} from "../../../types/chartTypes";
 
 interface ConfigureApiQueryStepProps {
   productId: string;
@@ -22,84 +24,139 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
   setDimensions,
   setMeasures,
 }) => {
-  const [structure, setStructure] = useState<ApiStructure | null>(null);
+  const [dimensionsMeta, setDimensionsMeta] = useState<Dimension[]>([]);
+  const [measuresMeta, setMeasuresMeta] = useState<Measure[]>([]);
   const [selectedDimensions, setSelectedDimensions] = useState<QueryPart[]>([]);
+  const [selectedMeasures, setSelectedMeasures] = useState<QueryPart[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStructure = async () => {
       try {
-        const response = await fetch(
-          `https://api.trafa.se/api/structure?query=${productId}&lang=sv`
+        const resp = await fetch(
+          `https://api.trafa.se/api/structure?query=${encodeURIComponent(
+            productId
+          )}&lang=sv`
         );
-        const text = await response.text();
-        const data = xmlToJson(text);
-        
-        const dimensions = (data.StructureResponseWrapper.StructureItems.StructureItem || [])
-          .filter((item: any) => item.Type === "D")
-          .map((dim: any) => ({
-            name: dim.Name,
-            label: dim.Label,
-            values: dim.Values?.Value || []
-          }));
+        const text = await resp.text();
+        let items: any[] = [];
+        try {
+          const json = JSON.parse(text);
+          items = json.StructureItems || [];
+        } catch {
+          const parsed = xmlToJson(text);
+          items =
+            parsed?.StructureResponseWrapper?.StructureItems?.StructureItem ||
+            [];
+        }
 
-        const measures = (data.StructureResponseWrapper.StructureItems.StructureItem || [])
-          .filter((item: any) => item.Type === "M")
-          .map((measure: any) => ({
-            name: `${measure.Name}_M`,
-            label: measure.Label,
-            unit: measure.Unit || '',
-            isSelected: true,
-            isConfidence: false
-          }));
+        const dims: Dimension[] = items
+          .filter((i) => i.Type === "D" || i["@attributes"]?.Type === "D")
+          .map((i: any) => {
+            const name = i.Name || i["@attributes"]?.Name;
+            const allValues = Array.isArray(i.Values?.Value)
+              ? i.Values.Value.map((v: any) => v.Code || v["@attributes"]?.Code)
+              : i.Values?.Value
+              ? [i.Values.Value.Code || i.Values.Value["@attributes"]?.Code]
+              : [];
+            return { name, allValues, selectedValues: [], unit: "" };
+          });
 
-        setStructure({ dimensions, measures });
-        setMeasures(measures);
-      } catch (error) {
-        console.error("Fel vid hämtning av API-struktur:", error);
+        const meas: Measure[] = items
+          .filter((i) => i.Type === "M" || i["@attributes"]?.Type === "M")
+          .map((i: any) => {
+            const name = i.Name || i["@attributes"]?.Name;
+            const unit = i.Unit || i["@attributes"]?.Unit?.Value || "";
+            return { name, unit, isSelected: false, isConfidence: false };
+          });
+
+        setDimensionsMeta(dims);
+        setMeasuresMeta(meas);
+        setMeasures(meas);
+      } catch (e: any) {
+        console.error(e);
+        setError(e.message || "Kunde inte ladda struktur");
       }
     };
-
-    fetchStructure();
+    if (productId) fetchStructure();
   }, [productId, setMeasures]);
 
   const handleBuildQuery = () => {
-    const queryParts = selectedDimensions.map(d => 
-      d.filters?.length ? `${d.variable}:${d.filters.join(",")}` : d.variable
-    );
-    setQuery([productId, ...queryParts].join("|"));
-    setStep("select-diagram-type");
+    const measureKeys = selectedMeasures.map((m) => m.variable);
+    const dimKeys = selectedDimensions.map((d) => d.variable);
+    const fullQuery = [productId, ...measureKeys, ...dimKeys].join("|");
+    setQuery(fullQuery);
+
+    const dimsForParent: Dimension[] = dimensionsMeta
+      .filter((d) => selectedDimensions.some((sd) => sd.variable === d.name))
+      .map((d) => ({ ...d }));
+    setDimensions(dimsForParent);
+
+    setStep("fetch-data");
   };
 
   return (
     <Card>
       <h3 className="text-2xl font-bold mb-4">API-konfiguration</h3>
+      {error && <p className="text-red-500 mb-2">Fel: {error}</p>}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <h4 className="text-lg font-semibold mb-2">Tillgängliga dimensioner</h4>
-          {structure?.dimensions.map((dim: any) => (
+          <h4 className="text-lg font-semibold mb-2">Dimensioner</h4>
+          {dimensionsMeta.map((dim) => (
             <Button
               key={dim.name}
-              onClick={() => setSelectedDimensions([...selectedDimensions, { variable: dim.name }])}
-              variant="secondary"
+              variant={
+                selectedDimensions.some((d) => d.variable === dim.name)
+                  ? "primary"
+                  : "secondary"
+              }
+              onClick={() =>
+                setSelectedDimensions((prev) =>
+                  prev.some((d) => d.variable === dim.name)
+                    ? prev.filter((d) => d.variable !== dim.name)
+                    : [...prev, { variable: dim.name }]
+                )
+              }
             >
-              {dim.label}
+              {dim.name}
             </Button>
           ))}
         </div>
         <div>
-          <h4 className="text-lg font-semibold mb-2">Valda dimensioner</h4>
-          {selectedDimensions.map((dim, index) => (
-            <div key={index} className="p-2 bg-gray-100 rounded mb-2">
-              {dim.variable}
-            </div>
+          <h4 className="text-lg font-semibold mb-2">Mått</h4>
+          {measuresMeta.map((me) => (
+            <Button
+              key={me.name}
+              variant={
+                selectedMeasures.some((m) => m.variable === me.name)
+                  ? "primary"
+                  : "secondary"
+              }
+              onClick={() =>
+                setSelectedMeasures((prev) =>
+                  prev.some((m) => m.variable === me.name)
+                    ? prev.filter((m) => m.variable !== me.name)
+                    : [...prev, { variable: me.name }]
+                )
+              }
+            >
+              {me.name}
+            </Button>
           ))}
         </div>
       </div>
-      <div className="mt-4 flex gap-4">
-        <Button onClick={() => setStep("select-api-product")} variant="secondary">
+      <div className="mt-6 flex justify-between">
+        <Button
+          variant="secondary"
+          onClick={() => setStep("select-api-product")}
+        >
           Tillbaka
         </Button>
-        <Button onClick={handleBuildQuery} variant="primary">
+        <Button
+          onClick={handleBuildQuery}
+          variant="primary"
+          disabled={selectedDimensions.length + selectedMeasures.length === 0}
+        >
           Hämta data
         </Button>
       </div>

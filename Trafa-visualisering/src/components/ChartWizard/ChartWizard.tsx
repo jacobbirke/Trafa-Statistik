@@ -9,7 +9,7 @@ import { ChartWizardProps } from "../../types/chartTypes";
 import { InputSourceStep } from "./steps/InputSourceStep";
 import { SelectApiProductStep } from "./steps/SelectApiProductStep";
 import { ConfigureApiQueryStep } from "./steps/ConfigureApiQueryStep";
-
+import { DisplayApiDataStep } from "./steps/DisplayApiDataStep";
 
 export const ChartWizard: React.FC<ChartWizardProps> = ({
   step,
@@ -74,10 +74,6 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setErrorDisplayType,
   selectedProduct,
   setSelectedProduct,
-  productId,
-  setQuery,
-  dataSource,
-  setDataSource,
   apiQuery,
   setApiQuery,
 }) => {
@@ -96,7 +92,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
         />
       )}
 
-{step === "configure-api-query" && (
+      {step === "configure-api-query" && (
         <ConfigureApiQueryStep
           productId={selectedProduct || ""}
           setQuery={setApiQuery}
@@ -104,6 +100,12 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           setDimensions={setDimensions}
           setMeasures={setMeasures}
         />
+      )}
+
+      {step === "fetch-data" && (
+        <DisplayApiDataStep 
+        query={apiQuery}
+        setStep={setStep} />
       )}
 
       {step === "select-diagram-type" && (

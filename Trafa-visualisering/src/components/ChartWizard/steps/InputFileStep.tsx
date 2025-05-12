@@ -10,26 +10,26 @@ const InfoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div
         className="absolute inset-0 bg-black opacity-50"
         onClick={onClose}
       ></div>
-      <div className="relative bg-white p-8 rounded shadow-lg max-w-3xl mx-auto z-10">
+      <div className="relative bg-white p-4 md:p-8 rounded shadow-lg w-full max-w-sm md:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto z-10">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+          className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl"
         >
           &times;
         </button>
-        <h4 className="text-3xl font-bold mb-4 text-center">
+        <h4 className="text-2xl md:text-3xl font-bold mb-4 text-center">
           Instruktioner och krav för filuppladdning
         </h4>
         <p className="mb-4">
           Kontrollera att filen du laddar upp uppfyller följande krav så att
           data kan visualiseras korrekt:
         </p>
-        <ul className="list-disc pl-8 mb-4 text-gray-900">
+        <ul className="list-disc pl-6 mb-4 text-gray-900 space-y-2 text-sm md:text-base">
           <li className="mb-2">
             <strong>Tillåtna filformat:</strong>{" "}
             <span className="text-blue-600">.xlsx, .xls, .csv</span>
@@ -69,7 +69,7 @@ const InfoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           <li className="mb-2">
             <strong>Exempel på filstruktur:</strong>
             <div className="overflow-x-auto mt-2">
-              <table className="min-w-full bg-white border border-gray-300">
+              <table className="min-w-full bg-white border border-gray-300 text-sm">
                 <thead className="bg-gray-200">
                   <tr>
                     <th className="border px-4 py-2 text-left">År</th>
@@ -113,12 +113,12 @@ const InfoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           </li>
         </ul>
 
-        <h2 className="text-xl font-bold mb-2">Möjligheter i gränssnittet</h2>
+        <h2 className="text-lg md:text-xl font-bold mb-2 mt-6">Möjligheter i gränssnittet</h2>
         <p className="mb-4">
-          Du kan anpassa och redigera diagrammet på flera sätt för
-          att det ska passa dina behov. Här är de huvudsakliga funktionerna:
+          Du kan anpassa och redigera diagrammet på flera sätt för att det ska
+          passa dina behov. Här är de huvudsakliga funktionerna:
         </p>
-        <ul className="list-disc pl-8 space-y-2 text-gray-900">
+        <ul className="list-disc pl-6 space-y-2 text-gray-900 text-sm md:text-base">
           <li>
             <strong>Diagramtyp:</strong> Välj mellan olika diagramtyper,
             exempelvis stapeldiagram, kombinerade linje- och stapeldiagram,
@@ -131,8 +131,8 @@ const InfoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             visualisera data tydligare.
           </li>
           <li>
-            <strong>Enheter:</strong> Bestäm vad du vill ha för enhet
-            till måttvärdet.
+            <strong>Enheter:</strong> Bestäm vad du vill ha för enhet till
+            måttvärdet.
           </li>
           <li>
             <strong>Dimensioner och roller:</strong> Välj vilka dimensioner som
@@ -195,9 +195,7 @@ export const InputFileStep: React.FC<Props> = ({
           />
         </svg>
       </button>
-
       <InfoModal isOpen={showInstructions} onClose={toggleInstructions} />
-
       <div>
         <h3 className="text-2xl font-bold text-center">Ladda upp fil</h3>
         <h6 className="text-center mb-10">
@@ -210,23 +208,13 @@ export const InputFileStep: React.FC<Props> = ({
           className="m-5 block w-full max-w-md text-sm text-gray-600 file:py-2 file:px-4 file:border file:border-gray-300 file:rounded mx-auto"
         />
       </div>
-
-
       <Button
         onClick={() => setStep("select-diagram-type")}
         variant="primary"
         className="w-full max-w-md mx-auto mt-5"
       >
         Nästa
-      </Button>    <h3 className="text-2xl font-bold mt-10">Välj datakälla</h3>
-    <div className="flex gap-9 mt-5">
-      <Button onClick={() => setStep("input-file")} variant="primary">
-        Ladda upp fil
-      </Button>
-      <Button onClick={() => setStep("select-api-product")} variant="primary">
-        Använd Trafikanalys API
-      </Button>
-      </div>
+      </Button>{" "}
     </Card>
   );
 };

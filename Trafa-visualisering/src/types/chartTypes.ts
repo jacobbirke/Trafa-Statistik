@@ -8,16 +8,19 @@ export type ChartType =
   | "variwide"
   | "errorbar-column"
   | "errorbar-line";
+  
 export type WizardStep =
   | "input-source" 
   | "input-file"
   | "select-api-product"
   | "configure-api-query"
+  | "fetch-data"
   | "select-diagram-type"
   | "filter-dimensions"
   | "select-measures"
   | "chart-configuration"
   | "review-generate";
+  
 
 export interface Dimension {
   name: string;
@@ -129,8 +132,8 @@ export interface ChartWizardProps {
   setErrorDisplayType: (type: "errorbar" | "dashed") => void;
   selectedProduct?: string;
   setSelectedProduct: (product: string) => void;
-  apiQuery?: string;
-  setApiQuery: React.Dispatch<React.SetStateAction<string>>;
+  apiQuery: string;
+  setApiQuery: React.Dispatch<React.SetStateAction<string>>;  
   dataSource?: "file" | "api";
   setDataSource?: (source: "file" | "api") => void;
   productId?: string;
