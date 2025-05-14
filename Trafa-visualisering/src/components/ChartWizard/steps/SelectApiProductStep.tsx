@@ -4,7 +4,10 @@ import { Card } from "../../UI/Card";
 import { Button } from "../../UI/Button";
 import { xmlToJson } from "../../../utils/xmlUtils";
 
-interface Product { id: string; label: string; }
+interface Product {
+  id: string;
+  label: string;
+}
 
 export const SelectApiProductStep: React.FC<{
   setStep: (step: WizardStep) => void;
@@ -12,7 +15,7 @@ export const SelectApiProductStep: React.FC<{
 }> = ({ setStep, setSelectedProduct }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -25,14 +28,20 @@ export const SelectApiProductStep: React.FC<{
           items = json.StructureItems || [];
         } catch {
           const parsed = xmlToJson(text);
-          items = parsed?.StructureResponseWrapper?.StructureItems?.StructureItem || [];
+          items =
+            parsed?.StructureResponseWrapper?.StructureItems?.StructureItem ||
+            [];
         }
 
         const prods: Product[] = items
-          .filter((it) => it.Type === "P" || it['@attributes']?.Type === "P")
+          .filter((it) => it.Type === "P" || it["@attributes"]?.Type === "P")
           .map((it) => ({
-            id: it.Name || it['@attributes']?.Name,
-            label: it.Label || it['@attributes']?.Label?.Value || it.FullLabel || it['@attributes']?.Name,
+            id: it.Name || it["@attributes"]?.Name,
+            label:
+              it.Label ||
+              it["@attributes"]?.Label?.Value ||
+              it.FullLabel ||
+              it["@attributes"]?.Name,
           }));
 
         setProducts(prods);
@@ -55,9 +64,11 @@ export const SelectApiProductStep: React.FC<{
             key={product.id}
             variant="secondary"
             onClick={() => {
+              console.log("ABOUT TO SET SELECTED PRODUCT:", product.id);
               setSelectedProduct(product.id);
               setStep("configure-api-query");
             }}
+            
           >
             {product.label}
           </Button>
@@ -66,13 +77,6 @@ export const SelectApiProductStep: React.FC<{
       <div className="mt-4 flex gap-4">
         <Button onClick={() => setStep("input-source")} variant="secondary">
           Tillbaka
-        </Button>
-        <Button
-          onClick={() => setStep("configure-api-query")}
-          variant="primary"
-          disabled={products.length === 0}
-        >
-          Nästa
         </Button>
       </div>
     </Card>

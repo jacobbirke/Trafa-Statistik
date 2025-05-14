@@ -94,11 +94,11 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
 
       {step === "configure-api-query" && (
         <ConfigureApiQueryStep
-          productId={selectedProduct || ""}
-          setQuery={setApiQuery}
-          setStep={setStep}
-          setDimensions={setDimensions}
-          setMeasures={setMeasures}
+        productId={selectedProduct}
+        setQuery={setApiQuery}
+        setStep={setStep}
+        setDimensions={setDimensions}
+        setMeasures={setMeasures}
         />
       )}
 

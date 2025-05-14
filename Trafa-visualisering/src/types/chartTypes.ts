@@ -130,12 +130,12 @@ export interface ChartWizardProps {
   setConfidenceMeasure: React.Dispatch<React.SetStateAction<string | null>>;
   errorDisplayType: "errorbar" | "dashed";
   setErrorDisplayType: (type: "errorbar" | "dashed") => void;
-  selectedProduct?: string;
-  setSelectedProduct: (product: string) => void;
   apiQuery: string;
   setApiQuery: React.Dispatch<React.SetStateAction<string>>;  
   dataSource?: "file" | "api";
   setDataSource?: (source: "file" | "api") => void;
   productId?: string;
   setQuery: (query: string) => void;
+  selectedProduct: string;
+  setSelectedProduct: (productId: string) => void;
 }

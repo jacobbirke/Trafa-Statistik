@@ -482,6 +482,7 @@ useEffect(() => {
         setDataSource={setDataSource}
         apiQuery={apiQuery}
         setApiQuery={setApiQuery}
+        selectedProduct={selectedProduct}
       />
     </div>
   );

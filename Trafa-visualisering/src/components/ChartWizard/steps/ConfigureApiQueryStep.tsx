@@ -30,7 +30,11 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
   const [selectedMeasures, setSelectedMeasures] = useState<QueryPart[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  console.log("🧪 Received productId in ConfigureApiQueryStep:", productId);
+
   useEffect(() => {
+    if (!productId) return;
+
     const fetchStructure = async () => {
       try {
         const resp = await fetch(
@@ -39,47 +43,65 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
           )}&lang=sv`
         );
         const text = await resp.text();
-        let items: any[] = [];
+
+        let itemsRaw: any[] = [];
         try {
           const json = JSON.parse(text);
-          items = json.StructureItems || [];
+          itemsRaw = Array.isArray(json.StructureItems)
+            ? json.StructureItems
+            : json.StructureItems
+            ? [json.StructureItems]
+            : [];
         } catch {
           const parsed = xmlToJson(text);
-          items =
-            parsed?.StructureResponseWrapper?.StructureItems?.StructureItem ||
-            [];
+          let xmlItems =
+            parsed?.StructureResponseWrapper?.StructureItems?.StructureItem;
+          itemsRaw = Array.isArray(xmlItems)
+            ? xmlItems
+            : xmlItems
+            ? [xmlItems]
+            : [];
         }
 
-        const dims: Dimension[] = items
-          .filter((i) => i.Type === "D" || i["@attributes"]?.Type === "D")
-          .map((i: any) => {
-            const name = i.Name || i["@attributes"]?.Name;
-            const allValues = Array.isArray(i.Values?.Value)
-              ? i.Values.Value.map((v: any) => v.Code || v["@attributes"]?.Code)
-              : i.Values?.Value
-              ? [i.Values.Value.Code || i.Values.Value["@attributes"]?.Code]
-              : [];
-            return { name, allValues, selectedValues: [], unit: "" };
-          });
+        const root = itemsRaw.find(
+          (it) => it.Name === productId || it["@attributes"]?.Name === productId
+        );
+        const children = root?.StructureItems?.StructureItem || [];
+        const childArr = Array.isArray(children) ? children : [children];
 
-        const meas: Measure[] = items
-          .filter((i) => i.Type === "M" || i["@attributes"]?.Type === "M")
-          .map((i: any) => {
-            const name = i.Name || i["@attributes"]?.Name;
-            const unit = i.Unit || i["@attributes"]?.Unit?.Value || "";
-            return { name, unit, isSelected: false, isConfidence: false };
-          });
+        const dims: Dimension[] = childArr
+          .filter(
+            (it: any) => it.Type === "D" || it["@attributes"]?.Type === "D"
+          )
+          .map((it: any) => ({
+            name: it.Name || it["@attributes"]?.Name,
+            allValues: [],
+            selectedValues: [],
+            unit: "",
+          }));
+
+        const meas: Measure[] = childArr
+          .filter(
+            (it: any) => it.Type === "M" || it["@attributes"]?.Type === "M"
+          )
+          .map((it: any) => ({
+            name: it.Name || it["@attributes"]?.Name,
+            unit: it.Unit || it["@attributes"]?.Unit || "",
+            isSelected: false,
+            isConfidence: false,
+          }));
 
         setDimensionsMeta(dims);
         setMeasuresMeta(meas);
         setMeasures(meas);
-      } catch (e: any) {
-        console.error(e);
-        setError(e.message || "Kunde inte ladda struktur");
+      } catch (err) {
+        console.error("fetchStructure failed:", err);
+        setError("Kunde inte ladda struktur");
       }
     };
-    if (productId) fetchStructure();
-  }, [productId, setMeasures]);
+
+    fetchStructure();
+  }, [productId]);
 
   const handleBuildQuery = () => {
     const measureKeys = selectedMeasures.map((m) => m.variable);
@@ -87,9 +109,9 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
     const fullQuery = [productId, ...measureKeys, ...dimKeys].join("|");
     setQuery(fullQuery);
 
-    const dimsForParent: Dimension[] = dimensionsMeta
-      .filter((d) => selectedDimensions.some((sd) => sd.variable === d.name))
-      .map((d) => ({ ...d }));
+    const dimsForParent = dimensionsMeta.filter((d) =>
+      selectedDimensions.some((sd) => sd.variable === d.name)
+    );
     setDimensions(dimsForParent);
 
     setStep("fetch-data");
