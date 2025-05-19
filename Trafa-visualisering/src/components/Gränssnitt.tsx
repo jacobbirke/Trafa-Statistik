@@ -8,6 +8,7 @@ import { createChart } from "../utils/chartUtils";
 import { ChartWizard } from "./ChartWizard/ChartWizard";
 import { ChartType, Dimension, Measure, WizardStep } from "../types/chartTypes";
 import { handleGenerateChart } from "./handleGenerateChart";
+import { xmlToJson } from "../utils/xmlUtils";
 
 HighchartsGroupedCategories(Highcharts);
 Variwide(Highcharts);
@@ -147,47 +148,6 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [seriesDimension, dimensions, setSeriesColors]);
 
-  function xmlToJson(xmlString: string) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-  
-  
-    function traverse(node: any): any {
-      let result: any = {};
-      if (node.attributes && node.attributes.length > 0) {
-        result["@attributes"] = {};
-        for (let i = 0; i < node.attributes.length; i++) {
-          const attribute = node.attributes.item(i);
-          result["@attributes"][attribute.nodeName] = attribute.nodeValue;
-        }
-      }
-      if (node.childNodes && node.childNodes.length > 0) {
-        for (let i = 0; i < node.childNodes.length; i++) {
-          const child = node.childNodes[i];
-          if (child.nodeType === 3) {
-            if (child.nodeValue.trim()) {
-              result = child.nodeValue.trim();
-            }
-          } else {
-            const childName = child.nodeName;
-            const childObj = traverse(child);
-            if (result[childName] === undefined) {
-              result[childName] = childObj;
-            } else {
-              if (!Array.isArray(result[childName])) {
-                result[childName] = [result[childName]];
-              }
-              result[childName].push(childObj);
-            }
-          }
-        }
-      }
-      return result;
-    }
-  
-    return traverse(xmlDoc.documentElement);
-  }
-  
   const fetchApiData = async (query?: string) => {
     try {
       const response = await fetch(
@@ -195,34 +155,34 @@ const StatistikGränssnitt: React.FC = () => {
       );
       const text = await response.text();
       const parsedData = xmlToJson(text);
-  
+
       const columns = parsedData?.StatisticsData?.Header?.Column || [];
-      const headers = columns.map((col: any) => 
-        col.attributes?.Type === "M" 
-          ? `${col.Value?.value}_M` 
+      const headers = columns.map((col: any) =>
+        col.attributes?.Type === "M"
+          ? `${col.Value?.value}_M`
           : col.Value?.value
       );
-  
-      const rows = parsedData?.StatisticsData?.Rows?.Row?.map((row: any) => {
-        return row.Cell?.map((cell: any) => {
-          const numValue = parseFloat(cell.Value?.value?.replace(",", "."));
-          return isNaN(numValue) ? cell.Value?.value : numValue;
-        });
-      }) || [];
-  
+
+      const rows =
+        parsedData?.StatisticsData?.Rows?.Row?.map((row: any) => {
+          return row.Cell?.map((cell: any) => {
+            const numValue = parseFloat(cell.Value?.value?.replace(",", "."));
+            return isNaN(numValue) ? cell.Value?.value : numValue;
+          });
+        }) || [];
+
       setJsonData([headers, ...rows]);
     } catch (error) {
       console.error("API fetch error:", error);
       setError("Kunde inte hitta API data");
     }
   };
-  
 
-useEffect(() => {
-  if (dataSource === "api" && apiQuery) {
-    fetchApiData(apiQuery);
-  }
-}, [apiQuery, dataSource]);
+  useEffect(() => {
+    if (dataSource === "api" && apiQuery) {
+      fetchApiData(apiQuery);
+    }
+  }, [apiQuery, dataSource]);
   const processApiStructure = (data: any) => {
     const dimensions = data.StatisticsData.Header.Column.filter(
       (col: any) => col.Type === "D"
@@ -252,7 +212,6 @@ useEffect(() => {
     setDimensions(dimensions);
     setMeasures(measures);
     processApiStructure(data);
-
   };
 
   useEffect(() => {
@@ -284,7 +243,6 @@ useEffect(() => {
       console.error("Error fetching API structure:", error);
     }
   };
-  
 
   const handleSetStep: React.Dispatch<React.SetStateAction<WizardStep>> = (
     value
@@ -409,11 +367,11 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-trafaPrimary pt-6">
-          {error && (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        <p>Error: {error}</p>
-      </div>
-    )}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <p>Error: {error}</p>
+        </div>
+      )}
       <ChartWizard
         step={step}
         chartType={chartType}

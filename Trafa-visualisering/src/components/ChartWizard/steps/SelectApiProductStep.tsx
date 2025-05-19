@@ -64,11 +64,9 @@ export const SelectApiProductStep: React.FC<{
             key={product.id}
             variant="secondary"
             onClick={() => {
-              console.log("ABOUT TO SET SELECTED PRODUCT:", product.id);
               setSelectedProduct(product.id);
               setStep("configure-api-query");
             }}
-            
           >
             {product.label}
           </Button>

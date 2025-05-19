@@ -30,8 +30,6 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
   const [selectedMeasures, setSelectedMeasures] = useState<QueryPart[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  console.log("🧪 Received productId in ConfigureApiQueryStep:", productId);
-
   useEffect(() => {
     if (!productId) return;
 
@@ -63,10 +61,11 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
             : [];
         }
 
-        const root = itemsRaw.find(
-          (it) => it.Name === productId || it["@attributes"]?.Name === productId
+        const children = itemsRaw.filter(
+          (item) =>
+            item.ParentName === productId ||
+            item["@attributes"]?.ParentName === productId
         );
-        const children = root?.StructureItems?.StructureItem || [];
         const childArr = Array.isArray(children) ? children : [children];
 
         const dims: Dimension[] = childArr
