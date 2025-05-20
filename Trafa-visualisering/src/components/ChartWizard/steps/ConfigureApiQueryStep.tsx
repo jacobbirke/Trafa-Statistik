@@ -9,27 +9,6 @@ import {
   Measure,
 } from "../../../types/chartTypes";
 
-function unwrapItem(it: any): { code: string; label: string; unit?: string } {
-  const attr = it["@attributes"] || {};
-
-  const code =
-    attr.Name ??
-    (typeof it.Name === "object" ? it.Name["#text"] : undefined) ??
-    it.Name ??
-    "";
-
-  const label =
-    attr.Label ??
-    it.Label ??
-    (typeof it.Value === "object" ? it.Value["#text"] : undefined) ??
-    attr.Value ??
-    it.Value ??
-    "";
-
-  const unit = attr.Unit ?? it.Unit ?? "";
-
-  return { code: String(code), label: String(label), unit: String(unit) };
-}
 interface ConfigureApiQueryStepProps {
   productId: string;
   setQuery: (query: string) => void;
@@ -89,34 +68,40 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
         );
         const childArr = Array.isArray(children) ? children : [children];
 
-        const dims = childArr
+        const dims: Dimension[] = childArr
           .filter(
             (it: any) => it.Type === "D" || it["@attributes"]?.Type === "D"
           )
           .map((it: any) => {
-            const { code, label } = unwrapItem(it);
+            const name =
+              it.Value ||
+              it["@attributes"]?.Value ||
+              it.Name ||
+              it["@attributes"]?.Name;
             return {
-              name: label,
-              variable: code,
+              name,
               allValues: [],
               selectedValues: [],
               unit: "",
-            } as Dimension;
+            };
           });
 
-        const meas = childArr
+        const meas: Measure[] = childArr
           .filter(
             (it: any) => it.Type === "M" || it["@attributes"]?.Type === "M"
           )
           .map((it: any) => {
-            const { code, label, unit } = unwrapItem(it);
+            const name =
+              it.Value ||
+              it["@attributes"]?.Value ||
+              it.Name ||
+              it["@attributes"]?.Name;
             return {
-              name: label,
-              variable: code,
-              unit,
+              name,
+              unit: it.Unit || it["@attributes"]?.Unit || "",
               isSelected: false,
               isConfidence: false,
-            } as Measure;
+            };
           });
 
         setDimensionsMeta(dims);
@@ -155,19 +140,20 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-1">
             {dimensionsMeta.map((dim) => (
               <Button
-                key={dim.variable}
+                key={dim.name}
                 variant={
-                  selectedDimensions.some((d) => d.variable === dim.variable)
+                  selectedDimensions.some((d) => d.variable === dim.name)
                     ? "primary"
                     : "secondary"
                 }
                 onClick={() =>
                   setSelectedDimensions((prev) =>
-                    prev.some((d) => d.variable === dim.variable)
-                      ? prev.filter((d) => d.variable !== dim.variable)
-                      : [...prev, { variable: dim.variable }]
+                    prev.some((d) => d.variable === dim.name)
+                      ? prev.filter((d) => d.variable !== dim.name)
+                      : [...prev, { variable: dim.name }]
                   )
                 }
+                className=""
               >
                 {dim.name}
               </Button>
@@ -179,7 +165,7 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-1">
             {measuresMeta.map((me) => (
               <Button
-                key={me.variable}
+                key={me.name}
                 variant={
                   selectedMeasures.some((m) => m.variable === me.name)
                     ? "primary"
@@ -192,7 +178,6 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
                       : [...prev, { variable: me.name }]
                   )
                 }
-                className="text-center"
               >
                 {me.name}
               </Button>
