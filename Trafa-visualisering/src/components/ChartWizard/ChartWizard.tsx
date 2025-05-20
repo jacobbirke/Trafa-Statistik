@@ -76,6 +76,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setSelectedProduct,
   apiQuery,
   setApiQuery,
+  setJsonData,
 }) => {
   return (
     <div className="max-w-6xl mx-auto p-3 space-y-8">
@@ -94,18 +95,22 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
 
       {step === "configure-api-query" && (
         <ConfigureApiQueryStep
-        productId={selectedProduct}
-        setQuery={setApiQuery}
-        setStep={setStep}
-        setDimensions={setDimensions}
-        setMeasures={setMeasures}
+          productId={selectedProduct}
+          setQuery={setApiQuery}
+          setStep={setStep}
+          setDimensions={setDimensions}
+          setMeasures={setMeasures}
         />
       )}
 
       {step === "fetch-data" && (
-        <DisplayApiDataStep 
-        query={apiQuery}
-        setStep={setStep} />
+        <DisplayApiDataStep
+          query={apiQuery}
+          setStep={setStep}
+          setDimensions={setDimensions}
+          setMeasures={setMeasures}
+          setJsonData={setJsonData}
+        />
       )}
 
       {step === "select-diagram-type" && (
@@ -177,6 +182,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           handleGoBack={handleGoBack}
           setStep={setStep}
           jsonData={jsonData}
+          setJsonData={setJsonData}
           title={title}
           setTitle={setTitle}
           seriesColors={seriesColors}

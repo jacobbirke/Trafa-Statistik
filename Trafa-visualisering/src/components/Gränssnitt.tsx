@@ -183,36 +183,6 @@ const StatistikGränssnitt: React.FC = () => {
       fetchApiData(apiQuery);
     }
   }, [apiQuery, dataSource]);
-  const processApiStructure = (data: any) => {
-    const dimensions = data.StatisticsData.Header.Column.filter(
-      (col: any) => col.Type === "D"
-    ).map((col: any) => ({
-      name: col.Value,
-      allValues: Array.from(
-        new Set(
-          data.StatisticsData.Rows.Row.map(
-            (row: any) =>
-              row.Cell.find((c: any) => c.Column === col.Name)?.Value
-          )
-        )
-      ),
-      selectedValues: [],
-      unit: "",
-    }));
-
-    const measures = data.StatisticsData.Header.Column.filter(
-      (col: any) => col.Type === "M"
-    ).map((col: any) => ({
-      name: col.Value + "_M",
-      unit: col.Unit || "",
-      isSelected: true,
-      isConfidence: false,
-    }));
-
-    setDimensions(dimensions);
-    setMeasures(measures);
-    processApiStructure(data);
-  };
 
   useEffect(() => {
     if (step === "select-diagram-type" && dataSource === "api") {
@@ -314,6 +284,7 @@ const StatistikGränssnitt: React.FC = () => {
           return {
             name: header,
             allValues: Array.from(uniqueValues),
+            variable: "...",
             selectedValues: [],
             unit: "",
           };
@@ -322,12 +293,14 @@ const StatistikGränssnitt: React.FC = () => {
         const measuresData: Measure[] = [
           ...measureHeaders.map((header) => ({
             name: header.replace("_M", ""),
+            variable: "...",
             unit: "",
             isSelected: false,
             isConfidence: false,
           })),
           ...confidenceHeaders.map((header) => ({
             name: header.replace("_KI", ""),
+            variable: "...",
             unit: "",
             isSelected: false,
             isConfidence: true,
@@ -441,6 +414,7 @@ const StatistikGränssnitt: React.FC = () => {
         apiQuery={apiQuery}
         setApiQuery={setApiQuery}
         selectedProduct={selectedProduct}
+        setJsonData={setJsonData}
       />
     </div>
   );

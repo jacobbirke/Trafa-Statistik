@@ -8,9 +8,9 @@ export type ChartType =
   | "variwide"
   | "errorbar-column"
   | "errorbar-line";
-  
+
 export type WizardStep =
-  | "input-source" 
+  | "input-source"
   | "input-file"
   | "select-api-product"
   | "configure-api-query"
@@ -20,10 +20,10 @@ export type WizardStep =
   | "select-measures"
   | "chart-configuration"
   | "review-generate";
-  
 
 export interface Dimension {
   name: string;
+  variable: string;
   allValues: string[];
   selectedValues: string[];
   unit?: string;
@@ -31,11 +31,11 @@ export interface Dimension {
 
 export interface Measure {
   name: string;
+  variable: string;
   unit?: string;
   isSelected: boolean;
   isConfidence?: boolean;
 }
-
 
 export interface ApiStructure {
   dimensions: ApiDimension[];
@@ -131,11 +131,12 @@ export interface ChartWizardProps {
   errorDisplayType: "errorbar" | "dashed";
   setErrorDisplayType: (type: "errorbar" | "dashed") => void;
   apiQuery: string;
-  setApiQuery: React.Dispatch<React.SetStateAction<string>>;  
+  setApiQuery: React.Dispatch<React.SetStateAction<string>>;
   dataSource?: "file" | "api";
   setDataSource?: (source: "file" | "api") => void;
   productId?: string;
   setQuery: (query: string) => void;
   selectedProduct: string;
   setSelectedProduct: (productId: string) => void;
+  setJsonData: React.Dispatch<React.SetStateAction<any[][]>>;
 }

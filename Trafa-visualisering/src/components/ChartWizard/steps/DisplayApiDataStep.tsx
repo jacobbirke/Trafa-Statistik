@@ -2,14 +2,23 @@ import React, { useEffect, useState } from "react";
 import { Card } from "../../UI/Card";
 import { Button } from "../../UI/Button";
 import { xmlToJson } from "../../../utils/xmlUtils";
-import { WizardStep } from "../../../types/chartTypes";
+import { Dimension, Measure, WizardStep } from "../../../types/chartTypes";
 
 interface Props {
   query: string;
   setStep: (step: WizardStep) => void;
+  setDimensions: React.Dispatch<React.SetStateAction<Dimension[]>>;
+  setMeasures: React.Dispatch<React.SetStateAction<Measure[]>>;
+  setJsonData: React.Dispatch<React.SetStateAction<any[][]>>;
 }
 
-export const DisplayApiDataStep: React.FC<Props> = ({ query, setStep }) => {
+export const DisplayApiDataStep: React.FC<Props> = ({
+  query,
+  setStep,
+  setDimensions,
+  setMeasures,
+  setJsonData,
+}) => {
   const [data, setData] = useState<any[][] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +74,34 @@ export const DisplayApiDataStep: React.FC<Props> = ({ query, setStep }) => {
         });
 
         setData([headers, ...rows]);
+        setJsonData([headers, ...rows]);
+        const dimNames = headers.filter(
+          (h) => !h.endsWith("_M") && !h.endsWith("_KI")
+        );
+        const dims: Dimension[] = dimNames.map((name) => {
+          const idx = headers.indexOf(name);
+          const vals = rows.map((r) => r[idx]?.toString() ?? "");
+          return {
+            name,
+            variable: name,
+            allValues: Array.from(new Set(vals)),
+            selectedValues: [],
+            unit: "",
+          };
+        });
+        setDimensions(dims);
+
+        const measures: Measure[] = headers
+          .map((h, i) => ({ header: h, idx: i }))
+          .filter((c) => c.header.endsWith("_M"))
+          .map((c) => ({
+            name: c.header.replace(/_M$/, ""),
+            variable: c.header.replace(/_M$/, ""),
+            unit: "",
+            isSelected: false,
+            isConfidence: false,
+          }));
+        setMeasures(measures);
       } catch (e: any) {
         console.error(e);
         setError("Kunde inte hämta data från API");
@@ -122,10 +159,10 @@ export const DisplayApiDataStep: React.FC<Props> = ({ query, setStep }) => {
         </Button>
         <Button
           variant="primary"
-          onClick={() => setStep("filter-dimensions")}
+          onClick={() => setStep("select-diagram-type")}
           disabled={!data}
         >
-          Fortsätt till filtrering
+          Fortsätt
         </Button>
       </div>
     </Card>

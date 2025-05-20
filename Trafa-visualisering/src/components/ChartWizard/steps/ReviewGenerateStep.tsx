@@ -74,6 +74,7 @@ interface Props {
   confidenceMeasures: Measure[];
   errorDisplayType: "errorbar" | "dashed";
   setErrorDisplayType: (type: "errorbar" | "dashed") => void;
+  setJsonData: React.Dispatch<React.SetStateAction<any[][]>>;
 }
 
 export const ReviewGenerateStep: React.FC<Props> = ({
