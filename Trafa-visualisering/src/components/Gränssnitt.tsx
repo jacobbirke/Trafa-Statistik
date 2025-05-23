@@ -184,7 +184,6 @@ const StatistikGränssnitt: React.FC = () => {
     }
   }, [apiQuery, dataSource]);
 
-
   useEffect(() => {
     if (step === "select-diagram-type" && dataSource === "api") {
       fetchApiData();
@@ -285,6 +284,7 @@ const StatistikGränssnitt: React.FC = () => {
           return {
             name: header,
             allValues: Array.from(uniqueValues),
+            variable: "...",
             selectedValues: [],
             unit: "",
           };
@@ -293,12 +293,14 @@ const StatistikGränssnitt: React.FC = () => {
         const measuresData: Measure[] = [
           ...measureHeaders.map((header) => ({
             name: header.replace("_M", ""),
+            variable: "...",
             unit: "",
             isSelected: false,
             isConfidence: false,
           })),
           ...confidenceHeaders.map((header) => ({
             name: header.replace("_KI", ""),
+            variable: "...",
             unit: "",
             isSelected: false,
             isConfidence: true,

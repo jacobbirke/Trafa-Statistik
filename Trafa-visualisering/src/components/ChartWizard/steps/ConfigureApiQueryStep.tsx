@@ -9,6 +9,28 @@ import {
   Measure,
 } from "../../../types/chartTypes";
 
+function unwrapItem(it: any): { code: string; label: string; unit?: string } {
+  const attr = it["@attributes"] || {};
+
+  const code =
+    attr.Name ??
+    (typeof it.Name === "object" ? it.Name["#text"] : undefined) ??
+    it.Name ??
+    "";
+
+  const label =
+    attr.Label ??
+    it.Label ??
+    (typeof it.Value === "object" ? it.Value["#text"] : undefined) ??
+    attr.Value ??
+    it.Value ??
+    "";
+
+  const unit = attr.Unit ?? it.Unit ?? "";
+
+  return { code: String(code), label: String(label), unit: String(unit) };
+}
+
 interface ConfigureApiQueryStepProps {
   productId: string;
   setQuery: (query: string) => void;
@@ -68,40 +90,34 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
         );
         const childArr = Array.isArray(children) ? children : [children];
 
-        const dims: Dimension[] = childArr
+        const dims = childArr
           .filter(
             (it: any) => it.Type === "D" || it["@attributes"]?.Type === "D"
           )
           .map((it: any) => {
-            const name =
-              it.Value ||
-              it["@attributes"]?.Value ||
-              it.Name ||
-              it["@attributes"]?.Name;
+            const { code, label } = unwrapItem(it);
             return {
-              name,
+              name: label,
+              variable: code,
               allValues: [],
               selectedValues: [],
               unit: "",
-            };
+            } as Dimension;
           });
 
-        const meas: Measure[] = childArr
+        const meas = childArr
           .filter(
             (it: any) => it.Type === "M" || it["@attributes"]?.Type === "M"
           )
           .map((it: any) => {
-            const name =
-              it.Value ||
-              it["@attributes"]?.Value ||
-              it.Name ||
-              it["@attributes"]?.Name;
+            const { code, label, unit } = unwrapItem(it);
             return {
-              name,
-              unit: it.Unit || it["@attributes"]?.Unit || "",
+              name: label,
+              variable: code,
+              unit,
               isSelected: false,
               isConfidence: false,
-            };
+            } as Measure;
           });
 
         setDimensionsMeta(dims);
@@ -140,20 +156,19 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-1">
             {dimensionsMeta.map((dim) => (
               <Button
-                key={dim.name}
+                key={dim.variable}
                 variant={
-                  selectedDimensions.some((d) => d.variable === dim.name)
+                  selectedDimensions.some((d) => d.variable === dim.variable)
                     ? "primary"
                     : "secondary"
                 }
                 onClick={() =>
                   setSelectedDimensions((prev) =>
-                    prev.some((d) => d.variable === dim.name)
-                      ? prev.filter((d) => d.variable !== dim.name)
-                      : [...prev, { variable: dim.name }]
+                    prev.some((d) => d.variable === dim.variable)
+                      ? prev.filter((d) => d.variable !== dim.variable)
+                      : [...prev, { variable: dim.variable }]
                   )
                 }
-                className=""
               >
                 {dim.name}
               </Button>
@@ -165,19 +180,20 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-1">
             {measuresMeta.map((me) => (
               <Button
-                key={me.name}
+                key={me.variable}
                 variant={
-                  selectedMeasures.some((m) => m.variable === me.name)
+                  selectedMeasures.some((m) => m.variable === me.variable)
                     ? "primary"
                     : "secondary"
                 }
                 onClick={() =>
                   setSelectedMeasures((prev) =>
-                    prev.some((m) => m.variable === me.name)
-                      ? prev.filter((m) => m.variable !== me.name)
-                      : [...prev, { variable: me.name }]
+                    prev.some((m) => m.variable === me.variable)
+                      ? prev.filter((m) => m.variable !== me.variable)
+                      : [...prev, { variable: me.variable }]
                   )
                 }
+                className="text-center"
               >
                 {me.name}
               </Button>

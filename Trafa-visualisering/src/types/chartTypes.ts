@@ -23,6 +23,7 @@ export type WizardStep =
 
 export interface Dimension {
   name: string;
+  variable: string;
   allValues: string[];
   selectedValues: string[];
   unit?: string;
@@ -30,6 +31,7 @@ export interface Dimension {
 
 export interface Measure {
   name: string;
+  variable: string;
   unit?: string;
   isSelected: boolean;
   isConfidence?: boolean;
