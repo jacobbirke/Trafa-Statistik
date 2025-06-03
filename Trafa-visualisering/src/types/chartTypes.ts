@@ -21,12 +21,21 @@ export type WizardStep =
   | "chart-configuration"
   | "review-generate";
 
+  export interface DimensionGroup {
+  title: string;
+  dimensions: Dimension[];
+}
+
 export interface Dimension {
   name: string;
   variable: string;
   allValues: string[];
   selectedValues: string[];
   unit?: string;
+  isSelectable: boolean;
+  isRequired?: boolean;
+  groupTitle?: string;
+  dependencies?: string[];
 }
 
 export interface Measure {
@@ -35,6 +44,7 @@ export interface Measure {
   unit?: string;
   isSelected: boolean;
   isConfidence?: boolean;
+  isSelectable: boolean;
 }
 
 export interface ApiStructure {
