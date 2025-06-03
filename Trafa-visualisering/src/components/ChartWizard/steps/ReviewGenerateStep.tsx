@@ -462,7 +462,7 @@ export const ReviewGenerateStep: React.FC<Props> = ({
       );
     } catch (error) {
       console.error("Embed generation failed:", error);
-      alert("Failed to generate embed code. Please try again.");
+      alert("Testa att trycka på generera igen och låt den ladda");
     }
   };
 
