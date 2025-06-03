@@ -55,7 +55,7 @@ export const SelectDiagramTypeStep: React.FC<Props> = ({
       ))}
     </div>
     <div className="mt-6 flex justify-between">
-      <Button onClick={() => setStep("input-file")} variant="secondary">
+      <Button onClick={() => setStep("input-source")} variant="secondary">
         Tillbaka
       </Button>
       <Button onClick={() => setStep("filter-dimensions")} variant="primary">

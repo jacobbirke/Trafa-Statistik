@@ -162,11 +162,9 @@ const StatistikGränssnitt: React.FC = () => {
         const colType = col.attributes?.Type;
         if (colValue && /konfidensintervall/i.test(colValue)) {
           return `${colValue}_KI`;
-        }
-        else if (colType === "M") {
+        } else if (colType === "M") {
           return `${colValue}_M`;
-        }
-        else {
+        } else {
           return colValue;
         }
       });
@@ -295,6 +293,7 @@ const StatistikGränssnitt: React.FC = () => {
             variable: "...",
             selectedValues: [],
             unit: "",
+            isSelectable: true,
           };
         });
 
@@ -305,6 +304,7 @@ const StatistikGränssnitt: React.FC = () => {
             unit: "",
             isSelected: false,
             isConfidence: false,
+            isSelectable: true,
           })),
           ...confidenceHeaders.map((header) => ({
             name: header.replace("_KI", ""),
@@ -312,6 +312,7 @@ const StatistikGränssnitt: React.FC = () => {
             unit: "",
             isSelected: false,
             isConfidence: true,
+            isSelectable: true,
           })),
         ];
 

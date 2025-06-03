@@ -42,6 +42,7 @@ export const DisplayApiDataStep: React.FC<Props> = ({
         } else {
           wrapped = JSON.parse(text);
         }
+
         const headerColumns =
           wrapped.Header?.Column?.Column ?? wrapped.Header?.Column ?? [];
         const colArray = Array.isArray(headerColumns)
@@ -72,7 +73,9 @@ export const DisplayApiDataStep: React.FC<Props> = ({
           return cells.map((cell: any) => {
             const rawValue = cell.Value?.["#text"] || cell.Value;
             if (typeof rawValue === "string") {
-              const cleanValue = rawValue.replace(/\s+/g, "").replace(",", ".");
+              const cleanValue = rawValue
+                .replace(/\s+/g, "")
+                .replace(",", ".");
               const num = parseFloat(cleanValue);
               return isNaN(num) ? rawValue : num;
             }
@@ -82,39 +85,57 @@ export const DisplayApiDataStep: React.FC<Props> = ({
 
         setData([headers, ...rows]);
         setJsonData([headers, ...rows]);
-        const dimNames = headers.filter(
-          (h) => !h.endsWith("_M") && !h.endsWith("_KI")
-        );
-        const dims: Dimension[] = dimNames.map((name) => {
-          const idx = headers.indexOf(name);
-          const vals = rows.map((r) => r[idx]?.toString() ?? "");
-          return {
-            name,
-            variable: name,
-            allValues: Array.from(new Set(vals)),
+        const dims: Dimension[] = [];
+        const seenDimensions = new Set<string>();
+
+        headers.forEach((header, idx) => {
+          if (header.endsWith("_M") || header.endsWith("_KI")) {
+            return;
+          }
+          if (seenDimensions.has(header)) {
+            return;
+          }
+          seenDimensions.add(header);
+
+          const uniqueValues = new Set<string>();
+          rows.forEach(row => {
+            if (row[idx] !== undefined) {
+              uniqueValues.add(String(row[idx]));
+            }
+          });
+
+          dims.push({
+            name: header,
+            variable: header,
+            allValues: Array.from(uniqueValues),
             selectedValues: [],
             unit: "",
-          };
+            isSelectable: true,
+          });
         });
         setDimensions(dims);
 
         const measures: Measure[] = headers
           .map((h, i) => ({ header: h, idx: i }))
-          .filter((c) => c.header.endsWith("_M") || c.header.endsWith("_KI"))
-          .map((c) => {
+          .filter(c => c.header.endsWith("_M") || c.header.endsWith("_KI"))
+          .map(c => {
             const isConfidence = c.header.endsWith("_KI");
             const baseName = isConfidence
               ? c.header.replace(/_KI$/, "")
               : c.header.replace(/_M$/, "");
             return {
               name: baseName,
-              variable: c.header, 
+              variable: c.header,
               unit: "",
               isSelected: false,
               isConfidence,
+              isSelectable: true,
             };
           });
         setMeasures(measures);
+        if (rows.length === 0) {
+          setError("Ingen data hittades med valda dimensioner och mått");
+        }
       } catch (e: any) {
         console.error(e);
         setError("Kunde inte hämta data från API");
@@ -125,6 +146,7 @@ export const DisplayApiDataStep: React.FC<Props> = ({
 
     fetchData();
   }, [query]);
+
   return (
     <Card>
       <h3 className="text-2xl font-bold mb-4">Resultat från API</h3>
@@ -158,22 +180,22 @@ export const DisplayApiDataStep: React.FC<Props> = ({
       )}
 
       <div className="mt-4 flex gap-4 justify-end">
-        <Button
-          variant="secondary"
-          onClick={() => setStep("select-api-product")}
-        >
+        <Button variant="secondary" onClick={() => setStep("select-api-product")}>
           Börja om
         </Button>
-        <Button
-          variant="secondary"
-          onClick={() => setStep("configure-api-query")}
-        >
+        <Button variant="secondary" onClick={() => setStep("configure-api-query")}>
           Tillbaka
         </Button>
         <Button
           variant="primary"
-          onClick={() => setStep("select-diagram-type")}
-          disabled={!data}
+          onClick={() => {
+            if (!data || data.length <= 1) {
+              alert("Det finns ingen data att visa. Välj andra dimensioner eller mått.");
+            } else {
+              setStep("select-diagram-type");
+            }
+          }}
+          disabled={!data || data.length <= 1}
         >
           Fortsätt
         </Button>
