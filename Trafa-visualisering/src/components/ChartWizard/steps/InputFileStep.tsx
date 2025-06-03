@@ -123,7 +123,6 @@ const InfoModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
               </span>
             </ul>
           </div>
-
           <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
             <h5 className="font-semibold text-lg mb-3 text-blue-700">
               Exempel på filstruktur
@@ -253,9 +252,7 @@ export const InputFileStep: React.FC<Props> = ({
           />
         </svg>
       </button>
-
       <InfoModal isOpen={showInstructions} onClose={toggleInstructions} />
-
       <div className="text-center mb-4">
         <div className="mb-5">
           <svg
@@ -337,7 +334,6 @@ export const InputFileStep: React.FC<Props> = ({
           </div>
         </div>
       </div>
-
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto mt-4">
         <Button
           onClick={() => setStep("input-source")}
@@ -355,6 +351,7 @@ export const InputFileStep: React.FC<Props> = ({
           Nästa
         </Button>
       </div>
+
     </Card>
   );
 };
