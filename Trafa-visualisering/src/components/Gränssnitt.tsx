@@ -157,11 +157,19 @@ const StatistikGränssnitt: React.FC = () => {
       const parsedData = xmlToJson(text);
 
       const columns = parsedData?.StatisticsData?.Header?.Column || [];
-      const headers = columns.map((col: any) =>
-        col.attributes?.Type === "M"
-          ? `${col.Value?.value}_M`
-          : col.Value?.value
-      );
+      const headers = columns.map((col: any) => {
+        const colValue = col.Value?.value || col.Value;
+        const colType = col.attributes?.Type;
+        if (colValue && /konfidensintervall/i.test(colValue)) {
+          return `${colValue}_KI`;
+        }
+        else if (colType === "M") {
+          return `${colValue}_M`;
+        }
+        else {
+          return colValue;
+        }
+      });
 
       const rows =
         parsedData?.StatisticsData?.Rows?.Row?.map((row: any) => {

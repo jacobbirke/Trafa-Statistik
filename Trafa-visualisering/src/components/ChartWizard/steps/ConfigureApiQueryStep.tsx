@@ -9,7 +9,7 @@ import {
   Measure,
 } from "../../../types/chartTypes";
 
-function unwrapItem(it: any): { code: string; label: string; unit?: string } {
+function unwrapItem(it: any): { code: string; label: string; unit?: string;  isConfidence: boolean;} {
   const attr = it["@attributes"] || {};
 
   const code =
@@ -27,8 +27,12 @@ function unwrapItem(it: any): { code: string; label: string; unit?: string } {
     "";
 
   const unit = attr.Unit ?? it.Unit ?? "";
-
-  return { code: String(code), label: String(label), unit: String(unit) };
+  const isConfidence =
+    /konfidensintervall/i.test(label) ||
+    it["@attributes"]?.MeasurementType === "KI" ||
+    /\bKI$/i.test(label);
+    
+  return { code: String(code), label: String(label), unit: String(unit), isConfidence  };
 }
 
 interface ConfigureApiQueryStepProps {
@@ -110,13 +114,13 @@ export const ConfigureApiQueryStep: React.FC<ConfigureApiQueryStepProps> = ({
             (it: any) => it.Type === "M" || it["@attributes"]?.Type === "M"
           )
           .map((it: any) => {
-            const { code, label, unit } = unwrapItem(it);
+            const { code, label, unit, isConfidence } = unwrapItem(it);
             return {
               name: label,
               variable: code,
               unit,
               isSelected: false,
-              isConfidence: false,
+              isConfidence, // Set confidence flag
             } as Measure;
           });
 

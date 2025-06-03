@@ -79,7 +79,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setJsonData,
 }) => {
   return (
-    <div className="max-w-6xl mx-auto p-3 space-y-8">
+    <div className="max-w-5xl mx-auto p-3 space-y-8">
       {step === "input-source" && <InputSourceStep setStep={setStep} />}
 
       {step === "input-file" && (

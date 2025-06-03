@@ -51,7 +51,14 @@ export const DisplayApiDataStep: React.FC<Props> = ({
         const headers = colArray.map((c: any) => {
           const type = c["@attributes"]?.Type || c.Type;
           const value = c.Value?.["#text"] || c.Value;
-          return type === "M" ? `${value}_M` : value;
+
+          if (value && /konfidensintervall/i.test(value)) {
+            return `${value}_KI`;
+          } else if (type === "M") {
+            return `${value}_M`;
+          } else {
+            return value;
+          }
         });
 
         const rowsNode = wrapped.Rows?.Row ?? wrapped.Rows ?? [];
@@ -93,14 +100,20 @@ export const DisplayApiDataStep: React.FC<Props> = ({
 
         const measures: Measure[] = headers
           .map((h, i) => ({ header: h, idx: i }))
-          .filter((c) => c.header.endsWith("_M"))
-          .map((c) => ({
-            name: c.header.replace(/_M$/, ""),
-            variable: c.header.replace(/_M$/, ""),
-            unit: "",
-            isSelected: false,
-            isConfidence: false,
-          }));
+          .filter((c) => c.header.endsWith("_M") || c.header.endsWith("_KI"))
+          .map((c) => {
+            const isConfidence = c.header.endsWith("_KI");
+            const baseName = isConfidence
+              ? c.header.replace(/_KI$/, "")
+              : c.header.replace(/_M$/, "");
+            return {
+              name: baseName,
+              variable: c.header, 
+              unit: "",
+              isSelected: false,
+              isConfidence,
+            };
+          });
         setMeasures(measures);
       } catch (e: any) {
         console.error(e);
