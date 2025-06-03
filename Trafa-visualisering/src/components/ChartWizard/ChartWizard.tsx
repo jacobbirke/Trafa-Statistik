@@ -6,6 +6,10 @@ import { SelectMeasuresStep } from "./steps/SelectMeasuresStep";
 import { ChartConfigurationStep } from "./steps/ChartConfigurationStep";
 import { ReviewGenerateStep } from "./steps/ReviewGenerateStep";
 import { ChartWizardProps } from "../../types/chartTypes";
+import { InputSourceStep } from "./steps/InputSourceStep";
+import { SelectApiProductStep } from "./steps/SelectApiProductStep";
+import { ConfigureApiQueryStep } from "./steps/ConfigureApiQueryStep";
+import { DisplayApiDataStep } from "./steps/DisplayApiDataStep";
 
 export const ChartWizard: React.FC<ChartWizardProps> = ({
   step,
@@ -68,11 +72,45 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
   setConfidenceMeasure,
   errorDisplayType,
   setErrorDisplayType,
+  selectedProduct,
+  setSelectedProduct,
+  apiQuery,
+  setApiQuery,
+  setJsonData,
 }) => {
   return (
-    <div className="max-w-6xl mx-auto p-3 space-y-8">
+    <div className="max-w-5xl mx-auto p-3 space-y-8">
+      {step === "input-source" && <InputSourceStep setStep={setStep} />}
+
       {step === "input-file" && (
         <InputFileStep handleFileUpload={handleFileUpload} setStep={setStep} />
+      )}
+
+      {step === "select-api-product" && (
+        <SelectApiProductStep
+          setSelectedProduct={setSelectedProduct}
+          setStep={setStep}
+        />
+      )}
+
+      {step === "configure-api-query" && (
+        <ConfigureApiQueryStep
+          productId={selectedProduct}
+          setQuery={setApiQuery}
+          setStep={setStep}
+          setDimensions={setDimensions}
+          setMeasures={setMeasures}
+        />
+      )}
+
+      {step === "fetch-data" && (
+        <DisplayApiDataStep
+          query={apiQuery}
+          setStep={setStep}
+          setDimensions={setDimensions}
+          setMeasures={setMeasures}
+          setJsonData={setJsonData}
+        />
       )}
 
       {step === "select-diagram-type" && (
@@ -144,6 +182,7 @@ export const ChartWizard: React.FC<ChartWizardProps> = ({
           handleGoBack={handleGoBack}
           setStep={setStep}
           jsonData={jsonData}
+          setJsonData={setJsonData}
           title={title}
           setTitle={setTitle}
           seriesColors={seriesColors}
